@@ -1,3 +1,19 @@
-<apex:page docType="html" showHeader="true" sidebar="false" standardStylesheets="false">
-	<div id="app">SLDS Calendar</div>
+<apex:page
+	contentType="text/html"
+	docType="html"
+	showHeader="true"
+	sidebar="false"
+	standardStylesheets="false"
+	title="Lunasa"
+	>
+	<!-- TODO: get these meta tags into the document <head/> -->
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+	<apex:stylesheet value="{!URLFOR($Resource.Calendar, 'main.css')}" />
+	<noscript>
+		You need to enable JavaScript to run this app.
+	</noscript>
+	<div id="root"></div>
+	<script src="{!URLFOR($Resource.Calendar, 'main.js')}" />
 </apex:page>
