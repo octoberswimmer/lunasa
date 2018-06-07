@@ -1,0 +1,35 @@
+{
+  "name": "lunasa",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": ".",
+  "scripts": {
+    "start": "react-scripts start",
+    "prebuild": "flow check && CI=true yarn test",
+    "build": "react-scripts build && yarn run static",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "precommit": "git-format-staged -f 'prettier --stdin' 'src/*.js'",
+    "static": "node scripts/static.js Calendar"
+  },
+  "prettier": {
+    "parser": "babylon",
+    "semi": false,
+    "useTabs": true
+  },
+  "dependencies": {
+    "fullcalendar": "^3.9.0",
+    "jquery": "*",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-scripts": "1.1.4"
+  },
+  "devDependencies": {
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "flow-bin": "^0.73.0",
+    "git-format-staged": "^1.1.0",
+    "husky": "^0.14.3",
+    "prettier": "^1.13.4"
+  }
+}
