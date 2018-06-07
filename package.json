@@ -9,7 +9,7 @@
     "build": "react-scripts build && yarn run static",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "precommit": "git-format-staged -f 'prettier --stdin' 'src/*.js'",
+    "precommit": "git-format-staged -f 'prettier --stdin' '*.js' '!flow-typed/*'",
     "static": "node scripts/static.js Calendar"
   },
   "prettier": {
@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "fullcalendar": "^3.9.0",
-    "jquery": "*",
+    "jquery": "3",
+    "moment": "2",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-scripts": "1.1.4"
@@ -27,8 +28,8 @@
   "devDependencies": {
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "flow-bin": "^0.73.0",
-    "git-format-staged": "^1.1.0",
+    "flow-bin": "^0.74.0",
+    "git-format-staged": "^2.0.0",
     "husky": "^0.14.3",
     "prettier": "^1.13.4"
   }
