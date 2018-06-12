@@ -1,23 +1,25 @@
 /* @flow strict */
 
-import "fullcalendar" // installs itself as a jquery plugin
+import { type JQueryStatic, type Options, Calendar } from "fullcalendar"
 import "fullcalendar/dist/fullcalendar.css"
-import $ from "jquery"
+import jQuery from "jquery"
 import * as React from "react"
 
-// TODO: declare fullcalendar initialization options
-interface Props {
-	weekends?: boolean;
+// Use the jQuery interface exported by fullcalendar, which adds the
+// `$.fn.fullCalendar()` function. This is just a type-level distinction: in
+// reality fullcalendar adds its method to the global JQuery object.
+const $: JQueryStatic = (jQuery: any)
+
+type Props = {
+	options?: Options
 }
 
 export default class FullCalendar extends React.Component<Props> {
-	instance: ?Object
-	jq: typeof $
-	root: React.Ref<"div">
+	instance: ?Calendar
+	root: { current: null | React.ElementRef<"div"> }
 
 	constructor(props: Props) {
 		super(props)
-		this.jq = $.noConflict()
 		this.root = React.createRef()
 	}
 
@@ -25,28 +27,42 @@ export default class FullCalendar extends React.Component<Props> {
 		this.initializeCalendar(this.props)
 	}
 
-	// TODO: If the root `div` was not replaced, we could update calendar
-	// settings based on changes to props instead of destroying and
-	// reinitializing.
 	componentDidUpdate(prevProps: Props) {
-		this.destroyCalendar()
-		this.initializeCalendar(this.props)
-	}
-
-	getRootElement(): typeof $ {
-		if (this.root.current) {
-			return this.jq(this.root.current)
+		// Reinitialize calendar if root element was replaced.
+		const calendar = $(this.getRootElement()).fullCalendar("getCalendar")
+		const instance = this.instance
+		if (!(calendar instanceof Calendar) || calendar !== instance) {
+			this.destroyCalendar()
+			this.initializeCalendar(this.props)
+		} else if (instance && this.props.options) {
+			instance.option(this.props.options)
 		}
 	}
 
+	componentWillUnmount() {
+		this.destroyCalendar()
+	}
+
+	getRootElement(): HTMLDivElement {
+		if (!this.root.current) {
+			throw new Error("Unable to find DOM mount point for calendar")
+		}
+		return this.root.current
+	}
+
 	initializeCalendar(props: Props) {
-		const settings = { ...props } // defensive copy of props
-		this.instance = this.getRootElement().fullCalendar(settings)
+		// Do not call `new Calendar()` directly because there is some necessary
+		// logic in `$.fn.fullCalendar()`.
+		const $elem = $(this.getRootElement())
+		$elem.fullCalendar(props.options || {})
+		this.instance = $elem.fullCalendar("getCalendar")
 	}
 
 	destroyCalendar() {
-		this.getRootElement().fullCalendar("destroy")
-		this.instance = null
+		if (this.instance) {
+			this.instance.destroy()
+			this.instance = null
+		}
 	}
 
 	render() {
