@@ -18,12 +18,14 @@
     "useTabs": true
   },
   "dependencies": {
+    "fast-deep-equal": "^2.0.1",
     "fullcalendar": "^3.9.0",
     "jquery": "3",
     "moment": "2",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
-    "react-scripts": "1.1.4"
+    "react-scripts": "1.1.4",
+    "unstated": "^2.1.1"
   },
   "devDependencies": {
     "enzyme": "^3.3.0",
@@ -31,6 +33,7 @@
     "flow-bin": "^0.74.0",
     "git-format-staged": "^2.0.0",
     "husky": "^0.14.3",
-    "prettier": "^1.13.4"
+    "prettier": "^1.13.4",
+    "reset-date-cache": "^1.0.4"
   }
 }

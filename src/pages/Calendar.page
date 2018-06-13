@@ -6,6 +6,16 @@
 	standardStylesheets="false"
 	title="Lunasa"
 	>
+	<apex:remoteObjects jsNamespace="Lunasa">
+		<apex:remoteObjectModel name="Event">
+			<apex:remoteObjectField name="EndDateTime" />
+			<apex:remoteObjectField name="Description" />
+			<apex:remoteObjectField name="IsAllDayEvent" />
+			<apex:remoteObjectField name="StartDateTime" />
+			<apex:remoteObjectField name="Subject" />
+		</apex:remoteObjectModel>
+	</apex:remoteObjects>
+
 	<!-- TODO: get these meta tags into the document <head/> -->
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
