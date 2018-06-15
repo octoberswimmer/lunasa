@@ -14,6 +14,7 @@ import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
 import { type Criteria } from "../api/SObject"
+import { visualforceDatetime } from "../models/Event"
 
 export type State = {
 	events: Event[],
@@ -43,14 +44,23 @@ export default class EventContainer extends Container<State> {
 	 * Fetches events from the given date range
 	 */
 	async getEventsByDateRange(
-		start: moment$Moment,
-		end: moment$Moment
+		rangeStart: moment$Moment,
+		rangeEnd: moment$Moment
 	): Promise<void> {
+		// Clone input values because most moment methods mutate their input
+		const start = rangeStart
+			.clone()
+			.local()
+			.startOf("day")
+		const end = rangeEnd
+			.clone()
+			.local()
+			.endOf("day")
 		return this._getEvents({
 			where: {
 				and: {
-					StartDateTime: { lt: end.endOf("day").toDate() },
-					EndDateTime: { gt: start.startOf("day").toDate() }
+					StartDateTime: { lt: visualforceDatetime(end) },
+					EndDateTime: { gt: visualforceDatetime(start) }
 				}
 			}
 		})

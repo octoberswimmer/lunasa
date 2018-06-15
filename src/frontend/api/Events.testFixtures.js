@@ -1,6 +1,5 @@
 /* @flow strict */
 
-import moment from "moment"
 import { type Event } from "../models/Event"
 import { events } from "../models/Event.testFixtures"
 import SObjectMock from "./SObject.testFixtures"
