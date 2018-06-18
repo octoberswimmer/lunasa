@@ -1,0 +1,39 @@
+version: 2
+jobs:
+  build:
+    parallelism: 1
+    shell: /bin/bash --login
+    docker:
+      - image: circleci/node:8.6
+    working_directory: ~/lunasa
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dep-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          - v1-dep-{{ .Branch }}-
+          # Default branch if not
+          - v1-dep-master-
+            # fallback to using the latest cache if no exact match is found
+          - v1-dep-
+      - run: yarn install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dep-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
+      - run:
+          name: Decrypt Key
+          command: openssl aes-256-cbc -d -in lib/ci.key.enc -out lib/ci.key -k "$JWT_KEY"
+      - run: mkdir ~/bin
+      - run:
+          name: Get Latest Force CLI Release
+          command: curl --output ~/bin/force https://force-cli.heroku.com/releases/v0.24.3/linux-amd64/force
+      - run: chmod +x ~/bin/force
+      - run: force login -i login -u "$SF_USER" -key lib/ci.key --connected-app-client-id "$CLIENT_ID"
+      - run:
+          name: Build Shipping Update Application Static Resource
+          command: yarn build
+      - run:
+          name: Run Salesforce Tests
+          command: force import -d src -c -l RunLocalTests -i
