@@ -3,5 +3,5 @@
     <apiVersion>42.0</apiVersion>
     <availableInTouch>false</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <label>SLDS Calendar</label>
+    <label>Account Scheduler</label>
 </ApexPage>
