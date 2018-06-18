@@ -1195,7 +1195,6 @@ declare module "fullcalendar" {
 		allDay?: boolean;
 		url?: string;
 		source?: EventSource;
-		[customField: string]: any;
 	}
 	declare type EventSourceFunction = (
 		start: Moment,

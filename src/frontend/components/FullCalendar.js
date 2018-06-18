@@ -1,6 +1,6 @@
 /* @flow strict */
 
-import { type JQueryStatic, type Options, Calendar } from "fullcalendar"
+import * as fullcalendar from "fullcalendar"
 import "fullcalendar/dist/fullcalendar.css"
 import jQuery from "jquery"
 import * as React from "react"
@@ -8,14 +8,15 @@ import * as React from "react"
 // Use the jQuery interface exported by fullcalendar, which adds the
 // `$.fn.fullCalendar()` function. This is just a type-level distinction: in
 // reality fullcalendar adds its method to the global JQuery object.
-const $: JQueryStatic = (jQuery: any)
+const $: fullcalendar.JQueryStatic = (jQuery: any)
 
 type Props = {
-	options?: Options
+	events?: fullcalendar.EventObjectInput[],
+	options?: fullcalendar.Options
 }
 
 export default class FullCalendar extends React.Component<Props> {
-	instance: ?Calendar
+	instance: ?fullcalendar.Calendar
 	root: { current: null | React.ElementRef<"div"> }
 
 	constructor(props: Props) {
@@ -24,18 +25,20 @@ export default class FullCalendar extends React.Component<Props> {
 	}
 
 	componentDidMount() {
-		this.initializeCalendar(this.props)
+		this.initializeCalendar()
+		this.displayEvents()
 	}
 
 	componentDidUpdate(prevProps: Props) {
 		// Reinitialize calendar if root element was replaced.
 		const calendar = $(this.getRootElement()).fullCalendar("getCalendar")
 		const instance = this.instance
-		if (!(calendar instanceof Calendar) || calendar !== instance) {
+		if (!(calendar instanceof fullcalendar.Calendar) || calendar !== instance) {
 			this.destroyCalendar()
-			this.initializeCalendar(this.props)
-		} else if (instance && this.props.options) {
-			instance.option(this.props.options)
+			this.initializeCalendar()
+		} else if (instance) {
+			instance.option(this.props.options || {})
+			this.displayEvents()
 		}
 	}
 
@@ -50,11 +53,11 @@ export default class FullCalendar extends React.Component<Props> {
 		return this.root.current
 	}
 
-	initializeCalendar(props: Props) {
+	initializeCalendar() {
 		// Do not call `new Calendar()` directly because there is some necessary
 		// logic in `$.fn.fullCalendar()`.
 		const $elem = $(this.getRootElement())
-		$elem.fullCalendar(props.options || {})
+		$elem.fullCalendar(this.props.options || {})
 		this.instance = $elem.fullCalendar("getCalendar")
 	}
 
@@ -62,6 +65,15 @@ export default class FullCalendar extends React.Component<Props> {
 		if (this.instance) {
 			this.instance.destroy()
 			this.instance = null
+		}
+	}
+
+	displayEvents() {
+		const events: fullcalendar.EventObjectInput[] = this.props.events || []
+		const instance = this.instance
+		if (instance) {
+			instance.removeEventSources()
+			instance.addEventSource(events)
 		}
 	}
 
