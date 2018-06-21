@@ -1,0 +1,14 @@
+.main {
+  display: flex;
+  align-items: flex-start;
+}
+
+.accounts {
+  padding: 0.5em;
+  width: 25em;
+}
+
+.calendar {
+  flex-grow: 1;
+  padding: 0.5em;
+}
