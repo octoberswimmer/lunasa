@@ -10,8 +10,17 @@
  */
 
 import { Container } from "unstated"
-import listViewsClient, { type ListViewsApi } from "../api/ListViews"
-import { type ListViews, type ListView, type Results } from "../models/ListView"
+import { type RestApi } from "../api/RestApi"
+import { type Account } from "../models/Account"
+import { type FieldSet, fieldList } from "../models/FieldSet"
+import {
+	type Id,
+	type ListView,
+	type ListViewDescription,
+	type ListViews,
+	whereClause
+} from "../models/ListView"
+import { type QueryResult } from "../models/QueryResult"
 import {
 	type AsyncActionState,
 	asyncAction,
@@ -20,23 +29,37 @@ import {
 } from "./asyncAction"
 
 export type State = AsyncActionState & {
-	listViews: ListViews | null,
-	results: Results | null
+	accountFieldSet: FieldSet,
+	accountQueryResult: QueryResult | null,
+	listViewDescriptions: { [key: Id]: ListViewDescription },
+	listViews: ListViews | null
 }
 
 export default class AccountContainer extends Container<State> {
-	_apiClient: Promise<ListViewsApi>
+	_restClient: Promise<RestApi>
 	_lastRequested: ?ListView
-	state = {
-		...asyncActionInitState,
-		listViews: null,
-		results: null
+
+	constructor(opts: {|
+		accountFieldSet: FieldSet,
+		restClient: Promise<RestApi>
+	|}) {
+		super()
+		this._restClient = opts.restClient
+		this.getListViews()
+		this.state = {
+			...asyncActionInitState,
+			accountFieldSet: opts.accountFieldSet,
+			accountQueryResult: null,
+			listViewDescriptions: {},
+			listViews: null
+		}
 	}
 
-	constructor(apiClient: Promise<ListViewsApi> = listViewsClient) {
-		super()
-		this._apiClient = apiClient
-		this.getListViews()
+	getAccounts(): ?(Account[]) {
+		const result = this.state.accountQueryResult
+		if (result) {
+			return result.records
+		}
 	}
 
 	isLoading(): boolean {
@@ -45,20 +68,40 @@ export default class AccountContainer extends Container<State> {
 
 	async getListViews(): Promise<void> {
 		await asyncAction(this, async () => {
-			const client = await this._apiClient
-			const listViews = await client.fetchListViews("Account")
-			await this.setState({ listViews })
+			const client = await this._restClient
+			const result = await client.fetchListViews("Account")
+			const descriptions = await Promise.all(
+				result.listviews.map(view => client.fetchListViewDescription(view))
+			)
+			const listViewDescriptions = {}
+			for (const [index, listView] of result.listviews.entries()) {
+				listViewDescriptions[listView.id] = descriptions[index]
+			}
+			await this.setState({ listViews: result, listViewDescriptions })
 		})
 	}
 
 	async selectListView(listView: ListView): Promise<void> {
 		this._lastRequested = listView
 		await asyncAction(this, async () => {
-			const client = await this._apiClient
-			const results = await client.fetchResults(listView)
+			const accountQueryResult = await this._fetchAccountsByListView(listView)
 			if (this._lastRequested === listView) {
-				await this.setState({ results })
+				await this.setState({ accountQueryResult })
 			}
 		})
+	}
+
+	async _fetchAccountsByListView(listView: ListView): Promise<QueryResult> {
+		const client = await this._restClient
+		const desc = this.state.listViewDescriptions[listView.id]
+		if (!desc) {
+			throw new Error(
+				"could not locate lookup criteria for the selected list view"
+			)
+		}
+		const fields = fieldList(this.state.accountFieldSet)
+		const where = whereClause(desc)
+		const query = `SELECT ${fields} FROM Account ${where} ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST`
+		return client.query(query)
 	}
 }

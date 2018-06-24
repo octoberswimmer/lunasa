@@ -2,7 +2,7 @@
  * This module describes the Visualforce remote object API. There are no
  * implementations here - only Flow types that match the Visualforce APIs.
  *
- * @flow srict
+ * @flow strict
  */
 
 // Type alias to make function signatures more descriptive

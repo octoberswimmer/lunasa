@@ -2,7 +2,8 @@
 
 import { mount } from "enzyme"
 import * as React from "react"
-import * as f from "../models/ListView.testFixtures"
+import * as af from "../models/Account.testFixtures"
+import * as lf from "../models/ListView.testFixtures"
 import AccountCard from "./AccountCard"
 import SelectAccounts from "./SelectAccounts"
 
@@ -13,17 +14,18 @@ afterEach(() => {
 })
 
 it("displays list views in a select", () => {
-	expect.assertions(f.accountListViews.listviews.length + 1)
+	expect.assertions(lf.accountListViews.listviews.length + 1)
 	const wrapper = mount(
 		<SelectAccounts
-			listViews={f.accountListViews}
+			accounts={null}
+			fieldSet={af.accountFieldSet}
+			listViews={lf.accountListViews}
 			onSelectListView={onSelect}
-			results={null}
 		/>
 	)
 	const options = wrapper.find('option')
-	expect(options.length).toBe(f.accountListViews.listviews.length)
-	for (const view of f.accountListViews.listviews) {
+	expect(options.length).toBe(lf.accountListViews.listviews.length)
+	for (const view of lf.accountListViews.listviews) {
 		const option = options.find(`[value="${view.id}"]`)
 		expect(option.text()).toBe(view.label)
 	}
@@ -32,12 +34,13 @@ it("displays list views in a select", () => {
 it("invokes a callback when a list view is selected", () => {
 	const wrapper = mount(
 		<SelectAccounts
-			listViews={f.accountListViews}
+			accounts={null}
+			fieldSet={af.accountFieldSet}
+			listViews={lf.accountListViews}
 			onSelectListView={onSelect}
-			results={null}
 		/>
 	)
-	const listView = f.accountListViews.listviews[0]
+	const listView = lf.accountListViews.listviews[0]
 	const select = wrapper.find('select')
 	select.simulate('input')
 	expect(onSelect).toHaveBeenCalledWith(listView)
@@ -46,15 +49,16 @@ it("invokes a callback when a list view is selected", () => {
 it("displays accounts", () => {
 	const wrapper = mount(
 		<SelectAccounts
-			listViews={f.accountListViews}
+			accounts={af.accountQueryResult.records}
+			fieldSet={af.accountFieldSet}
+			listViews={lf.accountListViews}
 			onSelectListView={onSelect}
-			results={f.accountResults}
 		/>
 	)
 	const cards = wrapper.find(AccountCard)
-	expect(cards.length).toBe(f.accountResults.records.length)
+	expect(cards.length).toBe(af.accountQueryResult.records.length)
 	const card = cards.first()
 	expect(card.props()).toMatchObject({
-		columns: f.accountResults.records[0].columns
+		record: af.accountQueryResult.records[0]
 	})
 })

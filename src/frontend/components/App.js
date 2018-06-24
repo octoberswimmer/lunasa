@@ -9,7 +9,7 @@ import "./App.css"
 import FullCalendar from "./FullCalendar"
 import SelectAccounts from "./SelectAccounts"
 
-interface Props {}
+type Props = {}
 
 const options = {
 	// Toolbar controls to be displayed in calendar header
@@ -36,12 +36,13 @@ export default function App(props: Props) {
 							: null}
 						<div className="main">
 							<SelectAccounts
+								accounts={accounts.getAccounts()}
 								className="accounts"
+								fieldSet={accounts.state.accountFieldSet}
 								listViews={accounts.state.listViews}
 								onSelectListView={listView => {
 									accounts.selectListView(listView)
 								}}
-								results={accounts.state.results}
 							/>
 							<FullCalendar
 								className="calendar"

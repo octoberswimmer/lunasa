@@ -1,46 +1,73 @@
 /* @flow strict */
 
 import * as React from "react"
-import { type ListView, type ListViews, type Results } from "../models/ListView"
+import { type Account } from "../models/Account"
+import { type FieldSet } from "../models/FieldSet"
+import { type ListView, type ListViews } from "../models/ListView"
 import AccountCard from "./AccountCard"
 
 type Props = {
+	accounts: ?(Account[]),
 	className?: string,
+	fieldSet: FieldSet,
 	listViews: ?ListViews,
-	onSelectListView(listView: ListView): void,
-	results: ?Results
+	onSelectListView(listView: ListView): void
 }
 
-export default function SelectAccounts(props: Props) {
-	const listViewOptions = props.listViews
-		? props.listViews.listviews.map(view => (
-				<option value={view.id} key={view.id}>
-					{view.label}
-				</option>
-		  ))
-		: []
-	const accounts = props.results
-		? props.results.records.map((record, idx) => (
-			<AccountCard key={idx} columns={record.columns} />
-		))
-		: []
-	return (
-		<div className={props.className || ""}>
-			<select onInput={onInput.bind(null, props)}>{listViewOptions}</select>
-			{accounts}
-		</div>
-	)
-}
+export default class SelectAccounts extends React.Component<Props> {
+	onInput: (event?: SyntheticInputEvent<>) => void;
+	select: { current: null | React.ElementRef<"select"> }
 
-function onInput({ onSelectListView, listViews }: Props, event: SyntheticInputEvent<>) {
-	event.preventDefault()
-	const listViewId = event.target.value
-	if (!listViews) {
-		return
+	constructor(props: Props) {
+		super(props)
+		this.onInput = this.onInput.bind(this)
+		this.select = React.createRef()
 	}
-	const listView = listViews.listviews.filter(view => view.id === listViewId)[0]
-	if (!listView) {
-		return
+
+	componentDidUpdate(prevProps: Props) {
+		// Trigger fetch for accounts from the first list view when list views
+		// load.
+		if (!prevProps.listViews) {
+			this.onInput()
+		}
 	}
-	onSelectListView(listView)
+
+	render() {
+		const { accounts, className, fieldSet, listViews } = this.props
+		const listViewOptions = listViews
+			? listViews.listviews.map(view => (
+					<option value={view.id} key={view.id}>
+						{view.label}
+					</option>
+			  ))
+			: []
+		const accountCards = accounts
+			? accounts.map(record => (
+					<AccountCard
+						key={record.attributes.url}
+						fieldSet={fieldSet}
+						record={record}
+					/>
+			  ))
+			: []
+		return (
+			<div className={className || ""}>
+				<select onInput={this.onInput} ref={this.select}>{listViewOptions}</select>
+				{accountCards}
+			</div>
+		)
+	}
+
+	onInput(event?: SyntheticInputEvent<>) {
+		const { onSelectListView, listViews } = this.props
+		const select = this.select.current
+		if (!select || !listViews) {
+			return
+		}
+		const listViewId = select.value
+		const listView = listViews.listviews.filter(view => view.id === listViewId)[0]
+		if (listView) {
+			onSelectListView(listView)
+		}
+	}
 }

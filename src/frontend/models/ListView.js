@@ -1,7 +1,9 @@
 /* @flow strict */
 
-type Id = string
-type URL = string
+import { type WhereCondition, stringifyCondition } from "./WhereCondition"
+
+export type Id = string
+export type URL = string
 
 export type ListView = {
 	describeUrl: URL,
@@ -44,16 +46,29 @@ export type Column = {
 	type: ResultType
 }
 
-export type Record = {
-	columns: Array<{ fieldNameOrPath: string, value: string | null }>
+export type ListViewDescription = {
+	columns: Column[],
+	id: Id,
+	orderBy: Array<{
+		fieldNameOrPath: string,
+		nullsPosition: string,
+		sortDirection: "ascending" | "descending"
+	}>,
+	query: string, // SOQL query
+	scope: string, // e.g. "everything"
+	sobjectType: string, // e.g. "Account"
+	whereCondition: WhereCondition
 }
 
-export type Results = {
-	columns: Column[],
-	developerName: string,
-	done: boolean,
-	id: Id,
-	label: string,
-	records: Record[],
-	size: number
+/*
+ * Read `whereCondition` and `scope` from a list view description and produce
+ * a string for use in a SOQL query.
+ */
+export function whereClause(desc: ListViewDescription): string {
+	const cond = stringifyCondition(desc.whereCondition)
+	const where = cond ? `WHERE ${cond}` : ""
+	const scope = desc.scope && desc.scope !== "everything"
+		? `USING SCOPE ${desc.scope}`
+		: ""
+	return [where, scope].join(" ")
 }

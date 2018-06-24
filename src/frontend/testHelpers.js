@@ -1,4 +1,4 @@
-/* flow strict */
+/* @flow strict */
 
 import { type ReactWrapper, type ShallowWrapper } from "enzyme"
 
