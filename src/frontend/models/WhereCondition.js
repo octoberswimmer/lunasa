@@ -6,12 +6,12 @@ export type WhereCondition =
 	| {| condition: WhereCondition |} // negation
 
 const operatorMap = {
-	"equals": "=",
-	"notEquals": "!=",
-	"greaterThan": ">",
-	"greaterThanOrEqualTo": ">=",
-	"lessThan": "<",
-	"lessThanOrEqualTo": "<="
+	equals: "=",
+	notEquals: "!=",
+	greaterThan: ">",
+	greaterThanOrEqualTo: ">=",
+	lessThan: "<",
+	lessThanOrEqualTo: "<="
 }
 
 export function stringifyCondition(cond: WhereCondition): string {

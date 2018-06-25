@@ -6,8 +6,8 @@ import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
 import { forFullcalendar } from "../models/Event"
 import "./App.css"
+import AccountList from "./AccountList"
 import FullCalendar from "./FullCalendar"
-import SelectAccounts from "./SelectAccounts"
 
 type Props = {}
 
@@ -35,14 +35,9 @@ export default function App(props: Props) {
 							? errors.map((e, i) => <p key={i}>{e.message}</p>)
 							: null}
 						<div className="main">
-							<SelectAccounts
-								accounts={accounts.getAccounts()}
+							<AccountList
 								className="accounts"
 								fieldSet={accounts.state.accountFieldSet}
-								listViews={accounts.state.listViews}
-								onSelectListView={listView => {
-									accounts.selectListView(listView)
-								}}
 							/>
 							<FullCalendar
 								className="calendar"

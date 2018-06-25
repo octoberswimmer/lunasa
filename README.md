@@ -9,6 +9,9 @@ You can find the most recent version of this guide [here](https://github.com/fac
 
 ## Before you start
 
+Due to a dependency on reset-date-cache, this project requires Node version 8.
+The dependency will not compile in version 10.
+
 Project dependencies and build script are managed with [yarn][]. Install yarn
 and run this command to install project dependencies:
 
