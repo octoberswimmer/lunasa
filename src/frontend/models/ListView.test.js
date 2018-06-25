@@ -9,9 +9,7 @@ it("produces a where clause for a SOQL query", () => {
 	)
 	expect(desc).toBeDefined()
 	if (desc) {
-		expect(whereClause(desc)).toBe(
-			"WHERE CreatedDate = THIS_WEEK "
-		)
+		expect(whereClause(desc)).toBe("WHERE CreatedDate = THIS_WEEK ")
 	}
 })
 

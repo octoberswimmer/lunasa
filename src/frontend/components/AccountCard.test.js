@@ -10,7 +10,7 @@ const record = {
 	CreatedDate: "2018-06-01T20:35:50.000+0000",
 	Name: "Test Account",
 	Phone: "(520) 773-9050",
-	Site: null,
+	Site: null
 }
 
 const fieldSet = [
