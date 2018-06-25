@@ -9,6 +9,10 @@
 		<name>CustomLabels</name>
 	</types>
 	<types>
+		<members>Account</members>
+		<name>CustomObject</name>
+	</types>
+	<types>
 		<members>*</members>
 		<name>CustomTab</name>
 	</types>
