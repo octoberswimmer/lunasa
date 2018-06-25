@@ -26,4 +26,20 @@
 	</noscript>
 	<div id="root"></div>
 	<script src="{!URLFOR($Resource.Calendar, 'main.js')}" />
+	<script>
+		lunasa({
+			accountFieldSet: [
+			<apex:repeat value="{!$ObjectType.Account.FieldSets.CalendarCard}" var="f">
+				{
+					name: "{!JSENCODE(f)}",
+					label: "{!JSENCODE(f.Label)}",
+					type: "{!JSENCODE(f.Type)}"
+				},
+			</apex:repeat>
+			null
+			].filter(x => !!x),
+			root: document.getElementById("root"),
+			sessionToken: "{!JSENCODE($Api.Session_ID)}",
+		});
+	</script>
 </apex:page>

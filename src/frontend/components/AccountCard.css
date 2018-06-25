@@ -1,0 +1,8 @@
+.account-card {
+  border: 2px solid black;
+  border-radius: 0.5em;
+}
+
+.account-card dt {
+  font-weight: bold;
+}
