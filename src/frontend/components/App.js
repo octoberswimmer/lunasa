@@ -4,10 +4,12 @@ import React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
-import { forFullcalendar } from "../models/Event"
+import { forFullcalendar, newEvent } from "../models/Event"
 import "./App.css"
 import AccountList from "./AccountList"
-import FullCalendar from "./FullCalendar"
+import CreateEvent from "./CreateEvent"
+import DroppableCalendar from "./DroppableCalendar"
+import Modal from "./Modal"
 
 type Props = {}
 
@@ -39,9 +41,16 @@ export default function App(props: Props) {
 								className="accounts"
 								fieldSet={accounts.state.accountFieldSet}
 							/>
-							<FullCalendar
+							<DroppableCalendar
 								className="calendar"
 								events={events.state.events.map(forFullcalendar)}
+								onDrop={({ accountUrl, date }) => {
+									const account = accounts.getAccount(accountUrl)
+									if (account) {
+										const draft = newEvent({ account, date })
+										events.newEvent(draft)
+									}
+								}}
 								options={{
 									...options,
 									viewRender(view) {
@@ -49,6 +58,15 @@ export default function App(props: Props) {
 									}
 								}}
 							/>
+							{events.state.newEvent ? (
+								<Modal
+									onRequestClose={() => {
+										events.discardNewEvent()
+									}}
+								>
+									<CreateEvent />
+								</Modal>
+							) : null}
 						</div>
 					</div>
 				)

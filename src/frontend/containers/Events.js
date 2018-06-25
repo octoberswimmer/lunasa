@@ -14,7 +14,7 @@ import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
 import { type Criteria } from "../api/SObject"
-import { visualforceDatetime } from "../models/Event"
+import { visualforceDatetime } from "../models/serialization"
 import {
 	type AsyncActionState,
 	asyncAction,
@@ -23,7 +23,8 @@ import {
 } from "./asyncAction"
 
 export type State = AsyncActionState & {
-	events: Event[]
+	events: Event[],
+	newEvent: ?$Shape<Event>
 }
 
 export default class EventContainer extends Container<State> {
@@ -31,7 +32,8 @@ export default class EventContainer extends Container<State> {
 	_latestQuery: ?Criteria<Event>
 	state = {
 		...asyncActionInitState,
-		events: []
+		events: [],
+		newEvent: null
 	}
 
 	constructor(remoteObject: RemoteObject<Event> = Events) {
@@ -83,6 +85,34 @@ export default class EventContainer extends Container<State> {
 			if (equal(query, this._latestQuery)) {
 				await this.setState({ events })
 			}
+		})
+	}
+
+	/*
+	 * Create or update a draft event
+	 */
+	async newEvent(details: $Shape<Event>): Promise<void> {
+		await this.setState({ newEvent: details })
+	}
+
+	async discardNewEvent(): Promise<void> {
+		await this.setState({
+			newEvent: null
+		})
+	}
+
+	async create(): Promise<void> {
+		await asyncAction(this, async () => {
+			const draft = this.state.newEvent
+			if (!draft) {
+				throw new Error("There is no event draft to create.")
+			}
+			const Id = await this._remoteObject.create(draft)
+			const event = { ...draft, Id }
+			await this.setState(state => ({
+				events: state.events.concat([event]),
+				newEvent: null
+			}))
 		})
 	}
 }

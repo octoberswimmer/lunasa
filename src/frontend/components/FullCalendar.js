@@ -10,7 +10,7 @@ import * as React from "react"
 // reality fullcalendar adds its method to the global JQuery object.
 const $: fullcalendar.JQueryStatic = (jQuery: any)
 
-type Props = {
+export type Props = {
 	className?: string,
 	events?: fullcalendar.EventObjectInput[],
 	options?: fullcalendar.Options

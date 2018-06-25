@@ -139,3 +139,17 @@ it("provides the total page count if known", async () => {
 	await accounts.setState({ pageSize: 5, count: 30 })
 	expect(accounts.pageCount()).toBe(6)
 })
+
+it("looks up an account by its URL", async () => {
+	const accounts = new Accounts(opts)
+	const account = af.accountQueryResult.records.find(
+		r => r.Name === "United Oil & Gas, UK"
+	)
+	expect(account).toBeDefined()
+	await accounts.setState({ accountQueryResult: af.accountQueryResult })
+	expect(
+		accounts.getAccount(
+			"/services/data/v40.0/sobjects/Account/001f200001XrDt3AAF"
+		)
+	).toEqual(account)
+})

@@ -64,6 +64,13 @@ export default class AccountContainer extends Container<State> {
 		}
 	}
 
+	getAccount(url: string): ?Account {
+		const accounts = this.getAccounts()
+		if (accounts) {
+			return accounts.find(a => a.attributes.url === url)
+		}
+	}
+
 	getAccounts(): ?(Account[]) {
 		const result = this.state.accountQueryResult
 		if (result) {

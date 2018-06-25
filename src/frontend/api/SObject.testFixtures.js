@@ -24,8 +24,19 @@ class SObjectRecordMock<Fields: Object> implements SObjectRecord<Fields> {
 	}
 }
 
+var lastId = 1000
+function uniqueId() {
+	lastId += 1
+	return String(lastId)
+}
+
 export default class SObjectMock<Fields: Object> implements SObject<Fields> {
 	fixtures: { [key: Id]: Fields } = {}
+	create(values: $Shape<Fields>, cb: Callback<Id[]>) {
+		const id = uniqueId()
+		values.Id = id
+		cb(null, [id], event)
+	}
 	retrieve(criteria: Criteria<Fields>, cb: Callback<SObjectRecord<Fields>[]>) {
 		const results = Object.keys(this.fixtures).map(
 			k => new SObjectRecordMock(this.fixtures[k])
