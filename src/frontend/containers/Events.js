@@ -15,20 +15,23 @@ import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
 import { type Criteria } from "../api/SObject"
 import { visualforceDatetime } from "../models/Event"
+import {
+	type AsyncActionState,
+	asyncAction,
+	asyncActionInitState,
+	isLoading
+} from "./asyncAction"
 
-export type State = {
-	events: Event[],
-	errors: Error[],
-	loading: number
+export type State = AsyncActionState & {
+	events: Event[]
 }
 
 export default class EventContainer extends Container<State> {
 	_remoteObject: RemoteObject<Event>
 	_latestQuery: ?Criteria<Event>
 	state = {
-		events: [],
-		errors: [],
-		loading: 0
+		...asyncActionInitState,
+		events: []
 	}
 
 	constructor(remoteObject: RemoteObject<Event> = Events) {
@@ -37,7 +40,7 @@ export default class EventContainer extends Container<State> {
 	}
 
 	isLoading(): boolean {
-		return this.state.loading > 0
+		return isLoading(this)
 	}
 
 	/*
@@ -73,7 +76,7 @@ export default class EventContainer extends Container<State> {
 			return
 		}
 		this._latestQuery = query
-		return this._asyncAction(async () => {
+		return asyncAction(this, async () => {
 			const events = await this._remoteObject.retrieve(query)
 			// If another request was started while this one was in progress
 			// then the query here will not match the latest query.
@@ -81,24 +84,5 @@ export default class EventContainer extends Container<State> {
 				await this.setState({ events })
 			}
 		})
-	}
-
-	/*
-	 * Given a callback that returns a promise, sets state to indicate loading
-	 * until the promise resolves, and set error state if the promise rejects.
-	 * Returns a promise that is guaranteed not to reject.
-	 */
-	async _asyncAction<T>(cb: () => Promise<T>): Promise<void> {
-		this.setState(state => ({
-			errors: [],
-			loading: state.loading + 1
-		}))
-		try {
-			await cb()
-		} catch (error) {
-			this.setState({ errors: [error] })
-		} finally {
-			this.setState(state => ({ loading: state.loading - 1 }))
-		}
 	}
 }

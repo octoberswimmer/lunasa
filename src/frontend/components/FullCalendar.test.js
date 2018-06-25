@@ -1,4 +1,4 @@
-/* @flow string */
+/* @flow strict */
 
 import { type ReactWrapper, mount } from "enzyme"
 import { type JQuery, type JQueryStatic, Calendar } from "fullcalendar"
