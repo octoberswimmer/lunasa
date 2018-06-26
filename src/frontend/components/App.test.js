@@ -13,8 +13,8 @@ import { events as eventFixtures } from "../models/Event.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
 import { delay } from "../testHelpers"
 import App from "./App"
+import AccountList from "./AccountList"
 import FullCalendar from "./FullCalendar"
-import SelectAccounts from "./SelectAccounts"
 
 const accountsOpts = {
 	accountFieldSet: af.accountFieldSet,
@@ -61,40 +61,14 @@ it("displays an error if something went wrong", async () => {
 	expect(wrapper.text()).toMatch("an error occurred")
 })
 
-it("displays account list view selector", async () => {
+it("displays account list component", async () => {
 	const wrapper = mount(<App />)
 	await delay(10)
 	wrapper.update()
-	const selectAccounts = wrapper.find(SelectAccounts)
-	expect(selectAccounts.props()).toMatchObject({
-		fieldSet: af.accountFieldSet,
-		listViews: lf.accountListViews,
-		onSelectListView: expect.any(Function)
+	const accountList = wrapper.find(AccountList)
+	expect(accountList.props()).toMatchObject({
+		fieldSet: af.accountFieldSet
 	})
-})
-
-it("requests accounts when an account list view is selected", async () => {
-	const accounts = new Accounts(accountsOpts)
-	const selectListViewSpy = jest.spyOn(accounts, "selectListView")
-	const wrapper = mount(<App />, { accounts })
-	await delay()
-	const listView = lf.accountListViews.listviews[0]
-	const selectAccounts = wrapper.find(SelectAccounts)
-	selectAccounts.props().onSelectListView(listView)
-	expect(selectListViewSpy).toHaveBeenCalledWith(listView)
-})
-
-it("displays account results", async () => {
-	const accounts = new Accounts(accountsOpts)
-	const wrapper = mount(<App />, { accounts })
-	await delay()
-	await accounts.setState({ accountQueryResult: af.accountQueryResult })
-	wrapper.update()
-	const selectAccounts = wrapper.find(SelectAccounts)
-	expect(selectAccounts.props()).toHaveProperty(
-		"accounts",
-		af.accountQueryResult.records
-	)
 })
 
 // Helper that wraps `<App/>` with a necessary `<Provider>` from unstated.

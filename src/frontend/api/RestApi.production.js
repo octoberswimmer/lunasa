@@ -1,6 +1,10 @@
 /* @flow strict */
 
-import { type ListView, type ListViewDescription, type ListViews } from "../models/ListView"
+import {
+	type ListView,
+	type ListViewDescription,
+	type ListViews
+} from "../models/ListView"
 import { type QueryResult } from "../models/QueryResult"
 
 async function request<T>(sessionToken: string, url: string): Promise<T> {
@@ -21,7 +25,9 @@ export default function ListViewsApi(sessionToken: string) {
 		)
 	}
 
-	function fetchListViewDescription(listView: ListView): Promise<ListViewDescription> {
+	function fetchListViewDescription(
+		listView: ListView
+	): Promise<ListViewDescription> {
 		return request(sessionToken, listView.describeUrl)
 	}
 

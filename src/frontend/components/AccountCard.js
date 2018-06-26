@@ -33,7 +33,7 @@ export default function AccountCard({ fieldSet, record }: Props) {
 	for (const { name, label, type } of fieldSet) {
 		const value = record[name]
 		fields.push(<dt key={name}>{label}</dt>)
-		fields.push(<dd key={name+'-value'}>{format(type, value)}</dd>)
+		fields.push(<dd key={name + "-value"}>{format(type, value)}</dd>)
 	}
 	return <dl className="account-card">{fields}</dl>
 }
