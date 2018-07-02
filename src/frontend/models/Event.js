@@ -1,6 +1,7 @@
 /* @flow strict */
 
 import { type EventObjectInput } from "fullcalendar"
+import { type Account } from "./Account"
 
 export type Event = {
 	EndDateTime: Date,
@@ -12,31 +13,6 @@ export type Event = {
 }
 
 /*
- * Visualforce requires datetime values to be in the UTC time zone in a *very*
- * *specific* format: an RFC 3339 string with whole-second precision, no
- * fractional seconds, and no time zone indicator. Use this format string with
- * moment's `.format()` method to get the appropriate string. For example:
- *
- *     moment(someDate).utc().format(RFC_3339)
- */
-const RFC_3339 = "YYYY-MM-DDTHH:mm:ss"
-
-/*
- * Creates a string representation of a date value suitable for consumption by
- * Visualforce.
- */
-export function visualforceDatetime(datetime: moment$Moment) {
-	const string = datetime
-		.clone()
-		.utc()
-		.format(RFC_3339)
-	// When deployed to Visualforce moment produces a formatted string with the
-	// letter "A" where the letter "T" should be. The reason is unclear. This
-	// does not happen in local testing.
-	return string.replace("A", "T")
-}
-
-/*
  * Convert a Salesforce Event record into a value that can be given to
  * Fullcalendar for display.
  */
@@ -45,5 +21,31 @@ export function forFullcalendar(event: Event): EventObjectInput {
 		title: event.Subject,
 		start: event.StartDateTime,
 		end: event.EndDateTime
+	}
+}
+
+export function newEvent({
+	account,
+	date
+}: {
+	account: Account,
+	date: moment$Moment
+}): $Shape<Event> {
+	return {
+		StartDateTime: date
+			.clone()
+			.local()
+			.hours(10)
+			.minutes(0)
+			.startOf("minute")
+			.toDate(),
+		EndDateTime: date
+			.clone()
+			.local()
+			.hours(11)
+			.minutes(0)
+			.startOf("minute")
+			.toDate(),
+		Subject: `Meeting with ${account.Name}`
 	}
 }

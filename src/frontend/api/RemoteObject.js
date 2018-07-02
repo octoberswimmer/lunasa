@@ -6,7 +6,10 @@
  * @flow strict
  */
 
+import { serializeObject } from "../models/serialization"
 import { type Callback, type Criteria, type SObject } from "./SObject"
+
+type Id = string
 
 export default class RemoteObject<Fields: Object> {
 	sObject: Promise<SObject<Fields>>
@@ -15,9 +18,19 @@ export default class RemoteObject<Fields: Object> {
 		this.sObject = Promise.resolve(sObject)
 	}
 
+	async create(values: $Shape<Fields>): Promise<Id> {
+		const sObject = await this.sObject
+		// Salesforce modifies the given object to add stuff like an `Id` field.
+		const record: Fields = serializeObject(values)
+		await lift(cb => sObject.create(record, cb))
+		return record.Id
+	}
+
 	async retrieve(criteria: Criteria<Fields>): Promise<Fields[]> {
 		const sObject = await this.sObject
-		const results = await lift(cb => sObject.retrieve(criteria, cb))
+		const results = await lift(cb =>
+			sObject.retrieve(serializeObject(criteria), cb)
+		)
 		return results.map(r => r._props)
 	}
 }

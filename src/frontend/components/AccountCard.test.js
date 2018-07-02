@@ -1,9 +1,12 @@
 /* @flow strict */
 
-import { mount } from "enzyme"
+import * as enzyme from "enzyme"
 import * as React from "react"
+import { DragDropContext } from "react-dnd"
+import TestBackend from "react-dnd-test-backend"
 import * as f from "../models/Account.testFixtures"
 import AccountCard from "./AccountCard"
+import Draggable from "./Draggable"
 
 const record = {
 	attributes: { type: "test", url: "test" },
@@ -37,3 +40,24 @@ it("formats dates according to the user's locale", () => {
 	const output = match[1]
 	expect(output).toMatch(/06\/01\/2018|01\/06\/2018/)
 })
+
+it("identifies an account by URL when dragging", () => {
+	const wrapper = mount(<AccountCard fieldSet={fieldSet} record={record} />)
+	const draggable = wrapper.find(Draggable)
+	expect(draggable.props()).toHaveProperty("item", {
+		type: "Account",
+		url: record.attributes.url
+	})
+})
+
+function mount(component: React.Node): enzyme.ReactWrapper {
+	function Identity(props: { children: React.Node }) {
+		return props.children
+	}
+	const DragDropContextProvider = DragDropContext(TestBackend)(Identity)
+	return enzyme.mount(
+		<DragDropContextProvider backend={TestBackend}>
+			{component}
+		</DragDropContextProvider>
+	)
+}

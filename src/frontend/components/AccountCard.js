@@ -5,10 +5,16 @@ import * as React from "react"
 import { type FieldSet, type FieldType } from "../models/FieldSet"
 import { type Record } from "../models/QueryResult"
 import "./AccountCard.css"
+import Draggable from "./Draggable"
 
 type Props = {
 	fieldSet: FieldSet,
 	record: Record
+}
+
+export type DraggableItem = {
+	type: "Account",
+	url: string
 }
 
 function format(type: FieldType, value: any): string {
@@ -35,5 +41,14 @@ export default function AccountCard({ fieldSet, record }: Props) {
 		fields.push(<dt key={name}>{label}</dt>)
 		fields.push(<dd key={name + "-value"}>{format(type, value)}</dd>)
 	}
-	return <dl className="account-card">{fields}</dl>
+	// `draggableItem` identifies the item being dragged to a drop target.
+	const draggableItem: DraggableItem = {
+		type: "Account",
+		url: record.attributes.url
+	}
+	return (
+		<Draggable item={draggableItem}>
+			{({ isDragging }) => <dl className="account-card">{fields}</dl>}
+		</Draggable>
+	)
 }
