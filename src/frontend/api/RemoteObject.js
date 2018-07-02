@@ -6,6 +6,7 @@
  * @flow strict
  */
 
+import { type SObjectDescription } from "../models/SObjectDescription"
 import { serializeObject } from "../models/serialization"
 import { type Callback, type Criteria, type SObject } from "./SObject"
 
@@ -24,6 +25,11 @@ export default class RemoteObject<Fields: Object> {
 		const record: Fields = serializeObject(values)
 		await lift(cb => sObject.create(record, cb))
 		return record.Id
+	}
+
+	async describe(): Promise<SObjectDescription> {
+		const sObject = await this.sObject
+		return lift(cb => sObject.describe(cb))
 	}
 
 	async retrieve(criteria: Criteria<Fields>): Promise<Fields[]> {

@@ -31,25 +31,27 @@
 			accountFieldSet: [
 			<apex:repeat value="{!$ObjectType.Account.FieldSets.CalendarCard}" var="f">
 				{
-					name: "{!JSENCODE(f)}",
-					label: "{!JSENCODE(f.Label)}",
-					type: "{!JSENCODE(f.Type)}"
+					name: "{!JSINHTMLENCODE(f)}",
+					label: "{!JSINHTMLENCODE(f.Label)}",
+					type: "{!JSINHTMLENCODE(f.Type)}",
+					dbRequired: {!f.DBRequired}
 				},
 			</apex:repeat>
 			null
-			].filter(x => !!x),
+			].filter(function(x) { return !!x; }),
 			eventCreateFieldSet: [
 			<apex:repeat value="{!$ObjectType.Event.FieldSets.CreateEvent}" var="f">
 				{
-					name: "{!JSENCODE(f)}",
-					label: "{!JSENCODE(f.Label)}",
-					type: "{!JSENCODE(f.Type)}"
+					name: "{!JSINHTMLENCODE(f)}",
+					label: "{!JSINHTMLENCODE(f.Label)}",
+					type: "{!JSINHTMLENCODE(f.Type)}",
+					dbRequired: {!f.DBRequired}
 				},
 			</apex:repeat>
 			null
-			].filter(x => !!x),
+			].filter(function(x) { return !!x; }),
 			root: document.getElementById("root"),
-			sessionToken: "{!JSENCODE($Api.Session_ID)}",
+			sessionToken: "{!JSINHTMLENCODE($Api.Session_ID)}",
 		});
 	</script>
 </apex:page>

@@ -5,6 +5,8 @@
  * @flow strict
  */
 
+import { type SObjectDescription } from "../models/SObjectDescription"
+
 // Type alias to make function signatures more descriptive
 export type Id = string
 
@@ -62,6 +64,7 @@ type Ordering<Fields: Object = Object> = {
 export interface SObject<Fields: Object> {
 	constructor(): any;
 	create(values: $Shape<Fields>, cb: Callback<Id[]>): void;
+	describe(cb: Callback<SObjectDescription>): void;
 	retrieve(
 		criteria: Criteria<Fields>,
 		cb: Callback<SObjectRecord<Fields>[]>

@@ -1,5 +1,6 @@
 /* @flow strict */
 
+import * as ef from "../models/Event.testFixtures"
 import RemoteObject from "./RemoteObject"
 import SObjectMock from "./SObject.testFixtures.js"
 
@@ -50,6 +51,12 @@ it("pre-serializes date values on create", async () => {
 		}),
 		expect.any(Function)
 	)
+})
+
+it("fetches an object description", async () => {
+	const remote = new RemoteObject(objectMock)
+	const description = await remote.describe()
+	expect(description).toEqual(ef.eventDescription)
 })
 
 it("retrieves records", async () => {
