@@ -5,7 +5,7 @@ import { Form, Formik } from "formik"
 import moment from "moment"
 import * as React from "react"
 import ReactDateTime from "react-datetime"
-import { delay } from "../testHelpers"
+import { delay } from "../../testHelpers"
 import DateTime from "./DateTime"
 
 const onSubmit = jest.fn()

@@ -11,7 +11,10 @@ import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
 import * as af from "../models/Account.testFixtures"
 import { forFullcalendar } from "../models/Event"
-import { events as eventFixtures } from "../models/Event.testFixtures"
+import {
+	events as eventFixtures,
+	eventCreateFieldSet
+} from "../models/Event.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
 import { delay, failIfMissing } from "../testHelpers"
 import App from "./App"
@@ -23,6 +26,8 @@ const accountsOpts = {
 	accountFieldSet: af.accountFieldSet,
 	restClient: RestApi("0000")
 }
+
+const eventsOpts = { eventCreateFieldSet }
 
 var initializeCalendar: JestMockFn<[], void>
 
@@ -42,7 +47,7 @@ it("renders a calendar", async () => {
 
 it("requests events by date range", async () => {
 	initializeCalendar.mockRestore()
-	const events = new Events()
+	const events = new Events(eventsOpts)
 	jest.spyOn(events, "getEventsByDateRange")
 	const wrapper = mount(<App />, { events })
 	expect(events.getEventsByDateRange).toHaveBeenCalledWith(
@@ -55,7 +60,7 @@ it("requests events by date range", async () => {
 })
 
 it("displays events in calendar", async () => {
-	const events = new Events()
+	const events = new Events(eventsOpts)
 	const wrapper = mount(<App />, { events })
 	await events.getEventsByDateRange(moment(), moment())
 	wrapper.update()
@@ -67,7 +72,7 @@ it("displays events in calendar", async () => {
 })
 
 it("displays an error if something went wrong", async () => {
-	const events = new Events()
+	const events = new Events(eventsOpts)
 	const wrapper = mount(<App />, { events })
 	await events.setState({
 		errors: [new Error("an error occurred")]
@@ -87,7 +92,7 @@ it("displays account list component", async () => {
 
 it("creates a new event draft when an account card is dropped on the calendar", async () => {
 	const accounts = new Accounts(accountsOpts)
-	const events = new Events()
+	const events = new Events(eventsOpts)
 	const wrapper = mount(<App />, { accounts, events })
 	const calendar = wrapper.find(DroppableCalendar)
 	const account = failIfMissing(
@@ -111,7 +116,7 @@ function mount(
 ): enzyme.ReactWrapper {
 	const accounts =
 		(containers && containers.accounts) || new Accounts(accountsOpts)
-	const events = (containers && containers.events) || new Events()
+	const events = (containers && containers.events) || new Events(eventsOpts)
 	return enzyme.mount(
 		<Provider inject={[accounts, events]}>
 			<DragDropContextProvider backend={TestBackend}>

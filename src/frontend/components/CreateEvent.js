@@ -4,7 +4,8 @@ import { Field, Form, Formik } from "formik"
 import * as React from "react"
 import { Subscribe } from "unstated"
 import Events from "../containers/Events"
-import DateTime from "./DateTime"
+import * as FS from "../models/FieldSet"
+import DateTime from "./forms/DateTime"
 
 type Props = {}
 
@@ -25,18 +26,7 @@ export default function CreateEvent(type: Props) {
 						}}
 						render={({ isSubmitting, values }) => (
 							<Form>
-								<label>
-									Subject: <Field type="text" name="Subject" />
-								</label>
-								<br />
-								<label>
-									Start: <DateTime name="StartDateTime" />
-								</label>
-								<br />
-								<label>
-									End: <DateTime name="EndDateTime" />
-								</label>
-								<br />
+								{inputsForFieldSet(events.state.eventCreateFieldSet)}
 								<button type="submit" disabled={isSubmitting}>
 									Create
 								</button>
@@ -47,4 +37,28 @@ export default function CreateEvent(type: Props) {
 			}}
 		</Subscribe>
 	)
+}
+
+function inputsForFieldSet(fieldSet: FS.FieldSet): React.Node {
+	return fieldSet.map(field => (
+		<label key={field.name}>
+			{field.label}: {inputFor(field)}
+			<br />
+		</label>
+	))
+}
+
+function inputFor({ name, type }: FS.Field): React.Node {
+	switch (type) {
+		case "boolean":
+			return <Field type="checkbox" name={name} />
+		case "date":
+			return <DateTime name={name} timeFormat={false} />
+		case "datetime":
+			return <DateTime name={name} />
+		case "textarea":
+			return <Field component="textarea" name={name} />
+		default:
+			return <Field type="text" name={name} />
+	}
 }

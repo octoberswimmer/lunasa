@@ -38,6 +38,16 @@
 			</apex:repeat>
 			null
 			].filter(x => !!x),
+			eventCreateFieldSet: [
+			<apex:repeat value="{!$ObjectType.Event.FieldSets.CreateEvent}" var="f">
+				{
+					name: "{!JSENCODE(f)}",
+					label: "{!JSENCODE(f.Label)}",
+					type: "{!JSENCODE(f.Type)}"
+				},
+			</apex:repeat>
+			null
+			].filter(x => !!x),
 			root: document.getElementById("root"),
 			sessionToken: "{!JSENCODE($Api.Session_ID)}",
 		});

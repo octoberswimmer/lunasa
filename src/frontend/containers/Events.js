@@ -14,6 +14,7 @@ import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
 import { type Criteria } from "../api/SObject"
+import { type FieldSet } from "../models/FieldSet"
 import { visualforceDatetime } from "../models/serialization"
 import {
 	type AsyncActionState,
@@ -24,21 +25,26 @@ import {
 
 export type State = AsyncActionState & {
 	events: Event[],
+	eventCreateFieldSet: FieldSet,
 	newEvent: ?$Shape<Event>
 }
 
 export default class EventContainer extends Container<State> {
 	_remoteObject: RemoteObject<Event>
 	_latestQuery: ?Criteria<Event>
-	state = {
-		...asyncActionInitState,
-		events: [],
-		newEvent: null
-	}
 
-	constructor(remoteObject: RemoteObject<Event> = Events) {
+	constructor(opts: {
+		eventCreateFieldSet: FieldSet,
+		remoteObject?: RemoteObject<Event>
+	}) {
 		super()
-		this._remoteObject = remoteObject
+		this._remoteObject = opts.remoteObject || Events
+		this.state = {
+			...asyncActionInitState,
+			events: [],
+			eventCreateFieldSet: opts.eventCreateFieldSet,
+			newEvent: null
+		}
 	}
 
 	isLoading(): boolean {
