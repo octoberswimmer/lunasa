@@ -8,6 +8,7 @@ import { Provider } from "unstated"
 import Events from "../containers/Events"
 import { eventCreateFieldSet } from "../models/Event.testFixtures"
 import { delay } from "../testHelpers"
+import Autocomplete from "./forms/Autocomplete"
 import CreateEvent from "./CreateEvent"
 import DateTime from "./forms/DateTime"
 
@@ -64,6 +65,46 @@ it("presents a checkbox input", async () => {
 	const wrapper = mount(<CreateEvent />, events)
 	const input = wrapper.find("input[name='IsAllDayEvent']")
 	expect(input.props().type).toBe("checkbox")
+})
+
+it("presents a combobox input", async () => {
+	const events = new Events({
+		eventCreateFieldSet: [
+			{ name: "Subject", label: "Subject", type: "combobox" }
+		]
+	})
+	await events.fetchEventDescription()
+	const wrapper = mount(<CreateEvent />, events)
+	const input = wrapper.find(Autocomplete)
+	expect(input.props()).toMatchObject({
+		name: "Subject",
+		label: "Subject",
+		// suggestion values from event fixtures
+		suggestions: ["Call", "Email", "Meeting", "Send Letter/Quote", "Other"]
+	})
+})
+
+it("presents a picklist input", async () => {
+	expect.assertions(4)
+	const events = new Events({
+		eventCreateFieldSet: [
+			{ name: "ShowAs", label: "Show Time As", type: "picklist" }
+		]
+	})
+	// Values from events fixtures
+	const values = [
+		{ label: "Busy", value: "Busy" },
+		{ label: "Out of Office", value: "OutOfOffice" },
+		{ label: "Free", value: "Free" }
+	]
+	await events.fetchEventDescription()
+	const wrapper = mount(<CreateEvent />, events)
+	const input = wrapper.find("select")
+	expect(input.closest("label").text()).toMatch("Show Time As")
+	for (const { label, value } of values) {
+		const option = input.find(`option[value='${value}']`)
+		expect(option.text()).toBe(label)
+	}
 })
 
 it("gets a boolean value from a checkbox input", async () => {

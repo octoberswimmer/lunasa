@@ -81,3 +81,18 @@ export type SObjectDescription = {|
 	urlEdit: URL,
 	urlNew: URL
 |}
+
+export function getField(
+	description: SObjectDescription,
+	name: string
+): ?Field {
+	return description.fields.find(f => f.name === name)
+}
+
+export function getPicklistValues(
+	description: SObjectDescription,
+	name: string
+): ?(PickListValue[]) {
+	const field = getField(description, name)
+	return field && field.picklistValues
+}
