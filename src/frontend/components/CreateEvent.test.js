@@ -20,6 +20,13 @@ const draft = {
 
 const eventsOpts = { eventCreateFieldSet }
 
+it("requests event object description on mount", async () => {
+	const events = new Events(eventsOpts)
+	jest.spyOn(events, "fetchEventDescription")
+	const wrapper = mount(<CreateEvent />, events)
+	expect(events.fetchEventDescription).toHaveBeenCalled()
+})
+
 it("creates an event", async () => {
 	const events = new Events(eventsOpts)
 	await events.newEvent(draft)
@@ -30,7 +37,7 @@ it("creates an event", async () => {
 	)
 })
 
-it("presents inputs based on a given field set", () => {
+it("presents inputs based on a given field set", async () => {
 	const events = new Events({
 		eventCreateFieldSet: [
 			{ name: "InputA", label: "Input A", type: "string" },
@@ -48,7 +55,7 @@ it("presents inputs based on a given field set", () => {
 	expect(inputB.closest("label").text()).toBe("Input B: ")
 })
 
-it("presents a checkbox input", () => {
+it("presents a checkbox input", async () => {
 	const events = new Events({
 		eventCreateFieldSet: [
 			{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
@@ -72,7 +79,7 @@ it("gets a boolean value from a checkbox input", async () => {
 	)
 })
 
-it("presents a date input", () => {
+it("presents a date input", async () => {
 	const events = new Events({
 		eventCreateFieldSet: [{ name: "Date", label: "Date", type: "date" }]
 	})
@@ -82,7 +89,7 @@ it("presents a date input", () => {
 	expect(input.props()).toHaveProperty("timeFormat", false)
 })
 
-it("presents a datetime input", () => {
+it("presents a datetime input", async () => {
 	const events = new Events({
 		eventCreateFieldSet: [
 			{ name: "StartDateTime", label: "Start", type: "datetime" }
@@ -111,7 +118,7 @@ it("gets a Date value from a datetime input", async () => {
 	)
 })
 
-it("presents a textarea input", () => {
+it("presents a textarea input", async () => {
 	const events = new Events({
 		eventCreateFieldSet: [
 			{ name: "Description", label: "Description", type: "textarea" }

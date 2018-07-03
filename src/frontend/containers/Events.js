@@ -16,6 +16,7 @@ import type RemoteObject from "../api/RemoteObject"
 import { type Criteria } from "../api/SObject"
 import { type FieldSet } from "../models/FieldSet"
 import { visualforceDatetime } from "../models/serialization"
+import { type SObjectDescription } from "../models/SObjectDescription"
 import {
 	type AsyncActionState,
 	asyncAction,
@@ -26,11 +27,13 @@ import {
 export type State = AsyncActionState & {
 	events: Event[],
 	eventCreateFieldSet: FieldSet,
+	eventDescription: ?SObjectDescription,
 	newEvent: ?$Shape<Event>
 }
 
 export default class EventContainer extends Container<State> {
 	_remoteObject: RemoteObject<Event>
+	_requestedDescription: boolean
 	_latestQuery: ?Criteria<Event>
 
 	constructor(opts: {
@@ -43,6 +46,7 @@ export default class EventContainer extends Container<State> {
 			...asyncActionInitState,
 			events: [],
 			eventCreateFieldSet: opts.eventCreateFieldSet,
+			eventDescription: null,
 			newEvent: null
 		}
 	}
@@ -91,6 +95,17 @@ export default class EventContainer extends Container<State> {
 			if (equal(query, this._latestQuery)) {
 				await this.setState({ events })
 			}
+		})
+	}
+
+	async fetchEventDescription(): Promise<void> {
+		if (this._requestedDescription) {
+			return
+		}
+		this._requestedDescription = true
+		await asyncAction(this, async () => {
+			const eventDescription = await this._remoteObject.describe()
+			await this.setState({ eventDescription })
 		})
 	}
 

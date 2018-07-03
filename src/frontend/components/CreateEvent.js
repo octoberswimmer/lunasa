@@ -13,6 +13,7 @@ export default function CreateEvent(type: Props) {
 	return (
 		<Subscribe to={[Events]}>
 			{events => {
+				events.fetchEventDescription()
 				return (
 					<Formik
 						enableReinitialize={false}

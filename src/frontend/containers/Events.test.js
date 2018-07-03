@@ -14,6 +14,7 @@ const eventsOpts = {
 }
 
 const createSpy = jest.spyOn(EventModel, "create")
+const describeSpy = jest.spyOn(EventModel, "describe")
 const retrieveSpy = jest.spyOn(EventModel, "retrieve")
 
 afterEach(() => {
@@ -107,6 +108,22 @@ it("avoids making the same query twice in a row", () => {
 			}
 		}
 	})
+})
+
+it("requests event sObject description", async () => {
+	const events = new Events(eventsOpts)
+	await events.fetchEventDescription()
+	expect(events.state.eventDescription).toEqual(ef.eventDescription)
+})
+
+it("does not transmit event description request more than once", async () => {
+	const events = new Events(eventsOpts)
+	await Promise.all([
+		events.fetchEventDescription(),
+		events.fetchEventDescription(),
+		events.fetchEventDescription()
+	])
+	expect(describeSpy).toHaveBeenCalledTimes(1)
 })
 
 it("initiates new event creation", async () => {
