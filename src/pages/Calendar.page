@@ -1,9 +1,8 @@
 <apex:page
 	contentType="text/html"
-	docType="html"
-	showHeader="true"
+	docType="html-5.0"
+	lightningStylesheets="true"
 	sidebar="false"
-	standardStylesheets="false"
 	title="Lunasa"
 	>
 	<apex:remoteObjects jsNamespace="Lunasa">
@@ -15,11 +14,6 @@
 			<apex:remoteObjectField name="Subject" />
 		</apex:remoteObjectModel>
 	</apex:remoteObjects>
-
-	<!-- TODO: get these meta tags into the document <head/> -->
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
 	<apex:stylesheet value="{!URLFOR($Resource.Calendar, 'main.css')}" />
 	<noscript>
 		You need to enable JavaScript to run this app.
