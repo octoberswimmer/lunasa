@@ -5,7 +5,10 @@ import { newEvent } from "./Event"
 import * as ef from "./Event.testFixtures"
 
 const account = {
-	attributes: { type: "test", url: "test:///" },
+	attributes: {
+		type: "test",
+		url: "/services/data/v40.0/sobjects/Account/001f200001XrDswAAF"
+	},
 	CreatedDate: "2018-06-01T20:35:50.000+0000",
 	Name: "Test Account",
 	Phone: "(520) 773-9050",
@@ -15,7 +18,7 @@ const account = {
 it("creates a new event draft from an account and a date", () => {
 	const date = moment()
 	const event = newEvent({ account, date })
-	expect(event.Subject).toBe("Meeting with Test Account")
+	expect(event.WhatId).toBe("001f200001XrDswAAF")
 })
 
 it("sets default start and end time for event draft", () => {

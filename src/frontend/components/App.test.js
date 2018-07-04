@@ -103,7 +103,6 @@ it("creates a new event draft when an account card is dropped on the calendar", 
 	calendar.props().onDrop({ accountUrl: account.attributes.url, date })
 	await delay()
 	expect(events.state.newEvent).toMatchObject({
-		Subject: "Meeting with United Oil & Gas, UK",
 		StartDateTime: expect.any(Date),
 		EndDateTime: expect.any(Date)
 	})
