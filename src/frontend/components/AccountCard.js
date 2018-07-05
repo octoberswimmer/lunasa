@@ -43,9 +43,25 @@ export default function AccountCard({ fieldSet, record }: Props) {
 		if (name === "Name") {
 			accountName = record[name]
 		} else {
-			const value = record[name]
-			fields.push(<dt key={name}>{label}</dt>)
-			fields.push(<dd key={name + "-value"}>{format(type, value)}</dd>)
+			const displayValue = format(type, record[name])
+			fields.push(
+				<dt
+					className="slds-item_label slds-text-color-weak slds-truncate"
+					key={name}
+					title={label}
+				>
+					{label}
+				</dt>
+			)
+			fields.push(
+				<dd
+					className="slds-item_detail slds-truncate"
+					key={name + "-value"}
+					title={displayValue}
+				>
+					{displayValue}
+				</dd>
+			)
 		}
 	}
 	// `draggableItem` identifies the item being dragged to a drop target.
@@ -58,11 +74,16 @@ export default function AccountCard({ fieldSet, record }: Props) {
 			{({ isDragging }) => (
 				<div>
 					<Card
+						className="slds-card__tile"
 						bodyClassName="account-card"
 						heading={accountName || "Account"}
 						icon={<Icon category="standard" name="account" size="small" />}
 					>
-						<dl>{fields}</dl>
+						<article className="slds-tile">
+							<div className="slds-tile__detail">
+								<dl className="slds-list_horizontal slds-wrap">{fields}</dl>
+							</div>
+						</article>
 					</Card>
 				</div>
 			)}

@@ -1,7 +1,3 @@
-.account-card-list > * {
-  padding-top: 0.2rem;
-}
-
 .pagination {
   display: flex;
   justify-content: space-between;
