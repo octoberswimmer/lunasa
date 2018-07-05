@@ -4,6 +4,7 @@
  *
  * @flow strict
  */
+import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css"
 import React from "react"
 import { DragDropContextProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
