@@ -4,6 +4,8 @@
  *
  * @flow strict
  */
+import IconSettings from "@salesforce/design-system-react/components/icon-settings"
+import standardSprite from "@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg"
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css"
 import React from "react"
 import { DragDropContextProvider } from "react-dnd"
@@ -21,12 +23,14 @@ export function lunasa({
 	accountFieldSet,
 	eventCreateFieldSet,
 	root,
-	sessionToken
+	sessionToken,
+	staticDirectory
 }: {
 	accountFieldSet: FieldSet,
 	eventCreateFieldSet: FieldSet,
 	root: HTMLElement,
-	sessionToken: string
+	sessionToken: string,
+	staticDirectory: string
 }) {
 	const accounts = new Accounts({
 		accountFieldSet,
@@ -36,14 +40,21 @@ export function lunasa({
 	ReactDOM.render(
 		<Provider inject={[accounts, events]}>
 			<DragDropContextProvider backend={HTML5Backend}>
-				<App />
+				<IconSettings
+					standardSprite={resolveAsset(staticDirectory, standardSprite)}
+				>
+					<App />
+				</IconSettings>
 			</DragDropContextProvider>
 		</Provider>,
 		root
 	)
 }
-
 window.lunasa = lunasa
+
+function resolveAsset(staticDirectory: string, path: string): string {
+	return [staticDirectory, path].filter(s => !!s).join("/")
+}
 
 if (process.env.NODE_ENV !== "production") {
 	const root = document.getElementById("root")
@@ -58,7 +69,8 @@ if (process.env.NODE_ENV !== "production") {
 			accountFieldSet: accountFixtures.accountFieldSet,
 			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
 			root,
-			sessionToken: "0000"
+			sessionToken: "0000",
+			staticDirectory: ""
 		})
 	})
 }

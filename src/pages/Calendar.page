@@ -14,12 +14,12 @@
 			<apex:remoteObjectField name="Subject" />
 		</apex:remoteObjectModel>
 	</apex:remoteObjects>
-	<apex:stylesheet value="{!URLFOR($Resource.Calendar, 'main.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.Calendar, 'static/css/main.css')}" />
 	<noscript>
 		You need to enable JavaScript to run this app.
 	</noscript>
 	<div id="root"></div>
-	<script src="{!URLFOR($Resource.Calendar, 'main.js')}" />
+	<script src="{!URLFOR($Resource.Calendar, 'static/js/main.js')}" />
 	<script>
 		lunasa({
 			accountFieldSet: [
@@ -46,6 +46,7 @@
 			].filter(function(x) { return !!x; }),
 			root: document.getElementById("root"),
 			sessionToken: "{!JSINHTMLENCODE($Api.Session_ID)}",
+			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}"
 		});
 	</script>
 </apex:page>
