@@ -4,10 +4,10 @@
   "private": true,
   "homepage": ".",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-app-rewired start",
     "prebuild": "flow check && CI=true yarn test",
-    "build": "react-scripts build && yarn run static",
-    "test": "react-scripts test --env=jsdom",
+    "build": "react-app-rewired build && yarn run static",
+    "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject",
     "precommit": "git-format-staged -f 'prettier --stdin' '*.js' '!flow-typed/*'",
     "static": "node scripts/static.js Calendar"
@@ -40,8 +40,10 @@
     "git-format-staged": "^2.0.0",
     "husky": "^0.14.3",
     "prettier": "^1.13.4",
+    "react-app-rewired": "^1.5.2",
     "react-dnd-test-backend": "^5.0.1",
-    "reset-date-cache": "^1.0.4"
+    "reset-date-cache": "^1.0.4",
+    "traverse": "^0.6.6"
   },
   "engines": {
     "node": "^8.0.0"
