@@ -12,7 +12,6 @@ import {
 	getPicklistValues
 } from "../models/SObjectDescription"
 import Autocomplete from "./forms/Autocomplete"
-import "./CreateEvent.css"
 import DateTime from "./forms/DateTime"
 
 type Props = {}
@@ -56,9 +55,9 @@ export default function CreateEvent(type: Props) {
 								onRequestClose={() => {
 									events.discardNewEvent()
 								}}
-								title="Create Event"
+								title="New Event"
 							>
-								<Form className="create-event-form">
+								<Form className="slds-form slds-form_stacked slds-p-around--large">
 									{inputsForFieldSet(
 										events.state.eventCreateFieldSet,
 										events.state.eventDescription
@@ -73,11 +72,42 @@ export default function CreateEvent(type: Props) {
 	)
 }
 
+// Get fields in pairs, and arrange inputs in a two-column grid
 function inputsForFieldSet(
 	fieldSet: FS.FieldSet,
 	description: ?SObjectDescription
 ): React.Node {
-	return fieldSet.map(field => inputFor(field, description))
+	const inputs = []
+	for (let i = 0; i < fieldSet.length; i += 2) {
+		const fields = fieldSet.slice(i, i + 2)
+		inputs.push(
+			<div
+				key={fields.map(field => field.name).join("-")}
+				className="slds-grid"
+			>
+				{fields.map(field => (
+					<div
+						className="slds-has-flexi-truncate slds-p-horizontal_medium"
+						key={field.name}
+					>
+						<div className="slds-form-element slds-form-element_edit slds-hint-parent slds-p-vertical_xx-small">
+							{inputFor(field, description)}
+						</div>
+					</div>
+				))}
+			</div>
+		)
+	}
+	return inputs
+}
+
+function FormElement(props: { children: React.Node, label: string }) {
+	return (
+		<label>
+			<span className="slds-form-element__label">{props.label}</span>
+			<div className="slds-form-element__control">{props.children}</div>
+		</label>
+	)
 }
 
 function inputFor(
@@ -87,9 +117,9 @@ function inputFor(
 	switch (type) {
 		case "boolean":
 			return (
-				<label key={name}>
-					{label}: <Field type="checkbox" name={name} />
-				</label>
+				<FormElement label={label}>
+					<Field type="checkbox" name={name} />
+				</FormElement>
 			)
 		case "combobox":
 			const suggestions = (
@@ -106,21 +136,20 @@ function inputFor(
 			)
 		case "date":
 			return (
-				<label key={name}>
-					{label}: <DateTime name={name} timeFormat={false} />
-				</label>
+				<FormElement label={label}>
+					<DateTime name={name} timeFormat={false} />
+				</FormElement>
 			)
 		case "datetime":
 			return (
-				<label key={name}>
-					{label}: <DateTime name={name} />
-				</label>
+				<FormElement label={label}>
+					<DateTime name={name} />
+				</FormElement>
 			)
 		case "picklist":
 			const values = (description && getPicklistValues(description, name)) || []
 			return (
-				<label key={name}>
-					{label}:{" "}
+				<FormElement label={label}>
 					<Field component="select" name={name}>
 						{values.map(({ label, value }) => (
 							<option key={value} value={value}>
@@ -128,19 +157,19 @@ function inputFor(
 							</option>
 						))}
 					</Field>
-				</label>
+				</FormElement>
 			)
 		case "textarea":
 			return (
-				<label key={name}>
-					{label}: <Field component="textarea" name={name} />
-				</label>
+				<FormElement label={label}>
+					<Field component="textarea" name={name} />
+				</FormElement>
 			)
 		default:
 			return (
-				<label key={name}>
-					{label}: <Field type="text" name={name} />
-				</label>
+				<FormElement label={label}>
+					<Field type="text" name={name} />
+				</FormElement>
 			)
 	}
 }

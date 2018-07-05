@@ -43,20 +43,27 @@ export default function Autocomplete(props: Props) {
 				>
 					{(state: DownshiftState<string>) => (
 						<div>
-							<label {...state.getLabelProps()}>{props.label}:</label>{" "}
-							<input
-								type="text"
-								name={props.name}
-								{...state.getInputProps({
-									onBlur: field.onBlur,
-									onFocus() {
-										state.openMenu()
-									}
-								})}
-							/>
-							<ul {...state.getMenuProps()}>
-								{state.isOpen ? menuItems(props, state) : null}
-							</ul>
+							<label
+								className="slds-form-element__label"
+								{...state.getLabelProps()}
+							>
+								{props.label}:
+							</label>{" "}
+							<div className="slds-form-element__control">
+								<input
+									type="text"
+									name={props.name}
+									{...state.getInputProps({
+										onBlur: field.onBlur,
+										onFocus() {
+											state.openMenu()
+										}
+									})}
+								/>
+								<ul {...state.getMenuProps()}>
+									{state.isOpen ? menuItems(props, state) : null}
+								</ul>
+							</div>
 						</div>
 					)}
 				</Downshift>
