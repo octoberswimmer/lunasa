@@ -5,7 +5,9 @@
  * @flow strict
  */
 import IconSettings from "@salesforce/design-system-react/components/icon-settings"
+import sldsSettings from "@salesforce/design-system-react/components/settings"
 import standardSprite from "@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg"
+import utilitySprite from "@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg"
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css"
 import React from "react"
 import { DragDropContextProvider } from "react-dnd"
@@ -23,15 +25,18 @@ export function lunasa({
 	accountFieldSet,
 	eventCreateFieldSet,
 	root,
+	assistiveRoot,
 	sessionToken,
 	staticDirectory
 }: {
 	accountFieldSet: FieldSet,
 	eventCreateFieldSet: FieldSet,
 	root: HTMLElement,
+	assistiveRoot: HTMLElement,
 	sessionToken: string,
 	staticDirectory: string
 }) {
+	sldsSettings.setAppElement(assistiveRoot)
 	const accounts = new Accounts({
 		accountFieldSet,
 		restClient: RestApi(sessionToken)
@@ -42,6 +47,7 @@ export function lunasa({
 			<DragDropContextProvider backend={HTML5Backend}>
 				<IconSettings
 					standardSprite={resolveAsset(staticDirectory, standardSprite)}
+					utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
 				>
 					<App />
 				</IconSettings>
@@ -58,7 +64,8 @@ function resolveAsset(staticDirectory: string, path: string): string {
 
 if (process.env.NODE_ENV !== "production") {
 	const root = document.getElementById("root")
-	if (!root) {
+	const assistiveRoot = document.getElementById("mount")
+	if (!root || !assistiveRoot) {
 		throw new Error("unable to locate DOM mount point for app")
 	}
 	Promise.all([
@@ -69,6 +76,7 @@ if (process.env.NODE_ENV !== "production") {
 			accountFieldSet: accountFixtures.accountFieldSet,
 			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
 			root,
+			assistiveRoot,
 			sessionToken: "0000",
 			staticDirectory: ""
 		})

@@ -9,7 +9,6 @@ import "./App.css"
 import AccountList from "./AccountList"
 import CreateEvent from "./CreateEvent"
 import DroppableCalendar from "./DroppableCalendar"
-import Modal from "./Modal"
 
 type Props = {}
 
@@ -58,15 +57,7 @@ export default function App(props: Props) {
 									}
 								}}
 							/>
-							{events.state.newEvent ? (
-								<Modal
-									onRequestClose={() => {
-										events.discardNewEvent()
-									}}
-								>
-									<CreateEvent />
-								</Modal>
-							) : null}
+							{events.state.newEvent ? <CreateEvent /> : null}
 						</div>
 					</div>
 				)

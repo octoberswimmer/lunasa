@@ -1,5 +1,7 @@
 /* @flow strict */
 
+import Button from "@salesforce/design-system-react/components/button"
+import Modal from "@salesforce/design-system-react/components/modal"
 import { Field, Form, Formik } from "formik"
 import * as React from "react"
 import { Subscribe } from "unstated"
@@ -31,16 +33,38 @@ export default function CreateEvent(type: Props) {
 							// TODO:
 							// actions.setErrors(submissionerrors)
 						}}
-						render={({ isSubmitting, values }) => (
-							<Form className="create-event-form">
-								{inputsForFieldSet(
-									events.state.eventCreateFieldSet,
-									events.state.eventDescription
-								)}
-								<button type="submit" disabled={isSubmitting}>
-									Create
-								</button>
-							</Form>
+						render={({ handleSubmit, isSubmitting, values }) => (
+							<Modal
+								footer={[
+									<Button
+										key="cancel-button"
+										label="Cancel"
+										onClick={() => {
+											events.discardNewEvent()
+										}}
+										disabled={isSubmitting}
+									/>,
+									<Button
+										key="save-button"
+										label="Save"
+										variant="brand"
+										onClick={handleSubmit}
+										disabled={isSubmitting}
+									/>
+								]}
+								isOpen={true}
+								onRequestClose={() => {
+									events.discardNewEvent()
+								}}
+								title="Create Event"
+							>
+								<Form className="create-event-form">
+									{inputsForFieldSet(
+										events.state.eventCreateFieldSet,
+										events.state.eventDescription
+									)}
+								</Form>
+							</Modal>
 						)}
 					/>
 				)
