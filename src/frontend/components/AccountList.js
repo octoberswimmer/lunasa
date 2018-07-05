@@ -25,10 +25,12 @@ export default function AccountList(props: Props) {
 							accounts.selectListView(listView)
 						}}
 					/>
-					<AccountCards
-						accounts={accounts.getAccounts()}
-						fieldSet={props.fieldSet}
-					/>
+					<div className="account-card-list">
+						<AccountCards
+							accounts={accounts.getAccounts()}
+							fieldSet={props.fieldSet}
+						/>
+					</div>
 					<Pagination
 						currentPage={accounts.currentPageNumber()}
 						onSelectPage={p => accounts.fetchPage(p)}

@@ -1,8 +1,47 @@
+/*
+ * Styles here for lining up dt and dd elements come from a Stack Overflow
+ * answer:
+ * https://stackoverflow.com/a/50177309/103017
+ */
+
 .account-card {
-  border: 2px solid black;
-  border-radius: 0.5em;
+  padding: 0 1rem;
+}
+
+.account-card dl {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .account-card dt {
   font-weight: bold;
+  width: 50%; /* this width and dd width should add to 100% */
+  padding-top: 0.1rem; /* should match dd padding-top */
+}
+
+.account-card dd {
+  display: flex;
+  margin: 0;
+  padding-top: 0.1rem; /* should match dt padding-top */
+}
+
+.account-card dd + dd {
+  width: 100%;
+  padding-top: 0;
+}
+
+.account-card dt + dd:not(:nth-child(2)),
+.account-card dt:first-child + dd:nth-child(2) {
+  width: 50%; /* this width and dt width should add to 100% */
+}
+
+/*
+ * In case of multiple dd elements for one dt, insert a pseudo element so that
+ * dd elements line up in a column
+ */
+.account-card dd + dd::before {
+  width: 50%; /* should match dt width */
+  content: "";
+  padding-top: 0; /* should match dd padding-top */
 }

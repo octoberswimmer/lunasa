@@ -1,5 +1,7 @@
 /* @flow strict */
 
+import Card from "@salesforce/design-system-react/components/card"
+import Icon from "@salesforce/design-system-react/components/icon"
 import moment from "moment"
 import * as React from "react"
 import { type FieldSet, type FieldType } from "../models/FieldSet"
@@ -36,10 +38,15 @@ function format(type: FieldType, value: any): string {
 
 export default function AccountCard({ fieldSet, record }: Props) {
 	const fields: React.Node[] = []
+	var accountName: string
 	for (const { name, label, type } of fieldSet) {
-		const value = record[name]
-		fields.push(<dt key={name}>{label}</dt>)
-		fields.push(<dd key={name + "-value"}>{format(type, value)}</dd>)
+		if (name === "Name") {
+			accountName = record[name]
+		} else {
+			const value = record[name]
+			fields.push(<dt key={name}>{label}</dt>)
+			fields.push(<dd key={name + "-value"}>{format(type, value)}</dd>)
+		}
 	}
 	// `draggableItem` identifies the item being dragged to a drop target.
 	const draggableItem: DraggableItem = {
@@ -48,7 +55,17 @@ export default function AccountCard({ fieldSet, record }: Props) {
 	}
 	return (
 		<Draggable item={draggableItem}>
-			{({ isDragging }) => <dl className="account-card">{fields}</dl>}
+			{({ isDragging }) => (
+				<div>
+					<Card
+						bodyClassName="account-card"
+						heading={accountName || "Account"}
+						icon={<Icon category="standard" name="account" size="small" />}
+					>
+						<dl>{fields}</dl>
+					</Card>
+				</div>
+			)}
 		</Draggable>
 	)
 }

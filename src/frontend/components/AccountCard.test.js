@@ -25,7 +25,7 @@ const fieldSet = [
 
 it("displays fields", () => {
 	const wrapper = mount(<AccountCard fieldSet={fieldSet} record={record} />)
-	expect(wrapper.text()).toMatch("Account NameTest Account")
+	expect(wrapper.text()).toMatch("Test Account")
 	expect(wrapper.text()).toMatch("Site-")
 	expect(wrapper.text()).toMatch(/Created Date[0-9/]+/)
 	expect(wrapper.text()).toMatch("Phone(520) 773-9050")
