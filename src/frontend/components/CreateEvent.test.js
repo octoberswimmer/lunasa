@@ -191,6 +191,19 @@ it("presents a textarea input", async () => {
 	expect(input.props().name).toBe("Description")
 })
 
+it("gets a string value from a textarea input", async () => {
+	const events = new Events(eventsOpts)
+	await events.newEvent(draft)
+	const wrapper = mount(<CreateEvent />, events)
+	const input = wrapper.find("textarea")
+	inputElement(input).value = "some description"
+	input.simulate("change")
+	await submit(wrapper)
+	expect(events.state.events).toContainEqual(
+		expect.objectContaining({ Description: "some description" })
+	)
+})
+
 function mount(
 	component: React.Node,
 	events: Events = new Events(eventsOpts)

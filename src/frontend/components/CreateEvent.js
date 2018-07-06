@@ -174,7 +174,7 @@ function inputFor(
 		case "textarea":
 			return (
 				<FormElement label={label}>
-					<Field component="textarea" name={name} />
+					<Field className="slds-textarea" component="textarea" name={name} />
 				</FormElement>
 			)
 		default:

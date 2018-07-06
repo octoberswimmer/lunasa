@@ -1,3 +1,7 @@
 .create-event-modal-content {
   min-height: 80%;
 }
+
+.create-event-modal-content label {
+  width: 100%;
+}
