@@ -11,7 +11,7 @@ import {
 	type SObjectDescription,
 	getPicklistValues
 } from "../models/SObjectDescription"
-import Autocomplete from "./forms/Autocomplete"
+import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
 
 type Props = {}
@@ -90,9 +90,7 @@ function inputsForFieldSet(
 						className="slds-has-flexi-truncate slds-p-horizontal_medium"
 						key={field.name}
 					>
-						<div className="slds-form-element slds-form-element_edit slds-hint-parent slds-p-vertical_xx-small">
-							{inputFor(field, description)}
-						</div>
+						{inputFor(field, description)}
 					</div>
 				))}
 			</div>
@@ -103,10 +101,12 @@ function inputsForFieldSet(
 
 function FormElement(props: { children: React.Node, label: string }) {
 	return (
-		<label>
-			<span className="slds-form-element__label">{props.label}</span>
-			<div className="slds-form-element__control">{props.children}</div>
-		</label>
+		<div className="slds-form-element slds-p-vertical_xx-small">
+			<label>
+				<span className="slds-form-element__label">{props.label}</span>
+				<div className="slds-form-element__control">{props.children}</div>
+			</label>
+		</div>
 	)
 }
 
@@ -122,16 +122,14 @@ function inputFor(
 				</FormElement>
 			)
 		case "combobox":
-			const suggestions = (
-				(description && getPicklistValues(description, name)) ||
-				[]
-			).map(item => item.value)
+			const options =
+				(description && getPicklistValues(description, name)) || []
 			return (
-				<Autocomplete
-					key={name}
-					name={name}
+				<Combobox
+					classNameContainer="slds-p-vertical_xx-small"
 					label={label}
-					suggestions={suggestions}
+					name={name}
+					options={options}
 				/>
 			)
 		case "date":

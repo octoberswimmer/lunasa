@@ -8,7 +8,7 @@ import { Provider } from "unstated"
 import Events from "../containers/Events"
 import { eventCreateFieldSet } from "../models/Event.testFixtures"
 import { delay } from "../testHelpers"
-import Autocomplete from "./forms/Autocomplete"
+import Combobox from "./forms/Combobox"
 import CreateEvent from "./CreateEvent"
 import DateTime from "./forms/DateTime"
 
@@ -49,11 +49,11 @@ it("presents inputs based on a given field set", async () => {
 
 	const inputA = wrapper.find("input[name='InputA']")
 	expect(inputA.props().type).toBe("text")
-	expect(inputA.closest("label").text()).toBe("Input A: ")
+	expect(inputA.closest("label").text()).toBe("Input A")
 
 	const inputB = wrapper.find("input[name='InputB']")
 	expect(inputB.props().type).toBe("text")
-	expect(inputB.closest("label").text()).toBe("Input B: ")
+	expect(inputB.closest("label").text()).toBe("Input B")
 })
 
 it("presents a checkbox input", async () => {
@@ -75,12 +75,28 @@ it("presents a combobox input", async () => {
 	})
 	await events.fetchEventDescription()
 	const wrapper = mount(<CreateEvent />, events)
-	const input = wrapper.find(Autocomplete)
+	const input = wrapper.find(Combobox)
 	expect(input.props()).toMatchObject({
 		name: "Subject",
 		label: "Subject",
-		// suggestion values from event fixtures
-		suggestions: ["Call", "Email", "Meeting", "Send Letter/Quote", "Other"]
+		// option values from event fixtures
+		options: [
+			{ active: true, defaultValue: false, label: "Call", value: "Call" },
+			{ active: true, defaultValue: false, label: "Email", value: "Email" },
+			{
+				active: true,
+				defaultValue: false,
+				label: "Meeting",
+				value: "Meeting"
+			},
+			{
+				active: true,
+				defaultValue: false,
+				label: "Send Letter/Quote",
+				value: "Send Letter/Quote"
+			},
+			{ active: true, defaultValue: false, label: "Other", value: "Other" }
+		]
 	})
 })
 

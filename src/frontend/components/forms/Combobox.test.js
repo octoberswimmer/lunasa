@@ -4,9 +4,14 @@ import { Form, Formik } from "formik"
 import * as enzyme from "enzyme"
 import * as React from "react"
 import { delay } from "../../testHelpers"
-import Autocomplete from "./Autocomplete"
+import Combobox from "./Combobox"
 
-const fruits = ["apple", "banana", "cranberry"]
+// const fruits = ["apple", "banana", "cranberry"]
+const fruits = [
+	{ value: "apple", label: "Apple", active: true, defaultValue: false },
+	{ value: "banana", label: "Banana", active: true, defaultValue: false },
+	{ value: "cranberry", label: "Cranberry", active: true, defaultValue: false }
+]
 
 const onSubmit = jest.fn()
 
@@ -16,41 +21,41 @@ afterEach(() => {
 
 it("passes initial value to input", async () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />,
+		<Combobox label="Fruit" name="fruit" options={fruits} />,
 		{ initialValues: { fruit: "cranberry" } }
 	)
-	const input = wrapper.find("input[name='fruit']")
+	const input = wrapper.find("input.slds-combobox__input")
 	input.simulate("change")
 	await submit(wrapper)
 	expect(onSubmit).toHaveBeenCalledWith(
-		{
+		expect.objectContaining({
 			fruit: "cranberry"
-		},
+		}),
 		expect.anything()
 	)
 })
 
 it("captures user input", async () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />
+		<Combobox label="Fruit" name="fruit" options={fruits} />
 	)
-	const input = wrapper.find("input[name='fruit']")
+	const input = wrapper.find("input.slds-combobox__input")
 	inputElement(input).value = "banana"
 	input.simulate("change")
 	await submit(wrapper)
 	expect(onSubmit).toHaveBeenCalledWith(
-		{
+		expect.objectContaining({
 			fruit: "banana"
-		},
+		}),
 		expect.anything()
 	)
 })
 
 it("accepts values not included in the given suggestion list", async () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />
+		<Combobox label="Fruit" name="fruit" options={fruits} />
 	)
-	const input = wrapper.find("input[name='fruit']")
+	const input = wrapper.find("input.slds-combobox__input")
 	inputElement(input).value = "date"
 	input.simulate("change")
 	await submit(wrapper)
@@ -64,9 +69,9 @@ it("accepts values not included in the given suggestion list", async () => {
 
 it("displays a label", () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />
+		<Combobox label="Fruit" name="fruit" options={fruits} />
 	)
-	const input = wrapper.find("input[name='fruit']")
+	const input = wrapper.find("input.slds-combobox__input")
 	const label = wrapper.find("label")
 	expect(label.props().htmlFor).toBeTruthy()
 	expect(label.props().htmlFor).toBe(input.props().id)
@@ -75,34 +80,36 @@ it("displays a label", () => {
 
 it("displays completions", () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />
+		<Combobox label="Fruit" name="fruit" options={fruits} />
 	)
-	const input = wrapper.find("input[name='fruit']")
-	inputElement(input).value = "a"
+	const input = wrapper.find("input.slds-combobox__input")
+	inputElement(input).value = "A"
 	input.simulate("change")
 	const completions = wrapper.find("li")
-	expect(completions.map(n => n.text())).toEqual(fruits)
+	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
 })
 
 it("displays completions when input is empty", () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />
+		<Combobox label="Fruit" name="fruit" options={fruits} />
 	)
-	const input = wrapper.find("input[name='fruit']")
+	const input = wrapper.find("input.slds-combobox__input")
 	expect(inputElement(input).value).toBe("")
-	input.simulate("focus")
+	input.simulate("click")
 	const completions = wrapper.find("li")
-	expect(completions.map(n => n.text())).toEqual(fruits)
+	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
 })
 
 it("updates form state when a completion is clicked", async () => {
 	const wrapper = mount(
-		<Autocomplete label="Fruit" name="fruit" suggestions={fruits} />
+		<Combobox label="Fruit" name="fruit" options={fruits} />
 	)
-	const input = wrapper.find("input[name='fruit']")
+	const input = wrapper.find("input.slds-combobox__input")
 	inputElement(input).value = "a"
 	input.simulate("change")
-	const completion = wrapper.find("li").filterWhere(n => n.text() === "banana")
+	const completion = wrapper
+		.find(".slds-listbox__option-text")
+		.filterWhere(n => n.text() === "Banana")
 	completion.simulate("click")
 	await submit(wrapper)
 	wrapper.update()
