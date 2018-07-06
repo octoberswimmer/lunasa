@@ -29,9 +29,6 @@ export default function App(props: Props) {
 				const errors = accounts.state.errors.concat(events.state.errors)
 				return (
 					<div className="App">
-						<header className="App-header">
-							<h1 className="App-title">Lunasa</h1>
-						</header>
 						{isLoading ? "Loading..." : null}
 						{errors.length > 0
 							? errors.map((e, i) => <p key={i}>{e.message}</p>)

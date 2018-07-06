@@ -1,5 +1,6 @@
 /* @flow strict */
 
+import Button from "@salesforce/design-system-react/components/button"
 import * as React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
@@ -133,24 +134,22 @@ function Pagination(props: {
 		onSelectPage(currentPage + 1)
 	}
 	return (
-		<div className="pagination">
-			<button
+		<footer className="pagination slds-p-around--medium">
+			<Button
 				disabled={currentPage <= 1}
+				label="Prev"
 				onClick={prev}
 				className="previousPage"
-			>
-				Prev
-			</button>
+			/>
 			<span>
 				Page {currentPage} of {pageCount}
 			</span>
-			<button
+			<Button
 				disabled={currentPage >= pageCount}
+				label="Next"
 				onClick={next}
 				className="nextPage"
-			>
-				Next
-			</button>
-		</div>
+			/>
+		</footer>
 	)
 }
