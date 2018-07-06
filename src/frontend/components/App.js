@@ -17,7 +17,8 @@ const options = {
 	header: {
 		left: "title",
 		right: "basicWeek,month today prev,next"
-	}
+	},
+	height: "auto"
 }
 
 export default function App(props: Props) {
