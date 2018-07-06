@@ -20,6 +20,7 @@
   "dependencies": {
     "@salesforce-ux/design-system": "^2.6.2",
     "@salesforce/design-system-react": "^0.8.18",
+    "classnames": "^2.2.5",
     "fast-deep-equal": "^2.0.1",
     "formik": "^1.0.0-beta.3",
     "fullcalendar": "^3.9.0",
@@ -27,7 +28,6 @@
     "jquery": "3",
     "moment": "2",
     "react": "^16.4.0",
-    "react-datetime": "^2.14.0",
     "react-dnd": "^5.0.0",
     "react-dnd-html5-backend": "^5.0.1",
     "react-dom": "^16.4.0",

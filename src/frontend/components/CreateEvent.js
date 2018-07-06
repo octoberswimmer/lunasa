@@ -12,6 +12,7 @@ import {
 	getPicklistValues
 } from "../models/SObjectDescription"
 import Combobox from "./forms/Combobox"
+import "./CreateEvent.css"
 import DateTime from "./forms/DateTime"
 
 type Props = {}
@@ -32,8 +33,12 @@ export default function CreateEvent(type: Props) {
 							// TODO:
 							// actions.setErrors(submissionerrors)
 						}}
-						render={({ handleSubmit, isSubmitting, values }) => (
+						render={({ errors, handleSubmit, isSubmitting, values }) => (
 							<Modal
+								contentClassName={[
+									"create-event-modal-content",
+									"slds-p-around--medium"
+								]}
 								footer={[
 									<Button
 										key="cancel-button"
@@ -48,7 +53,7 @@ export default function CreateEvent(type: Props) {
 										label="Save"
 										variant="brand"
 										onClick={handleSubmit}
-										disabled={isSubmitting}
+										disabled={isSubmitting || hasErrors(errors)}
 									/>
 								]}
 								isOpen={true}
@@ -57,7 +62,7 @@ export default function CreateEvent(type: Props) {
 								}}
 								title="New Event"
 							>
-								<Form className="slds-form slds-form_stacked slds-p-around--large">
+								<Form className="slds-form slds-form_stacked">
 									{inputsForFieldSet(
 										events.state.eventCreateFieldSet,
 										events.state.eventDescription
@@ -70,6 +75,10 @@ export default function CreateEvent(type: Props) {
 			}}
 		</Subscribe>
 	)
+}
+
+function hasErrors(errors: { [field: string]: string }): boolean {
+	return Object.keys(errors).length > 0
 }
 
 // Get fields in pairs, and arrange inputs in a two-column grid
@@ -134,15 +143,20 @@ function inputFor(
 			)
 		case "date":
 			return (
-				<FormElement label={label}>
-					<DateTime name={name} timeFormat={false} />
-				</FormElement>
+				<DateTime
+					containerClassName="slds-p-vertical_xx-small"
+					label={label}
+					name={name}
+					showTime={false}
+				/>
 			)
 		case "datetime":
 			return (
-				<FormElement label={label}>
-					<DateTime name={name} />
-				</FormElement>
+				<DateTime
+					containerClassName="slds-p-vertical_xx-small"
+					label={label}
+					name={name}
+				/>
 			)
 		case "picklist":
 			const values = (description && getPicklistValues(description, name)) || []
