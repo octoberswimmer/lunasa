@@ -70,6 +70,7 @@ export default function CreateEvent(props: Props) {
 								onRequestClose={() => {
 									events.discardNewEvent()
 								}}
+								size="large"
 								title="New Event"
 							>
 								<Form className="slds-form slds-form_stacked">
