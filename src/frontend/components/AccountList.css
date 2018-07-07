@@ -1,8 +1,9 @@
-.accounts .select-wrapper {
-  width: 100%;
+.account-list {
+  display: flex;
+  flex-direction: column;
 }
 
-.accounts .select-wrapper select {
+.select-wrapper select {
   width: 100%;
 }
 

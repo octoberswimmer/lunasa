@@ -1,6 +1,7 @@
 /* @flow strict */
 
 import Button from "@salesforce/design-system-react/components/button"
+import classNames from "classnames"
 import * as React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
@@ -11,7 +12,7 @@ import AccountCard from "./AccountCard"
 import "./AccountList.css"
 
 type Props = {
-	className?: string,
+	className?: string | string[],
 	fieldSet: FieldSet,
 	spinner?: string // path to spinner image
 }
@@ -20,7 +21,7 @@ export default function AccountList(props: Props) {
 	return (
 		<Subscribe to={[Accounts]}>
 			{accounts => (
-				<div className={props.className || ""}>
+				<div className={classNames("account-list", props.className)}>
 					<div className="select-wrapper">
 						<SelectAccountListView
 							listViews={accounts.state.listViews}

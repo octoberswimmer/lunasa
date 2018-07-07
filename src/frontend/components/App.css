@@ -8,8 +8,8 @@
 }
 
 .accounts {
+  flex: 0 0 18rem;
   padding: 0.5rem;
-  width: 18rem;
 }
 
 .calendar {

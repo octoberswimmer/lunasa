@@ -11,7 +11,6 @@ import * as React from "react"
 const $: fullcalendar.JQueryStatic = (jQuery: any)
 
 export type Props = {
-	className?: string,
 	events?: fullcalendar.EventObjectInput[],
 	options?: fullcalendar.Options
 }
@@ -86,6 +85,6 @@ export default class FullCalendar extends React.Component<Props> {
 	}
 
 	render() {
-		return <div className={this.props.className || ""} ref={this.root} />
+		return <div ref={this.root} />
 	}
 }
