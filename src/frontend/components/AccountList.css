@@ -1,5 +1,22 @@
-.accounts > select {
+.accounts .select-wrapper {
   width: 100%;
+}
+
+.accounts .select-wrapper select {
+  width: 100%;
+}
+
+.select-wrapper {
+  display: flex;
+  align-items: center; /* center loading spinner vertically */
+  position: relative; /* set stacking context for loading spinner */
+}
+
+.select-wrapper .loading-spinner {
+  position: absolute;
+  right: 1.5em;
+  height: 2em;
+  width: 2em;
 }
 
 .pagination {

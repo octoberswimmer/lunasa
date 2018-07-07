@@ -12,7 +12,8 @@ import "./AccountList.css"
 
 type Props = {
 	className?: string,
-	fieldSet: FieldSet
+	fieldSet: FieldSet,
+	spinner?: string // path to spinner image
 }
 
 export default function AccountList(props: Props) {
@@ -20,12 +21,21 @@ export default function AccountList(props: Props) {
 		<Subscribe to={[Accounts]}>
 			{accounts => (
 				<div className={props.className || ""}>
-					<SelectAccountListView
-						listViews={accounts.state.listViews}
-						onSelectListView={listView => {
-							accounts.selectListView(listView)
-						}}
-					/>
+					<div className="select-wrapper">
+						<SelectAccountListView
+							listViews={accounts.state.listViews}
+							onSelectListView={listView => {
+								accounts.selectListView(listView)
+							}}
+						/>
+						{accounts.isLoading() ? (
+							<img
+								alt="Loading..."
+								className="loading-spinner"
+								src={props.spinner}
+							/>
+						) : null}
+					</div>
 					<div className="account-card-list">
 						<AccountCards
 							accounts={accounts.getAccounts()}

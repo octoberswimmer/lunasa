@@ -15,9 +15,11 @@ import Combobox from "./forms/Combobox"
 import "./CreateEvent.css"
 import DateTime from "./forms/DateTime"
 
-type Props = {}
+type Props = {
+	spinner?: string // path to spinner image
+}
 
-export default function CreateEvent(type: Props) {
+export default function CreateEvent(props: Props) {
 	return (
 		<Subscribe to={[Events]}>
 			{events => {
@@ -40,6 +42,14 @@ export default function CreateEvent(type: Props) {
 									"slds-p-around--medium"
 								]}
 								footer={[
+									events.isLoading() ? (
+										<img
+											alt="Loading..."
+											className="loading-spinner"
+											key="loading-spinner"
+											src={props.spinner}
+										/>
+									) : null,
 									<Button
 										key="cancel-button"
 										label="Cancel"

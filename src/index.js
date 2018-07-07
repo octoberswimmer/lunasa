@@ -8,6 +8,7 @@ import IconSettings from "@salesforce/design-system-react/components/icon-settin
 import sldsSettings from "@salesforce/design-system-react/components/settings"
 import standardSprite from "@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg"
 import utilitySprite from "@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg"
+import spinner from "@salesforce-ux/design-system/assets/images/spinners/slds_spinner.gif"
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css"
 import React from "react"
 import { DragDropContextProvider } from "react-dnd"
@@ -49,7 +50,7 @@ export function lunasa({
 					standardSprite={resolveAsset(staticDirectory, standardSprite)}
 					utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
 				>
-					<App />
+					<App spinner={resolveAsset(staticDirectory, spinner)} />
 				</IconSettings>
 			</DragDropContextProvider>
 		</Provider>,

@@ -5,3 +5,8 @@
 .create-event-modal-content label {
   width: 100%;
 }
+
+footer .loading-spinner {
+  height: 2em;
+  margin-right: 1em;
+}

@@ -1,3 +1,7 @@
+.App.loading {
+  cursor: progress;
+}
+
 .main {
   display: flex;
   align-items: flex-start;

@@ -2,6 +2,7 @@
 
 import Toast from "@salesforce/design-system-react/components/toast"
 import ToastContainer from "@salesforce/design-system-react/components/toast/container"
+import classNames from "classnames"
 import React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
@@ -12,7 +13,9 @@ import AccountList from "./AccountList"
 import CreateEvent from "./CreateEvent"
 import DroppableCalendar from "./DroppableCalendar"
 
-type Props = {}
+type Props = {
+	spinner?: string // path to spinner image
+}
 
 const options = {
 	// Toolbar controls to be displayed in calendar header
@@ -29,8 +32,7 @@ export default function App(props: Props) {
 			{(accounts, events) => {
 				const isLoading = accounts.isLoading() || events.isLoading()
 				return (
-					<div className="App">
-						{isLoading ? "Loading..." : null}
+					<div className={classNames("App", { loading: isLoading })}>
 						<ToastContainer>
 							<Errors container={accounts} />
 							<Errors container={events} />
@@ -39,6 +41,7 @@ export default function App(props: Props) {
 							<AccountList
 								className="accounts"
 								fieldSet={accounts.state.accountFieldSet}
+								spinner={props.spinner}
 							/>
 							<DroppableCalendar
 								className="calendar"
@@ -57,7 +60,9 @@ export default function App(props: Props) {
 									}
 								}}
 							/>
-							{events.state.newEvent ? <CreateEvent /> : null}
+							{events.state.newEvent ? (
+								<CreateEvent spinner={props.spinner} />
+							) : null}
 						</div>
 					</div>
 				)
