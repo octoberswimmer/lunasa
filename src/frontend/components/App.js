@@ -1,5 +1,7 @@
 /* @flow strict */
 
+import Toast from "@salesforce/design-system-react/components/toast"
+import ToastContainer from "@salesforce/design-system-react/components/toast/container"
 import React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
@@ -26,13 +28,13 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const isLoading = accounts.isLoading() || events.isLoading()
-				const errors = accounts.state.errors.concat(events.state.errors)
 				return (
 					<div className="App">
 						{isLoading ? "Loading..." : null}
-						{errors.length > 0
-							? errors.map((e, i) => <p key={i}>{e.message}</p>)
-							: null}
+						<ToastContainer>
+							<Errors container={accounts} />
+							<Errors container={events} />
+						</ToastContainer>
 						<div className="main">
 							<AccountList
 								className="accounts"
@@ -62,4 +64,22 @@ export default function App(props: Props) {
 			}}
 		</Subscribe>
 	)
+}
+
+interface ErrorReporter {
+	getErrors(): Error[];
+	dismissError(error: Error): any;
+}
+
+function Errors({ container }: { container: ErrorReporter }) {
+	return container
+		.getErrors()
+		.map((e, i) => (
+			<Toast
+				key={i}
+				labels={{ heading: e.message }}
+				onRequestClose={() => container.dismissError(e)}
+				variant="error"
+			/>
+		))
 }

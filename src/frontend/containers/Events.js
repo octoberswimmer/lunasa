@@ -55,6 +55,16 @@ export default class EventContainer extends Container<State> {
 		return isLoading(this)
 	}
 
+	getErrors(): Error[] {
+		return this.state.errors
+	}
+
+	async dismissError(error: Error): Promise<void> {
+		await this.setState(state => ({
+			errors: state.errors.filter(e => e.message !== error.message)
+		}))
+	}
+
 	/*
 	 * Fetches events from the given date range
 	 */

@@ -5,6 +5,7 @@
  */
 
 import sldsSettings from "@salesforce/design-system-react/components/settings"
+import ElementFocus from "@salesforce/design-system-react/utilities/dom-element-focus"
 import { configure } from "enzyme"
 import Adapter from "enzyme-adapter-react-16"
 
@@ -33,3 +34,6 @@ class Range {
 	}
 }
 global.window.document.createRange = () => new Range()
+
+// Suppress element focus warning from SLDS in testing
+ElementFocus.returnFocusToStoredElement = function returnFocusToStoredElement() {}

@@ -72,12 +72,33 @@ it("displays events in calendar", async () => {
 })
 
 it("displays an error if something went wrong", async () => {
+	const accounts = new Accounts(accountsOpts)
 	const events = new Events(eventsOpts)
-	const wrapper = mount(<App />, { events })
-	await events.setState({
-		errors: [new Error("an error occurred")]
-	})
-	expect(wrapper.text()).toMatch("an error occurred")
+	for (const container of [accounts, events]) {
+		const wrapper = mount(<App />, { accounts, events })
+		await container.setState({
+			errors: [new Error("an error occurred")]
+		})
+		expect(wrapper.text()).toMatch("an error occurred")
+	}
+})
+
+it("dismisses errors when the user clicks the close control on a toast", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const events = new Events(eventsOpts)
+	for (const container of [accounts, events]) {
+		const wrapper = mount(<App />, { accounts, events })
+		await container.setState({
+			errors: [new Error("an error occurred")]
+		})
+		expect(wrapper.text()).toMatch("an error occurred")
+		wrapper.update()
+		wrapper.find(".slds-notify button[title='Close']").forEach(closeControl => {
+			closeControl.simulate("click")
+		})
+		await delay()
+		expect(wrapper.text()).not.toMatch("an error occurref")
+	}
 })
 
 it("displays account list component", async () => {
