@@ -6,7 +6,13 @@ import * as enzyme from "enzyme"
 import { Form, Formik } from "formik"
 import moment from "moment"
 import * as React from "react"
-import { delay, inputElement, withLocale } from "../../testHelpers"
+import {
+	delay,
+	inputElement,
+	parseLocalDate,
+	withLocaleAndTz,
+	withTimezone
+} from "../../testHelpers"
 import DateTime from "./DateTime"
 
 const onSubmit = jest.fn()
@@ -17,26 +23,36 @@ afterEach(() => {
 
 it("preserves initial value if no changes have been made", async () => {
 	const start = new Date("2018-06-29T10:00-07:00")
-	const wrapper = mount(<DateTime label="Start" name="start" />, {
-		initialValues: { start }
-	})
-	await submit(wrapper)
-	expect(onSubmit).toHaveBeenCalledWith(
-		expect.objectContaining({ start }),
-		expect.anything()
-	)
+	const inputs = [
+		{ tz: "Europe/Berlin" },
+		{ tz: "America/Los_Angeles" },
+		{ tz: "UTC" }
+	]
+	expect.assertions(inputs.length)
+	for (const { tz } of inputs) {
+		await withTimezone(tz, async () => {
+			const wrapper = mount(<DateTime label="Start" name="start" />, {
+				initialValues: { start }
+			})
+			await submit(wrapper)
+			expect(onSubmit).toHaveBeenCalledWith(
+				expect.objectContaining({ start }),
+				expect.anything()
+			)
+		})
+	}
 })
 
 it("displays date according to locale", async () => {
-	const start = new Date("2018-07-05")
 	const inputs = [
-		{ locale: "de", value: "05.07.2018" },
-		{ locale: "en", value: "07/05/2018" },
-		{ locale: "es", value: "05/07/2018" }
+		{ locale: "de", value: "05.07.2018", tz: "Europe/Berlin" },
+		{ locale: "en", value: "07/05/2018", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "05/07/2018", tz: "UTC" }
 	]
 	expect.assertions(inputs.length)
-	for (const { locale, value } of inputs) {
-		await withLocale(locale, async () => {
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-07-05")
 			const wrapper = mount(<DateTime label="Start" name="start" />, {
 				initialValues: { start }
 			})
@@ -46,16 +62,16 @@ it("displays date according to locale", async () => {
 	}
 })
 
-it("captures change to date input", async () => {
-	const start = new Date("2018-06-29T00:00Z")
+it("captures change to date input via text entry", async () => {
 	const inputs = [
-		{ locale: "de", value: "05.07.2018" },
-		{ locale: "en", value: "07/05/2018" },
-		{ locale: "es", value: "05/07/2018" }
+		{ locale: "de", value: "05.07.2018", tz: "Europe/Berlin" },
+		{ locale: "en", value: "07/05/2018", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "05/07/2018", tz: "UTC" }
 	]
 	expect.assertions(inputs.length * 2)
-	for (const { locale, value } of inputs) {
-		await withLocale(locale, async () => {
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-06-29")
 			const wrapper = mount(<DateTime label="Start" name="start" />, {
 				initialValues: { start }
 			})
@@ -75,17 +91,46 @@ it("captures change to date input", async () => {
 	}
 })
 
-it("updates date but not time when date input changes", async () => {
-	const start = new Date("2018-06-29T10:00")
-	const expected = new Date("2018-07-05T10:00")
+it("captures change to date input via calendar dropdown", async () => {
 	const inputs = [
-		{ locale: "de", value: "05.07.2018" },
-		{ locale: "en", value: "07/05/2018" },
-		{ locale: "es", value: "05/07/2018" }
+		{ locale: "de", value: "05.07.2018", tz: "Europe/Berlin" },
+		{ locale: "en", value: "07/05/2018", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "05/07/2018", tz: "UTC" }
+	]
+	expect.assertions(inputs.length * 2)
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-06-29")
+			const newDate = parseLocalDate("2018-07-05")
+			const wrapper = mount(<DateTime label="Start" name="start" />, {
+				initialValues: { start }
+			})
+			const datePicker = wrapper.find(Datepicker)
+			datePicker.prop("onChange")({}, { date: newDate })
+			await submit(wrapper)
+			expect(onSubmit).toHaveBeenCalledTimes(1)
+			const result = onSubmit.mock.calls[0][0].start
+			expect(
+				moment(result)
+					.local()
+					.format("YYYY-MM-DD")
+			).toMatch("2018-07-05")
+			onSubmit.mockClear()
+		})
+	}
+})
+
+it("updates date but not time when date input changes", async () => {
+	const inputs = [
+		{ locale: "de", value: "05.07.2018", tz: "Europe/Berlin" },
+		{ locale: "en", value: "07/05/2018", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "05/07/2018", tz: "UTC" }
 	]
 	expect.assertions(inputs.length)
-	for (const { locale, value } of inputs) {
-		await withLocale(locale, async () => {
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-06-29T10:00")
+			const expected = parseLocalDate("2018-07-05T10:00")
 			const wrapper = mount(<DateTime label="Start" name="start" />, {
 				initialValues: { start }
 			})
@@ -102,15 +147,15 @@ it("updates date but not time when date input changes", async () => {
 })
 
 it("displays time according to locale", async () => {
-	const start = new Date("2018-06-29T14:10")
 	const inputs = [
-		{ locale: "de", value: "14:10" },
-		{ locale: "en", value: "2:10 PM" },
-		{ locale: "es", value: "14:10" }
+		{ locale: "de", value: "14:10", tz: "Europe/Berlin" },
+		{ locale: "en", value: "2:10 PM", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "14:10", tz: "UTC" }
 	]
 	expect.assertions(inputs.length)
-	for (const { locale, value } of inputs) {
-		await withLocale(locale, async () => {
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-06-29T14:10")
 			const wrapper = mount(<DateTime label="Start" name="start" />, {
 				initialValues: { start }
 			})
@@ -121,15 +166,15 @@ it("displays time according to locale", async () => {
 })
 
 it("captures change to time input", async () => {
-	const start = new Date("2018-06-29T10:00-07:00")
 	const inputs = [
-		{ locale: "de", value: "14:10" },
-		{ locale: "en", value: "2:10 PM" },
-		{ locale: "es", value: "14:10" }
+		{ locale: "de", value: "14:10", tz: "Europe/Berlin" },
+		{ locale: "en", value: "2:10 PM", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "14:10", tz: "UTC" }
 	]
 	expect.assertions(inputs.length * 2)
-	for (const { locale, value } of inputs) {
-		await withLocale(locale, async () => {
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-06-29T10:00")
 			const wrapper = mount(<DateTime label="Start" name="start" />, {
 				initialValues: { start }
 			})
@@ -150,16 +195,16 @@ it("captures change to time input", async () => {
 })
 
 it("updates time but not date when time input changes", async () => {
-	const start = new Date("2018-06-29T10:00-07:00")
-	const expected = new Date("2018-06-29T14:10-07:00")
 	const inputs = [
-		{ locale: "de", value: "14:10" },
-		{ locale: "en", value: "2:10 PM" },
-		{ locale: "es", value: "14:10" }
+		{ locale: "de", value: "14:10", tz: "Europe/Berlin" },
+		{ locale: "en", value: "2:10 PM", tz: "America/Los_Angeles" },
+		{ locale: "es", value: "14:10", tz: "UTC" }
 	]
 	expect.assertions(inputs.length)
-	for (const { locale, value } of inputs) {
-		await withLocale(locale, async () => {
+	for (const { locale, value, tz } of inputs) {
+		await withLocaleAndTz(locale, tz, async () => {
+			const start = parseLocalDate("2018-06-29T10:00")
+			const expected = parseLocalDate("2018-06-29T14:10")
 			const wrapper = mount(<DateTime label="Start" name="start" />, {
 				initialValues: { start }
 			})
@@ -177,7 +222,7 @@ it("updates time but not date when time input changes", async () => {
 })
 
 it("displays an error on invalid date entry", () => {
-	const start = new Date("2018-06-29T10:00-07:00")
+	const start = new Date("2018-06-29T10:00")
 	const wrapper = mount(<DateTime label="Start" name="start" />, {
 		initialValues: { start }
 	})
@@ -188,7 +233,7 @@ it("displays an error on invalid date entry", () => {
 })
 
 it("clears an invalid date error when a valid date is entered", () => {
-	const start = new Date("2018-06-29T10:00-07:00")
+	const start = new Date("2018-06-29T10:00")
 	const wrapper = mount(<DateTime label="Start" name="start" />, {
 		initialValues: { start }
 	})
@@ -201,7 +246,7 @@ it("clears an invalid date error when a valid date is entered", () => {
 })
 
 it("displays an error on invalid time entry", () => {
-	const start = new Date("2018-06-29T10:00-07:00")
+	const start = new Date("2018-06-29T10:00")
 	const wrapper = mount(<DateTime label="Start" name="start" />, {
 		initialValues: { start }
 	})
@@ -212,7 +257,7 @@ it("displays an error on invalid time entry", () => {
 })
 
 it("clears an invalid time error when a valid time is entered", () => {
-	const start = new Date("2018-06-29T10:00-07:00")
+	const start = new Date("2018-06-29T10:00")
 	const wrapper = mount(<DateTime label="Start" name="start" />, {
 		initialValues: { start }
 	})

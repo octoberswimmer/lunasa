@@ -85,17 +85,11 @@ export default function DateTime({
 							}
 						}}
 						formatter={(date: ?Date): string =>
-							// Date given `T00:00` UTC; so we use `.utc()` to
-							// avoid off-by-one-day errors. The "L" format
-							// string outputs date only according to the
-							// user's locale.
-							date
-								? moment(date)
-										.utc()
-										.format("L")
-								: ""
+							date ? moment(date).format("L") : ""
 						}
-						parser={(inputStr: string) => moment(inputStr, "L", true).toDate()}
+						parser={(inputStr: string): Date =>
+							moment(inputStr, "L", true).toDate()
+						}
 						triggerClassName="slds-col"
 						value={field.value}
 					/>
@@ -205,11 +199,9 @@ function setFieldErrors(form: Object, fieldName: string, errors: string[]) {
  */
 function mergeDateAndTime({ date, time }: { date: Date, time: Date }): Date {
 	const result = new Date(time)
-	// Use `getUTC*` methods to prevent date recalculation. `Datepicker`
-	// provides a date with its time set to `T00:00` UTC.
-	result.setFullYear(date.getUTCFullYear())
-	result.setMonth(date.getUTCMonth())
-	result.setDate(date.getUTCDate())
+	result.setFullYear(date.getFullYear())
+	result.setMonth(date.getMonth())
+	result.setDate(date.getDate())
 	return result
 }
 
