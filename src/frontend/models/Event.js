@@ -6,11 +6,11 @@ import { type Account, getId } from "./Account"
 type Id = string
 
 export type Event = {
-	EndDateTime: Date,
+	EndDateTime: Date | number, // Date may be provided as milliseconds since epoch
 	Description: string,
 	Id: string,
 	IsAllDayEvent: boolean,
-	StartDateTime: Date,
+	StartDateTime: Date | number,
 	Subject: string,
 	WhatId?: Id
 }

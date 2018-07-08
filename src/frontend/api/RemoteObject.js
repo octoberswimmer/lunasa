@@ -14,9 +14,14 @@ type Id = string
 
 export default class RemoteObject<Fields: Object> {
 	sObject: Promise<SObject<Fields>>
+	transformAfterRetrieve: ?(record: Fields) => Fields
 
-	constructor(sObject: SObject<Fields> | Promise<SObject<Fields>>) {
+	constructor(
+		sObject: SObject<Fields> | Promise<SObject<Fields>>,
+		options?: {| transformAfterRetrieve?: (record: Fields) => Fields |}
+	) {
 		this.sObject = Promise.resolve(sObject)
+		this.transformAfterRetrieve = options && options.transformAfterRetrieve
 	}
 
 	async create(values: $Shape<Fields>): Promise<Id> {
@@ -41,7 +46,10 @@ export default class RemoteObject<Fields: Object> {
 		const results = await lift(cb =>
 			sObject.retrieve(serializeObject(criteria), cb)
 		)
-		return results.map(r => r._props)
+		const records = results.map(r => r._props)
+		return this.transformAfterRetrieve
+			? records.map(this.transformAfterRetrieve)
+			: records
 	}
 
 	async update(ids: Id[], changes: $Shape<Fields>): Promise<Id[]> {
