@@ -23,8 +23,12 @@ export default class RemoteObject<Fields: Object> {
 		const sObject = await this.sObject
 		// Salesforce modifies the given object to add stuff like an `Id` field.
 		const record: Fields = serializeObject(values)
-		await lift(cb => sObject.create(record, cb))
-		return record.Id
+		const createdIds = await lift(cb => sObject.create(record, cb))
+		const id = createdIds[0]
+		if (!id || createdIds.length !== 1) {
+			throw new Error("An error occurred creating the new record.")
+		}
+		return id
 	}
 
 	async describe(): Promise<SObjectDescription> {
