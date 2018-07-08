@@ -23,7 +23,9 @@ export function forFullcalendar(event: Event): EventObjectInput {
 	return {
 		title: event.Subject,
 		start: event.StartDateTime,
-		end: event.EndDateTime
+		end: event.EndDateTime,
+		type: "Event",
+		id: event.Id
 	}
 }
 

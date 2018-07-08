@@ -39,6 +39,11 @@ export default class RemoteObject<Fields: Object> {
 		)
 		return results.map(r => r._props)
 	}
+
+	async update(ids: Id[], changes: $Shape<Fields>): Promise<Id[]> {
+		const sObject = await this.sObject
+		return lift(cb => sObject.update(ids, serializeObject(changes), cb))
+	}
 }
 
 function lift<T>(f: (cb: Callback<T>) => void): Promise<T> {

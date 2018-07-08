@@ -69,6 +69,7 @@ export interface SObject<Fields: Object> {
 		criteria: Criteria<Fields>,
 		cb: Callback<SObjectRecord<Fields>[]>
 	): void;
+	update(ids: Id[], changes: $Shape<Fields>, cb: Callback<Id[]>): void;
 }
 
 export interface SObjectRecord<Fields: Object> {

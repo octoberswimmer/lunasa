@@ -12,17 +12,20 @@ type TestObject = {
 }
 
 const objectMock: SObjectMock<TestObject> = new SObjectMock()
-objectMock.fixtures = {
-	"1": {
-		Id: "1",
-		CreatedDate: "2018-06-15T21:00:00.000+0000",
-		Name: "test object",
-		Value: 3
-	}
-}
 
 const createSpy = jest.spyOn(objectMock, "create")
 const retrieveSpy = jest.spyOn(objectMock, "retrieve")
+
+beforeEach(() => {
+	objectMock.fixtures = {
+		"1": {
+			Id: "1",
+			CreatedDate: "2018-06-15T21:00:00.000+0000",
+			Name: "test object",
+			Value: 3
+		}
+	}
+})
 
 afterEach(() => {
 	jest.clearAllMocks()
@@ -77,4 +80,18 @@ it("pre-serializes date values on retrieve", async () => {
 		{ where: { CreatedDate: { lt: "2018-01-03T22:00:00" } } },
 		expect.any(Function)
 	)
+})
+
+it("updates records", async () => {
+	const remote = new RemoteObject(objectMock)
+	const updatedIds = await remote.update(["1"], { Value: 6 })
+	expect(updatedIds).toEqual(["1"])
+	expect(objectMock.fixtures["1"].Value).toBe(6)
+})
+
+it("pre-serializes date values on update", async () => {
+	const remote = new RemoteObject(objectMock)
+	const changes = { CreatedDate: new Date("2018-01-03T22:00:00Z") }
+	await remote.update(["1"], changes)
+	expect(objectMock.fixtures["1"].CreatedDate).toBe("2018-01-03T22:00:00")
 })

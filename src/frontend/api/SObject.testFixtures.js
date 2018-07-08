@@ -37,6 +37,7 @@ export default class SObjectMock<Fields: Object> implements SObject<Fields> {
 	create(values: $Shape<Fields>, cb: Callback<Id[]>) {
 		const id = uniqueId()
 		values.Id = id
+		this.fixtures[id] = values
 		cb(null, [id], event)
 	}
 	describe(cb: Callback<SObjectDescription>) {
@@ -47,5 +48,16 @@ export default class SObjectMock<Fields: Object> implements SObject<Fields> {
 			k => new SObjectRecordMock(this.fixtures[k])
 		)
 		cb(null, results, event)
+	}
+	update(ids: Id[], changes: $Shape<Fields>, cb: Callback<Id[]>) {
+		const updatedIds = []
+		for (const id of ids) {
+			const record = this.fixtures[id]
+			if (record) {
+				this.fixtures[id] = { ...record, ...changes }
+				updatedIds.push(id)
+			}
+		}
+		cb(null, updatedIds, event)
 	}
 }

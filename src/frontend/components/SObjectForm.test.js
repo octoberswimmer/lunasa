@@ -3,15 +3,18 @@
 import Datepicker from "@salesforce/design-system-react/components/date-picker"
 import Timepicker from "@salesforce/design-system-react/components/time-picker"
 import * as enzyme from "enzyme"
+import { Formik } from "formik"
 import moment from "moment"
 import * as React from "react"
-import { Provider } from "unstated"
-import Events from "../containers/Events"
-import { eventCreateFieldSet } from "../models/Event.testFixtures"
+import { type Event } from "../models/Event"
+import {
+	eventCreateFieldSet,
+	eventDescription as description
+} from "../models/Event.testFixtures"
 import { delay, inputElement } from "../testHelpers"
 import Combobox from "./forms/Combobox"
-import CreateEvent from "./CreateEvent"
 import DateTime from "./forms/DateTime"
+import SObjectForm from "./SObjectForm"
 
 const draft = {
 	Subject: "Meeting with Account",
@@ -20,34 +23,22 @@ const draft = {
 	IsAllDayEvent: false
 }
 
-const eventsOpts = { eventCreateFieldSet }
+const onSubmit = jest.fn()
 
-it("requests event object description on mount", async () => {
-	const events = new Events(eventsOpts)
-	jest.spyOn(events, "fetchEventDescription")
-	const wrapper = mount(<CreateEvent />, events)
-	expect(events.fetchEventDescription).toHaveBeenCalled()
+afterEach(() => {
+	onSubmit.mockClear()
 })
 
-it("creates an event", async () => {
-	const events = new Events(eventsOpts)
-	await events.newEvent(draft)
-	const wrapper = mount(<CreateEvent />, events)
-	await submit(wrapper)
-	expect(events.state.events).toContainEqual(
-		expect.objectContaining({ Subject: "Meeting with Account" })
+it("presents inputs based on a given field set", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[
+				{ name: "InputA", label: "Input A", type: "string" },
+				{ name: "InputB", label: "Input B", type: "string" }
+			]}
+		/>
 	)
-})
-
-it("presents inputs based on a given field set", async () => {
-	const events = new Events({
-		eventCreateFieldSet: [
-			{ name: "InputA", label: "Input A", type: "string" },
-			{ name: "InputB", label: "Input B", type: "string" }
-		]
-	})
-	const wrapper = mount(<CreateEvent />, events)
-
 	const inputA = wrapper.find("input[name='InputA']")
 	expect(inputA.props().type).toBe("text")
 	expect(inputA.closest("label").text()).toBe("Input A")
@@ -57,25 +48,26 @@ it("presents inputs based on a given field set", async () => {
 	expect(inputB.closest("label").text()).toBe("Input B")
 })
 
-it("presents a checkbox input", async () => {
-	const events = new Events({
-		eventCreateFieldSet: [
-			{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
-		]
-	})
-	const wrapper = mount(<CreateEvent />, events)
+it("presents a checkbox input", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[
+				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
+			]}
+		/>
+	)
 	const input = wrapper.find("input[name='IsAllDayEvent']")
 	expect(input.props().type).toBe("checkbox")
 })
 
-it("presents a combobox input", async () => {
-	const events = new Events({
-		eventCreateFieldSet: [
-			{ name: "Subject", label: "Subject", type: "combobox" }
-		]
-	})
-	await events.fetchEventDescription()
-	const wrapper = mount(<CreateEvent />, events)
+it("presents a combobox input", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[{ name: "Subject", label: "Subject", type: "combobox" }]}
+		/>
+	)
 	const input = wrapper.find(Combobox)
 	expect(input.props()).toMatchObject({
 		name: "Subject",
@@ -101,21 +93,20 @@ it("presents a combobox input", async () => {
 	})
 })
 
-it("presents a picklist input", async () => {
+it("presents a picklist input", () => {
 	expect.assertions(4)
-	const events = new Events({
-		eventCreateFieldSet: [
-			{ name: "ShowAs", label: "Show Time As", type: "picklist" }
-		]
-	})
 	// Values from events fixtures
 	const values = [
 		{ label: "Busy", value: "Busy" },
 		{ label: "Out of Office", value: "OutOfOffice" },
 		{ label: "Free", value: "Free" }
 	]
-	await events.fetchEventDescription()
-	const wrapper = mount(<CreateEvent />, events)
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[{ name: "ShowAs", label: "Show Time As", type: "picklist" }]}
+		/>
+	)
 	const input = wrapper.find("select")
 	expect(input.closest("label").text()).toMatch("Show Time As")
 	for (const { label, value } of values) {
@@ -125,46 +116,51 @@ it("presents a picklist input", async () => {
 })
 
 it("gets a boolean value from a checkbox input", async () => {
-	const events = new Events(eventsOpts)
-	await events.newEvent(draft)
-	const wrapper = mount(<CreateEvent />, events)
+	const wrapper = mount(
+		<SObjectForm description={description} fieldSet={eventCreateFieldSet} />,
+		draft
+	)
 	const input = wrapper.find("input[name='IsAllDayEvent']")
 	;(input.getDOMNode(): any).checked = true
 	input.simulate("change")
 	await submit(wrapper)
-	expect(events.state.events).toContainEqual(
-		expect.objectContaining({ IsAllDayEvent: true })
+	expect(onSubmit).toHaveBeenCalledWith(
+		expect.objectContaining({ IsAllDayEvent: true }),
+		expect.anything()
 	)
 })
 
-it("presents a date input", async () => {
-	const events = new Events({
-		eventCreateFieldSet: [{ name: "Date", label: "Date", type: "date" }]
-	})
-	const wrapper = mount(<CreateEvent />, events)
+it("presents a date input", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[{ name: "Date", label: "Date", type: "date" }]}
+		/>
+	)
 	const input = wrapper.find(DateTime)
 	expect(input.props()).toHaveProperty("label", "Date")
 	expect(input.props()).toHaveProperty("name", "Date")
 	expect(input.props()).toHaveProperty("showTime", false)
 })
 
-it("presents a datetime input", async () => {
-	const events = new Events({
-		eventCreateFieldSet: [
-			{ name: "StartDateTime", label: "Start", type: "datetime" }
-		]
-	})
-	const wrapper = mount(<CreateEvent />, events)
+it("presents a datetime input", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[{ name: "StartDateTime", label: "Start", type: "datetime" }]}
+		/>
+	)
 	const input = wrapper.find(DateTime)
 	expect(input.props()).toHaveProperty("label", "Start")
 	expect(input.props()).toHaveProperty("name", "StartDateTime")
-	expect(input.props()).not.toHaveProperty("timeFormat")
+	expect(input.props()).not.toHaveProperty("showTime")
 })
 
 it("gets a Date value from a datetime input", async () => {
-	const events = new Events(eventsOpts)
-	await events.newEvent(draft)
-	const wrapper = mount(<CreateEvent />, events)
+	const wrapper = mount(
+		<SObjectForm description={description} fieldSet={eventCreateFieldSet} />,
+		draft
+	)
 	const dateTime = wrapper.find(DateTime).filter("[name='StartDateTime']")
 	const dateInput = dateTime.find(Datepicker).find("input")
 	inputElement(dateInput).value = moment("2018-07-15T10:00-07:00").format("L")
@@ -173,42 +169,54 @@ it("gets a Date value from a datetime input", async () => {
 	inputElement(timeInput).value = moment("2018-07-15T10:00-07:00").format("LT")
 	timeInput.simulate("change")
 	await submit(wrapper)
-	expect(events.state.events).toContainEqual(
+	expect(onSubmit).toHaveBeenCalledWith(
 		expect.objectContaining({
 			StartDateTime: new Date("2018-07-15T10:00-07:00")
-		})
+		}),
+		expect.anything()
 	)
 })
 
-it("presents a textarea input", async () => {
-	const events = new Events({
-		eventCreateFieldSet: [
-			{ name: "Description", label: "Description", type: "textarea" }
-		]
-	})
-	const wrapper = mount(<CreateEvent />, events)
+it("presents a textarea input", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[
+				{ name: "Description", label: "Description", type: "textarea" }
+			]}
+		/>
+	)
 	const input = wrapper.find("textarea")
 	expect(input.props().name).toBe("Description")
 })
 
 it("gets a string value from a textarea input", async () => {
-	const events = new Events(eventsOpts)
-	await events.newEvent(draft)
-	const wrapper = mount(<CreateEvent />, events)
+	const wrapper = mount(
+		<SObjectForm description={description} fieldSet={eventCreateFieldSet} />
+	)
 	const input = wrapper.find("textarea")
 	inputElement(input).value = "some description"
 	input.simulate("change")
 	await submit(wrapper)
-	expect(events.state.events).toContainEqual(
-		expect.objectContaining({ Description: "some description" })
+	expect(onSubmit).toHaveBeenCalledWith(
+		expect.objectContaining({
+			Description: "some description"
+		}),
+		expect.anything()
 	)
 })
 
 function mount(
 	component: React.Node,
-	events: Events = new Events(eventsOpts)
+	initialValues: $Shape<Event> = {}
 ): enzyme.ReactWrapper {
-	return enzyme.mount(<Provider inject={[events]}>{component}</Provider>)
+	return enzyme.mount(
+		<Formik
+			initialValues={initialValues}
+			onSubmit={onSubmit}
+			render={() => component}
+		/>
+	)
 }
 
 async function submit(wrapper: enzyme.ReactWrapper) {

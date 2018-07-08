@@ -1,8 +1,8 @@
-.create-event-modal-content {
+.event-form-modal-content {
   min-height: 80%;
 }
 
-.create-event-modal-content label {
+.event-form-modal-content label {
   width: 100%;
 }
 
