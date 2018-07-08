@@ -19,40 +19,78 @@ type Props = {
 	options: PickListValue[]
 }
 
-export default function Combobox(props: Props) {
-	const { label, name, options, ...rest } = props
-	return (
-		<Field
-			name={name}
-			render={({ field, form }) => (
-				<SLDSCombobox
-					events={{
-						onBlur() {
-							form.setFieldTouched(name, true)
-						},
-						onChange(event, { value }) {
-							form.setFieldValue(name, value)
-						},
-						onSelect(event, { selection }: { selection: PickListValue[] }) {
-							const option = selection[0]
-							if (option) {
-								form.setFieldValue(name, option.value)
-							}
-						}
-					}}
-					labels={{ label }}
-					options={filter({
-						inputValue: field.value || "",
-						options: options.map(addId),
-						selection: [field.value].filter(isTruthy)
-					})}
-					value={field.value || ""}
-					variant="inline-listbox"
-					{...rest}
-				/>
-			)}
-		/>
-	)
+type State = {
+	isOpen: boolean
+}
+
+export default class Combobox extends React.Component<Props, State> {
+	state = {
+		// Control `isOpen` state of completions dropdown so that we can hide
+		// the dropdown when there are no completions to display.
+		isOpen: false
+	}
+
+	combobox({ field, form }: { field: Object, form: Object }): React.Node {
+		const { label, name, options, ...rest } = this.props
+		const events = {
+			onBlur: () => {
+				form.setFieldTouched(name, true)
+			},
+			onChange: (event, { value }) => {
+				form.setFieldValue(name, value)
+				this.setState(state => ({
+					isOpen: state.isOpen && applicableOptions(options, value).length > 0
+				}))
+			},
+			// `onClose` is called on input blur, or on pressing
+			// escape
+			onClose: () => {
+				this.setState({ isOpen: false })
+			},
+			// `onRequestClose` is called on a click outside the
+			// input
+			onRequestClose: () => {
+				this.setState({ isOpen: false })
+			},
+			onRequestOpen: () => {
+				// Open completions menu if there are completions to
+				// display.
+				this.setState({
+					isOpen: applicableOptions(options, field.value).length > 0
+				})
+			},
+			onSelect: (event, { selection }: { selection: PickListValue[] }) => {
+				const option = selection[0]
+				if (option) {
+					form.setFieldValue(name, option.value)
+				}
+			}
+		}
+		return (
+			<SLDSCombobox
+				events={events}
+				isOpen={this.state.isOpen}
+				labels={{ label, noOptionsFound: "" }}
+				options={applicableOptions(options, field.value)}
+				value={field.value || ""}
+				variant="inline-listbox"
+				{...rest}
+			/>
+		)
+	}
+
+	render() {
+		const { name } = this.props
+		return <Field name={name} render={formik => this.combobox(formik)} />
+	}
+}
+
+function applicableOptions(options: PickListValue[], inputValue: ?string) {
+	return filter({
+		inputValue: inputValue || "",
+		options: options.map(addId),
+		selection: [inputValue].filter(isTruthy)
+	})
 }
 
 function addId(
