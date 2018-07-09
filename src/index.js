@@ -13,14 +13,17 @@ import "./index.css"
 import RestApi from "./frontend/api/RestApi"
 import App from "./frontend/components/App"
 import Accounts from "./frontend/containers/Accounts"
+import Events from "./frontend/containers/Events"
 import { type FieldSet } from "./frontend/models/FieldSet"
 
 export function lunasa({
 	accountFieldSet,
+	eventCreateFieldSet,
 	root,
 	sessionToken
 }: {
 	accountFieldSet: FieldSet,
+	eventCreateFieldSet: FieldSet,
 	root: HTMLElement,
 	sessionToken: string
 }) {
@@ -28,8 +31,9 @@ export function lunasa({
 		accountFieldSet,
 		restClient: RestApi(sessionToken)
 	})
+	const events = new Events({ eventCreateFieldSet })
 	ReactDOM.render(
-		<Provider inject={[accounts]}>
+		<Provider inject={[accounts, events]}>
 			<DragDropContextProvider backend={HTML5Backend}>
 				<App />
 			</DragDropContextProvider>
@@ -45,9 +49,13 @@ if (process.env.NODE_ENV !== "production") {
 	if (!root) {
 		throw new Error("unable to locate DOM mount point for app")
 	}
-	import("./frontend/models/Account.testFixtures").then(af => {
+	Promise.all([
+		import("./frontend/models/Account.testFixtures"),
+		import("./frontend/models/Event.testFixtures")
+	]).then(([accountFixtures, eventFixtures]) => {
 		lunasa({
-			accountFieldSet: af.accountFieldSet,
+			accountFieldSet: accountFixtures.accountFieldSet,
+			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
 			root,
 			sessionToken: "0000"
 		})

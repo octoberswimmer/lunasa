@@ -3,11 +3,18 @@
 import moment from "moment"
 import resetDateCache from "reset-date-cache"
 import EventModel from "../api/Events"
+import * as ef from "../models/Event.testFixtures"
 import { visualforceDatetime } from "../models/serialization"
 import { delay, failIfMissing } from "../testHelpers"
 import Events from "./Events"
 
+const eventsOpts = {
+	eventCreateFieldSet: ef.eventCreateFieldSet,
+	remoteObject: EventModel
+}
+
 const createSpy = jest.spyOn(EventModel, "create")
+const describeSpy = jest.spyOn(EventModel, "describe")
 const retrieveSpy = jest.spyOn(EventModel, "retrieve")
 
 afterEach(() => {
@@ -15,7 +22,7 @@ afterEach(() => {
 })
 
 it("requests events by date range", () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	const today = moment()
 	events.getEventsByDateRange(today, today)
 	expect(EventModel.retrieve).toHaveBeenCalledTimes(1)
@@ -30,7 +37,7 @@ it("requests events by date range", () => {
 })
 
 it("sets time range to start and end of day in the local time zone", () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	const origTz = process.env.TZ
 
 	// Data for various time zones with the following properties: an input time
@@ -88,7 +95,7 @@ it("sets time range to start and end of day in the local time zone", () => {
 })
 
 it("avoids making the same query twice in a row", () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	const today = moment()
 	events.getEventsByDateRange(today, today)
 	events.getEventsByDateRange(today, today)
@@ -103,8 +110,24 @@ it("avoids making the same query twice in a row", () => {
 	})
 })
 
+it("requests event sObject description", async () => {
+	const events = new Events(eventsOpts)
+	await events.fetchEventDescription()
+	expect(events.state.eventDescription).toEqual(ef.eventDescription)
+})
+
+it("does not transmit event description request more than once", async () => {
+	const events = new Events(eventsOpts)
+	await Promise.all([
+		events.fetchEventDescription(),
+		events.fetchEventDescription(),
+		events.fetchEventDescription()
+	])
+	expect(describeSpy).toHaveBeenCalledTimes(1)
+})
+
 it("initiates new event creation", async () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	const draft = { Subject: "event draft" }
 	await events.newEvent(draft)
 	expect(events.state).toMatchObject({
@@ -115,7 +138,7 @@ it("initiates new event creation", async () => {
 })
 
 it("discards the new event draft", async () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	await events.newEvent({ Subject: "event draft" })
 	expect(events.state.newEvent).toBeTruthy()
 	await events.discardNewEvent()
@@ -123,7 +146,7 @@ it("discards the new event draft", async () => {
 })
 
 it("creates a new event from a draft", async () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	const draft = { Subject: "event draft" }
 	await events.newEvent(draft)
 	await events.create()
@@ -131,7 +154,7 @@ it("creates a new event from a draft", async () => {
 })
 
 it("removes draft event from state on successful create", async () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	await events.newEvent({ Subject: "event draft" })
 	await events.create()
 	expect(events.state.errors).toEqual([])
@@ -139,7 +162,7 @@ it("removes draft event from state on successful create", async () => {
 })
 
 it("adds a new event to events list on creation", async () => {
-	const events = new Events(EventModel)
+	const events = new Events(eventsOpts)
 	const StartDateTime = new Date("2018-06-29T17:00Z")
 	const EndDateTime = new Date("2018-06-29T18:00Z")
 	await events.newEvent({ Subject: "event draft", StartDateTime, EndDateTime })

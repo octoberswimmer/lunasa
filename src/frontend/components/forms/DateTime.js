@@ -37,7 +37,7 @@ function DateTime({ formik, name, ...dateTimeProps }: Props) {
 		<ReactDateTime
 			onBlur={() => formik.setFieldTouched(name, true)}
 			onChange={moment => {
-				formik.setFieldValue(name, moment)
+				formik.setFieldValue(name, moment.toDate())
 			}}
 			value={formik.values[name]}
 			{...dateTimeProps}

@@ -4,6 +4,8 @@
  * @flow strict
  */
 
+import { type SObjectDescription } from "../models/SObjectDescription"
+import * as ef from "../models/Event.testFixtures"
 import {
 	type Id,
 	type Callback,
@@ -36,6 +38,9 @@ export default class SObjectMock<Fields: Object> implements SObject<Fields> {
 		const id = uniqueId()
 		values.Id = id
 		cb(null, [id], event)
+	}
+	describe(cb: Callback<SObjectDescription>) {
+		return cb(null, ef.eventDescription, event)
 	}
 	retrieve(criteria: Criteria<Fields>, cb: Callback<SObjectRecord<Fields>[]>) {
 		const results = Object.keys(this.fixtures).map(

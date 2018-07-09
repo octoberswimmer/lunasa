@@ -1,7 +1,9 @@
 /* @flow strict */
 
 import { type EventObjectInput } from "fullcalendar"
-import { type Account } from "./Account"
+import { type Account, getId } from "./Account"
+
+type Id = string
 
 export type Event = {
 	EndDateTime: Date,
@@ -9,7 +11,8 @@ export type Event = {
 	Id: string,
 	IsAllDayEvent: boolean,
 	StartDateTime: Date,
-	Subject: string
+	Subject: string,
+	WhatId?: Id
 }
 
 /*
@@ -32,6 +35,7 @@ export function newEvent({
 	date: moment$Moment
 }): $Shape<Event> {
 	return {
+		WhatId: getId(account),
 		StartDateTime: date
 			.clone()
 			.local()
@@ -45,7 +49,6 @@ export function newEvent({
 			.hours(11)
 			.minutes(0)
 			.startOf("minute")
-			.toDate(),
-		Subject: `Meeting with ${account.Name}`
+			.toDate()
 	}
 }

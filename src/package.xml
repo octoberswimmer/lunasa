@@ -10,6 +10,7 @@
 	</types>
 	<types>
 		<members>Account</members>
+		<members>Event</members>
 		<name>CustomObject</name>
 	</types>
 	<types>

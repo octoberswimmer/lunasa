@@ -4,6 +4,7 @@
 export type FieldType =
 	| "address" // given as `Address` object
 	| "boolean" // given as JSON boolean
+	| "combobox"
 	| "currency"
 	| "date" // given as string
 	| "datetime" // given as string
@@ -17,11 +18,13 @@ export type FieldType =
 	| "textarea" // given as string
 	| "url" // given as string
 
-export type FieldSet = Array<{
+export type Field = {
 	name: string,
 	label: string,
 	type: FieldType
-}>
+}
+
+export type FieldSet = Array<Field>
 
 // References for certain field types:
 
