@@ -10,8 +10,8 @@ import Events from "../containers/Events"
 import { forFullcalendar, newEvent } from "../models/Event"
 import "./App.css"
 import AccountList from "./AccountList"
-import CreateEvent from "./CreateEvent"
 import DroppableCalendar from "./DroppableCalendar"
+import EditEvent from "./EditEvent"
 
 type Props = {
 	spinner?: string // path to spinner image
@@ -50,18 +50,24 @@ export default function App(props: Props) {
 									const account = accounts.getAccount(accountUrl)
 									if (account) {
 										const draft = newEvent({ account, date })
-										events.newEvent(draft)
+										events.setEventDraft(draft)
 									}
 								}}
 								options={{
 									...options,
+									eventClick(event) {
+										const sfEvent = events.getEvent(event.id)
+										if (sfEvent) {
+											events.setEventDraft(sfEvent)
+										}
+									},
 									viewRender(view) {
 										events.getEventsByDateRange(view.start, view.end)
 									}
 								}}
 							/>
-							{events.state.newEvent ? (
-								<CreateEvent spinner={props.spinner} />
+							{events.isCreatingEvent() || events.isEditingEvent() ? (
+								<EditEvent spinner={props.spinner} />
 							) : null}
 						</div>
 					</div>

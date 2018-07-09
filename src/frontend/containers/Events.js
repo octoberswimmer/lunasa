@@ -28,7 +28,7 @@ export type State = AsyncActionState & {
 	events: Event[],
 	eventCreateFieldSet: FieldSet,
 	eventDescription: ?SObjectDescription,
-	newEvent: ?$Shape<Event>
+	eventDraft: ?$Shape<Event>
 }
 
 export default class EventContainer extends Container<State> {
@@ -47,8 +47,18 @@ export default class EventContainer extends Container<State> {
 			events: [],
 			eventCreateFieldSet: opts.eventCreateFieldSet,
 			eventDescription: null,
-			newEvent: null
+			eventDraft: null
 		}
+	}
+
+	isCreatingEvent(): boolean {
+		const draft = this.state.eventDraft
+		return !!draft && !draft.Id
+	}
+
+	isEditingEvent(): boolean {
+		const draft = this.state.eventDraft
+		return !!draft && !!draft.Id
 	}
 
 	isLoading(): boolean {
@@ -57,6 +67,12 @@ export default class EventContainer extends Container<State> {
 
 	getErrors(): Error[] {
 		return this.state.errors
+	}
+
+	getEvent(id: string | number | void): ?Event {
+		if (id) {
+			return this.state.events.find(e => e.Id === id)
+		}
 	}
 
 	async dismissError(error: Error): Promise<void> {
@@ -122,28 +138,48 @@ export default class EventContainer extends Container<State> {
 	/*
 	 * Create or update a draft event
 	 */
-	async newEvent(details: $Shape<Event>): Promise<void> {
-		await this.setState({ newEvent: details })
+	async setEventDraft(details: $Shape<Event>): Promise<void> {
+		await this.setState({ eventDraft: details })
 	}
 
-	async discardNewEvent(): Promise<void> {
+	async discardEventDraft(): Promise<void> {
 		await this.setState({
-			newEvent: null
+			eventDraft: null
 		})
 	}
 
-	async create(): Promise<void> {
+	/*
+	 * Create a new event, or update an existing event
+	 */
+	async saveDraft(): Promise<void> {
 		await asyncAction(this, async () => {
-			const draft = this.state.newEvent
+			const draft = this.state.eventDraft
 			if (!draft) {
-				throw new Error("There is no event draft to create.")
+				throw new Error("There is no event draft to save.")
 			}
-			const Id = await this._remoteObject.create(draft)
-			const event = { ...draft, Id }
-			await this.setState(state => ({
-				events: state.events.concat([event]),
-				newEvent: null
-			}))
+			const event = draft.Id
+				? await this._update(draft)
+				: await this._create(draft)
+			await this.setState(state => {
+				const events = state.events.filter(e => e.Id !== event.Id)
+				return {
+					events: events.concat([event]),
+					eventDraft: null
+				}
+			})
 		})
+	}
+
+	async _create(draft: $Shape<Event>): Promise<Event> {
+		const Id = await this._remoteObject.create(draft)
+		return { ...draft, Id }
+	}
+
+	async _update(draft: $Shape<Event>): Promise<Event> {
+		const updatedIds = await this._remoteObject.update([draft.Id], draft)
+		if (updatedIds[0] !== draft.Id) {
+			throw new Error("An error occurred saving changes to the event")
+		}
+		return draft
 	}
 }

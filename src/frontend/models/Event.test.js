@@ -1,8 +1,21 @@
 /* @flow strict */
 
 import moment from "moment"
-import { newEvent } from "./Event"
+import { type Event, forFullcalendar, newEvent } from "./Event"
 import * as ef from "./Event.testFixtures"
+
+export const testEvent: Event = {
+	Id: "1",
+	EndDateTime: moment()
+		.endOf("hour")
+		.toDate(),
+	Description: "test event",
+	IsAllDayEvent: false,
+	StartDateTime: moment()
+		.startOf("hour")
+		.toDate(),
+	Subject: "Meeting"
+}
 
 const account = {
 	attributes: {
@@ -29,4 +42,15 @@ it("sets default start and end time for event draft", () => {
 	expect(start.isSame(date, "day")).toBe(true)
 	expect(end.isSame(date, "day")).toBe(true)
 	expect(start.isBefore(end))
+})
+
+it("produces data for a Full Calendar event", () => {
+	const event = forFullcalendar(testEvent)
+	expect(event).toMatchObject({
+		title: "Meeting",
+		start: testEvent.StartDateTime,
+		end: testEvent.EndDateTime,
+		type: "Event",
+		id: "1"
+	})
 })

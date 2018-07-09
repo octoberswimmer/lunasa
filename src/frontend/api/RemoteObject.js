@@ -14,17 +14,26 @@ type Id = string
 
 export default class RemoteObject<Fields: Object> {
 	sObject: Promise<SObject<Fields>>
+	transformAfterRetrieve: ?(record: Fields) => Fields
 
-	constructor(sObject: SObject<Fields> | Promise<SObject<Fields>>) {
+	constructor(
+		sObject: SObject<Fields> | Promise<SObject<Fields>>,
+		options?: {| transformAfterRetrieve?: (record: Fields) => Fields |}
+	) {
 		this.sObject = Promise.resolve(sObject)
+		this.transformAfterRetrieve = options && options.transformAfterRetrieve
 	}
 
 	async create(values: $Shape<Fields>): Promise<Id> {
 		const sObject = await this.sObject
 		// Salesforce modifies the given object to add stuff like an `Id` field.
 		const record: Fields = serializeObject(values)
-		await lift(cb => sObject.create(record, cb))
-		return record.Id
+		const createdIds = await lift(cb => sObject.create(record, cb))
+		const id = createdIds[0]
+		if (!id || createdIds.length !== 1) {
+			throw new Error("An error occurred creating the new record.")
+		}
+		return id
 	}
 
 	async describe(): Promise<SObjectDescription> {
@@ -37,7 +46,15 @@ export default class RemoteObject<Fields: Object> {
 		const results = await lift(cb =>
 			sObject.retrieve(serializeObject(criteria), cb)
 		)
-		return results.map(r => r._props)
+		const records = results.map(r => r._props)
+		return this.transformAfterRetrieve
+			? records.map(this.transformAfterRetrieve)
+			: records
+	}
+
+	async update(ids: Id[], changes: $Shape<Fields>): Promise<Id[]> {
+		const sObject = await this.sObject
+		return lift(cb => sObject.update(ids, serializeObject(changes), cb))
 	}
 }
 

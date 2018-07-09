@@ -20,6 +20,7 @@ import { delay, failIfMissing } from "../testHelpers"
 import App from "./App"
 import AccountList from "./AccountList"
 import DroppableCalendar from "./DroppableCalendar"
+import EditEvent from "./EditEvent"
 import FullCalendar from "./FullCalendar"
 
 const accountsOpts = {
@@ -69,6 +70,19 @@ it("displays events in calendar", async () => {
 		"events",
 		eventFixtures.map(forFullcalendar)
 	)
+})
+
+it("sets an event draft when a calendar event is clicked", async () => {
+	initializeCalendar.mockRestore()
+	const events = new Events(eventsOpts)
+	jest.spyOn(events, "setEventDraft")
+	await events.setState({ events: eventFixtures.slice(0, 1) })
+	const wrapper = mount(<App />, { events })
+	const calendarEvent = failIfMissing(
+		wrapper.getDOMNode().querySelector(".fc-event")
+	)
+	calendarEvent.click()
+	expect(events.setEventDraft).toHaveBeenCalledWith(eventFixtures[0])
 })
 
 it("displays an error if something went wrong", async () => {
@@ -123,10 +137,30 @@ it("creates a new event draft when an account card is dropped on the calendar", 
 	const date = moment()
 	calendar.props().onDrop({ accountUrl: account.attributes.url, date })
 	await delay()
-	expect(events.state.newEvent).toMatchObject({
+	expect(events.state.eventDraft).toMatchObject({
 		StartDateTime: expect.any(Date),
 		EndDateTime: expect.any(Date)
 	})
+})
+
+it("displays event form when a new event draft is present", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ Subject: "Meeting" })
+	const wrapper = mount(<App />, { accounts, events })
+	const form = wrapper.find(EditEvent)
+	expect(form.exists()).toBe(true)
+	expect(form.find("h2").text()).toBe("New Event")
+})
+
+it("displays event form when a draft of changes to an existing event is present", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ Id: "1", Subject: "Meeting" })
+	const wrapper = mount(<App />, { accounts, events })
+	const form = wrapper.find(EditEvent)
+	expect(form.exists()).toBe(true)
+	expect(form.find("h2").text()).toBe("Edit Meeting")
 })
 
 // Helper that wraps `<App/>` with a necessary `<Provider>` from unstated.

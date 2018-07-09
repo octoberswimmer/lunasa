@@ -6,11 +6,11 @@ import { type Account, getId } from "./Account"
 type Id = string
 
 export type Event = {
-	EndDateTime: Date,
+	EndDateTime: Date | number, // Date may be provided as milliseconds since epoch
 	Description: string,
 	Id: string,
 	IsAllDayEvent: boolean,
-	StartDateTime: Date,
+	StartDateTime: Date | number,
 	Subject: string,
 	WhatId?: Id
 }
@@ -23,7 +23,9 @@ export function forFullcalendar(event: Event): EventObjectInput {
 	return {
 		title: event.Subject,
 		start: event.StartDateTime,
-		end: event.EndDateTime
+		end: event.EndDateTime,
+		type: "Event",
+		id: event.Id
 	}
 }
 

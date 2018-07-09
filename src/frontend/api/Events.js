@@ -27,4 +27,37 @@ const EventModel: Promise<SObject<Event>> =
 		? import("./Events.development.js").then(module => module.default)
 		: new Lunasa.Event()
 
-export default new RemoteObject(EventModel)
+function transformAfterRetrieve(record: Event): Event {
+	// If `IsAllDay` is set then the start and end times will be set to midnight
+	// of the given date UTC. Transform to the appropriate local time zone.
+	if (record.IsAllDayEvent) {
+		return {
+			...record,
+			StartDateTime: dateToLocalTz(record.StartDateTime),
+			EndDateTime: dateToLocalTz(record.EndDateTime)
+		}
+	}
+	return record
+}
+
+function isMidnightUTC(date: Date): boolean {
+	return date.getUTCHours() === 0 && date.getUTCMinutes() === 0
+}
+
+function dateToLocalTz<T: Date | number | void>(input: T): T {
+	if (!input) {
+		return input
+	}
+	const date = new Date(input)
+	return isMidnightUTC(date)
+		? new Date(
+				date.getUTCFullYear(),
+				date.getUTCMonth(),
+				date.getUTCDate(),
+				0,
+				0
+		  )
+		: date
+}
+
+export default new RemoteObject(EventModel, { transformAfterRetrieve })

@@ -1,95 +1,26 @@
 /* @flow strict */
 
-import Button from "@salesforce/design-system-react/components/button"
-import Modal from "@salesforce/design-system-react/components/modal"
-import { Field, Form, Formik } from "formik"
+import { Field, Form } from "formik"
 import * as React from "react"
-import { Subscribe } from "unstated"
-import Events from "../containers/Events"
 import * as FS from "../models/FieldSet"
 import {
 	type SObjectDescription,
 	getPicklistValues
 } from "../models/SObjectDescription"
 import Combobox from "./forms/Combobox"
-import "./CreateEvent.css"
 import DateTime from "./forms/DateTime"
 
 type Props = {
-	spinner?: string // path to spinner image
+	description: ?SObjectDescription, // description may be loading when form renders
+	fieldSet: FS.FieldSet
 }
 
-export default function CreateEvent(props: Props) {
+export default function SObjectForm({ description, fieldSet }: Props) {
 	return (
-		<Subscribe to={[Events]}>
-			{events => {
-				events.fetchEventDescription()
-				return (
-					<Formik
-						enableReinitialize={false}
-						initialValues={events.state.newEvent}
-						onSubmit={async (values, actions) => {
-							await events.newEvent(values)
-							await events.create()
-							actions.setSubmitting(false)
-							// TODO:
-							// actions.setErrors(submissionerrors)
-						}}
-						render={({ errors, handleSubmit, isSubmitting, values }) => (
-							<Modal
-								contentClassName={[
-									"create-event-modal-content",
-									"slds-p-around--medium"
-								]}
-								footer={[
-									events.isLoading() ? (
-										<img
-											alt="Loading..."
-											className="loading-spinner"
-											key="loading-spinner"
-											src={props.spinner}
-										/>
-									) : null,
-									<Button
-										key="cancel-button"
-										label="Cancel"
-										onClick={() => {
-											events.discardNewEvent()
-										}}
-										disabled={isSubmitting}
-									/>,
-									<Button
-										key="save-button"
-										label="Save"
-										variant="brand"
-										onClick={handleSubmit}
-										disabled={isSubmitting || hasErrors(errors)}
-									/>
-								]}
-								isOpen={true}
-								onRequestClose={() => {
-									events.discardNewEvent()
-								}}
-								size="large"
-								title="New Event"
-							>
-								<Form className="slds-form slds-form_stacked">
-									{inputsForFieldSet(
-										events.state.eventCreateFieldSet,
-										events.state.eventDescription
-									)}
-								</Form>
-							</Modal>
-						)}
-					/>
-				)
-			}}
-		</Subscribe>
+		<Form className="slds-form slds-form_stacked">
+			{inputsForFieldSet(fieldSet, description)}
+		</Form>
 	)
-}
-
-function hasErrors(errors: { [field: string]: string }): boolean {
-	return Object.keys(errors).length > 0
 }
 
 // Get fields in pairs, and arrange inputs in a two-column grid

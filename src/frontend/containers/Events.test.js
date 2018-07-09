@@ -16,6 +16,7 @@ const eventsOpts = {
 const createSpy = jest.spyOn(EventModel, "create")
 const describeSpy = jest.spyOn(EventModel, "describe")
 const retrieveSpy = jest.spyOn(EventModel, "retrieve")
+const updateSpy = jest.spyOn(EventModel, "update")
 
 afterEach(() => {
 	jest.clearAllMocks()
@@ -129,44 +130,80 @@ it("does not transmit event description request more than once", async () => {
 it("initiates new event creation", async () => {
 	const events = new Events(eventsOpts)
 	const draft = { Subject: "event draft" }
-	await events.newEvent(draft)
+	await events.setEventDraft(draft)
 	expect(events.state).toMatchObject({
-		newEvent: {
+		eventDraft: {
 			Subject: "event draft"
 		}
 	})
+	expect(events.isCreatingEvent()).toBe(true)
+	expect(events.isEditingEvent()).toBe(false)
 })
 
-it("discards the new event draft", async () => {
+it("sets a draft to update an existing event", async () => {
 	const events = new Events(eventsOpts)
-	await events.newEvent({ Subject: "event draft" })
-	expect(events.state.newEvent).toBeTruthy()
-	await events.discardNewEvent()
-	expect(events.state.newEvent).toBeFalsy()
+	const draft = { Id: "1", Subject: "event draft" }
+	await events.setEventDraft(draft)
+	expect(events.state).toMatchObject({
+		eventDraft: {
+			Id: "1",
+			Subject: "event draft"
+		}
+	})
+	expect(events.isCreatingEvent()).toBe(false)
+	expect(events.isEditingEvent()).toBe(true)
+})
+
+it("discards the event draft", async () => {
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ Subject: "event draft" })
+	expect(events.state.eventDraft).toBeTruthy()
+	await events.discardEventDraft()
+	expect(events.state.eventDraft).toBeFalsy()
 })
 
 it("creates a new event from a draft", async () => {
 	const events = new Events(eventsOpts)
 	const draft = { Subject: "event draft" }
-	await events.newEvent(draft)
-	await events.create()
+	await events.setEventDraft(draft)
+	await events.saveDraft()
 	expect(createSpy).toHaveBeenCalledWith(draft)
+})
+
+it("updates an existing event based on changes in a draft", async () => {
+	const events = new Events(eventsOpts)
+	const draft = { Id: "1", Subject: "event draft" }
+	await events.setEventDraft(draft)
+	await events.saveDraft()
+	expect(updateSpy).toHaveBeenCalledWith(["1"], draft)
 })
 
 it("removes draft event from state on successful create", async () => {
 	const events = new Events(eventsOpts)
-	await events.newEvent({ Subject: "event draft" })
-	await events.create()
+	await events.setEventDraft({ Subject: "event draft" })
+	await events.saveDraft()
 	expect(events.state.errors).toEqual([])
-	expect(events.state.newEvent).toBeFalsy()
+	expect(events.state.eventDraft).toBeFalsy()
+})
+
+it("removes draft event from state on successful update", async () => {
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ Id: "1", Subject: "event draft" })
+	await events.saveDraft()
+	expect(events.state.errors).toEqual([])
+	expect(events.state.eventDraft).toBeFalsy()
 })
 
 it("adds a new event to events list on creation", async () => {
 	const events = new Events(eventsOpts)
 	const StartDateTime = new Date("2018-06-29T17:00Z")
 	const EndDateTime = new Date("2018-06-29T18:00Z")
-	await events.newEvent({ Subject: "event draft", StartDateTime, EndDateTime })
-	await events.create()
+	await events.setEventDraft({
+		Subject: "event draft",
+		StartDateTime,
+		EndDateTime
+	})
+	await events.saveDraft()
 	expect(events.state.events).toContainEqual(
 		expect.objectContaining({ Subject: "event draft" })
 	)
@@ -176,4 +213,20 @@ it("adds a new event to events list on creation", async () => {
 	expect(event.Id).toBeTruthy()
 	expect(event.StartDateTime).toEqual(StartDateTime)
 	expect(event.EndDateTime).toEqual(EndDateTime)
+})
+
+it("it updates events list with updated event", async () => {
+	const events = new Events(eventsOpts)
+	const StartDateTime = new Date("2018-06-29T17:00Z")
+	const EndDateTime = new Date("2018-06-29T18:00Z")
+	const event = ef.events[0]
+	await events.setState({ events: [event] })
+	await events.setEventDraft({ ...event, Subject: "Call" })
+
+	expect(events.state.events).toHaveLength(1)
+	expect(events.state.events[0]).toHaveProperty("Subject", "Meeting")
+
+	await events.saveDraft()
+	expect(events.state.events).toHaveLength(1)
+	expect(events.state.events[0]).toHaveProperty("Subject", "Call")
 })
