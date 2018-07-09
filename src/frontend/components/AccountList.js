@@ -87,7 +87,7 @@ class SelectAccountListView extends React.Component<SelectProps> {
 			  ))
 			: []
 		return (
-			<select onInput={this.onInput} ref={this.select}>
+			<select className="slds-select" onInput={this.onInput} ref={this.select}>
 				{listViewOptions}
 			</select>
 		)

@@ -104,7 +104,7 @@ function inputFor(
 			const values = (description && getPicklistValues(description, name)) || []
 			return (
 				<FormElement label={label}>
-					<Field component="select" name={name}>
+					<Field className="slds-select" component="select" name={name}>
 						{values.map(({ label, value }) => (
 							<option key={value} value={value}>
 								{label}
