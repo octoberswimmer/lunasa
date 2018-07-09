@@ -121,6 +121,17 @@ it("updates form state when a completion is clicked", async () => {
 	)
 })
 
+it("hides completions dropdown when there are no completions to display", async () => {
+	const wrapper = mount(
+		<Combobox label="Fruit" name="fruit" options={fruits} />
+	)
+	const input = wrapper.find("input.slds-combobox__input")
+	inputElement(input).value = "not a fruit"
+	input.simulate("change")
+	const dropdown = wrapper.find("ul")
+	expect(dropdown.exists()).toBe(false)
+})
+
 function mount(
 	component: React.Node,
 	formikProps: Object = {}
