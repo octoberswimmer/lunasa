@@ -3,8 +3,8 @@
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
 import * as lvf from "../models/ListView.testFixtures"
-import { delay } from "../testHelpers"
-import Accounts from "./Accounts"
+import { delay, failIfMissing } from "../testHelpers"
+import Accounts, { GIVEN_IDS } from "./Accounts"
 
 const restClient = RestApi("0000")
 
@@ -35,6 +35,27 @@ it("requests Account list views on initialization", async () => {
 	const accounts = new Accounts(opts)
 	await delay()
 	expect(listViewsSpy).toHaveBeenCalledWith("Account")
+})
+
+it("includes a special list view when account IDs are given via query parameter", async () => {
+	const accounts = new Accounts({
+		...opts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	await accounts.fetchListViews()
+	const listViews = failIfMissing(accounts.getListViews())
+	expect(listViews[0]).toHaveProperty("id", GIVEN_IDS)
+})
+
+it("does not include special list view when account IDs are *not* provided via query parameter", async () => {
+	const accounts = new Accounts(opts)
+	await accounts.fetchListViews()
+	const listViews = failIfMissing(accounts.getListViews())
+	expect(listViews[0]).not.toHaveProperty("id", GIVEN_IDS)
 })
 
 it("requests Account list views", async () => {
@@ -68,6 +89,31 @@ it("requests accounts and record count when an account list view is selected", a
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
 			/SELECT COUNT\(\) FROM Account WHERE CreatedDate = THIS_WEEK\s*$/
+		)
+	)
+	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
+it("requests accounts and record count when the 'given IDs' view is selected", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts({
+		...opts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	await accounts.selectListView({ id: GIVEN_IDS })
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+		)
+	)
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT COUNT\(\) FROM Account WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
@@ -113,6 +159,27 @@ it("fetches pages of results", async () => {
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
 			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
+		)
+	)
+	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
+it("fetches pages of results when the 'given IDs' view is selected", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts({
+		...opts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	await accounts.selectListView({ id: GIVEN_IDS })
+	await accounts.fetchPage(2)
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)

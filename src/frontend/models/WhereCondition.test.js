@@ -57,3 +57,27 @@ it("combines multiple conditions with a conjunction", () => {
 		"(Amount != '1') and (NOT (Name like '%bar%')) and ((Name like '%foo%') or (Name like '%baz%'))"
 	)
 })
+
+it("outputs arguments to `IN` as a list", () => {
+	expect(
+		stringifyCondition({
+			field: "Id",
+			operator: "IN",
+			values: ["'001f200001XrDsxAAF'", "'001f200001XrDsyAAF'"]
+		})
+	).toBe("Id IN ('001f200001XrDsxAAF', '001f200001XrDsyAAF')")
+	expect(
+		stringifyCondition({
+			field: "Id",
+			operator: "IN",
+			values: ["'001f200001XrDsxAAF'"]
+		})
+	).toBe("Id IN ('001f200001XrDsxAAF')")
+	expect(
+		stringifyCondition({
+			field: "Id",
+			operator: "IN",
+			values: []
+		})
+	).toBe("Id IN ()")
+})

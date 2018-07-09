@@ -4,7 +4,7 @@ import * as enzyme from "enzyme"
 import * as React from "react"
 import { Provider } from "unstated"
 import RestApi from "../api/RestApi"
-import Accounts from "../containers/Accounts"
+import Accounts, { GIVEN_IDS } from "../containers/Accounts"
 import * as af from "../models/Account.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
 import AccountCard from "./AccountCard"
@@ -29,6 +29,41 @@ it("displays list views in a select", async () => {
 		const option = options.find(`[value="${view.id}"]`)
 		expect(option.text()).toBe(view.label)
 	}
+})
+
+it("displays a special list view for accounts specified by query parameter", async () => {
+	const accounts = new Accounts({
+		...accountsOpts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	await accounts.fetchListViews()
+	wrapper.update()
+	const firstOption = wrapper.find("option").first()
+	expect(firstOption.text()).toBe("Selected Accounts")
+	expect(firstOption.props()).toHaveProperty("value", GIVEN_IDS)
+})
+
+it("loads accounts on mount if account IDs are provided via query parameter", async () => {
+	const accounts = new Accounts({
+		...accountsOpts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	const selectListView = jest.spyOn(accounts, "selectListView")
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	expect(selectListView).toHaveBeenCalledWith({ id: GIVEN_IDS })
 })
 
 it("updates state container with initially-selected list view", async () => {

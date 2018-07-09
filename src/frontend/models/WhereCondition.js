@@ -14,6 +14,9 @@ const operatorMap = {
 	lessThanOrEqualTo: "<="
 }
 
+// operators that require an argument in the form of a list
+const listOperators = ["in"]
+
 export function stringifyCondition(cond: WhereCondition): string {
 	if (cond.conditions) {
 		if (cond.conditions.length < 1) {
@@ -26,16 +29,16 @@ export function stringifyCondition(cond: WhereCondition): string {
 		return `NOT (${stringifyCondition(cond.condition)})`
 	} else {
 		const operator = operatorMap[cond.operator] || cond.operator
-		return `${cond.field} ${operator} ${stringifyValues(cond.values)}`
+		return `${cond.field} ${operator} ${stringifyValues(operator, cond.values)}`
 	}
 }
 
-function stringifyValues(values: string[]): string {
-	if (values.length === 0) {
-		return ""
-	} else if (values.length === 1) {
-		return values[0]
-	} else {
+function stringifyValues(operator: string, values: string[]): string {
+	if (values.length > 1 || listOperators.includes(operator.toLowerCase())) {
 		return `(${values.join(", ")})`
+	} else if (values.length === 0) {
+		return ""
+	} else {
+		return values[0]
 	}
 }

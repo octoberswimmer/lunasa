@@ -4,10 +4,9 @@ import Button from "@salesforce/design-system-react/components/button"
 import classNames from "classnames"
 import * as React from "react"
 import { Subscribe } from "unstated"
-import Accounts from "../containers/Accounts"
+import Accounts, { type ListViewLike, GIVEN_IDS } from "../containers/Accounts"
 import { type Account } from "../models/Account"
 import { type FieldSet } from "../models/FieldSet"
-import { type ListView, type ListViews } from "../models/ListView"
 import AccountCard from "./AccountCard"
 import "./AccountList.css"
 
@@ -24,7 +23,7 @@ export default function AccountList(props: Props) {
 				<div className={classNames("account-list", props.className)}>
 					<div className="select-wrapper">
 						<SelectAccountListView
-							listViews={accounts.state.listViews}
+							listViews={accounts.getListViews()}
 							onSelectListView={listView => {
 								accounts.selectListView(listView)
 							}}
@@ -55,8 +54,8 @@ export default function AccountList(props: Props) {
 }
 
 type SelectProps = {
-	listViews: ?ListViews,
-	onSelectListView(listView: ListView): void
+	listViews: ?(ListViewLike[]),
+	onSelectListView(listView: ListViewLike): void
 }
 
 class SelectAccountListView extends React.Component<SelectProps> {
@@ -67,6 +66,10 @@ class SelectAccountListView extends React.Component<SelectProps> {
 		super(props)
 		this.onInput = this.onInput.bind(this)
 		this.select = React.createRef()
+	}
+
+	componentDidMount() {
+		this.onInput()
 	}
 
 	componentDidUpdate(prevProps: SelectProps) {
@@ -80,9 +83,9 @@ class SelectAccountListView extends React.Component<SelectProps> {
 	render() {
 		const { listViews } = this.props
 		const listViewOptions = listViews
-			? listViews.listviews.map(view => (
+			? listViews.map(view => (
 					<option value={view.id} key={view.id}>
-						{view.label}
+						{labelFor(view)}
 					</option>
 			  ))
 			: []
@@ -100,12 +103,18 @@ class SelectAccountListView extends React.Component<SelectProps> {
 			return
 		}
 		const listViewId = select.value
-		const listView = listViews.listviews.filter(
-			view => view.id === listViewId
-		)[0]
+		const listView = listViews.filter(view => view.id === listViewId)[0]
 		if (listView) {
 			onSelectListView(listView)
 		}
+	}
+}
+
+function labelFor(listView: ListViewLike): string {
+	if (listView.id === GIVEN_IDS) {
+		return "Selected Accounts"
+	} else {
+		return listView.label
 	}
 }
 
