@@ -1,5 +1,7 @@
 /* @flow strict */
 
+import Button from "@salesforce/design-system-react/components/button"
+import classNames from "classnames"
 import * as React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
@@ -10,25 +12,37 @@ import AccountCard from "./AccountCard"
 import "./AccountList.css"
 
 type Props = {
-	className?: string,
-	fieldSet: FieldSet
+	className?: string | string[],
+	fieldSet: FieldSet,
+	spinner?: string // path to spinner image
 }
 
 export default function AccountList(props: Props) {
 	return (
 		<Subscribe to={[Accounts]}>
 			{accounts => (
-				<div className={props.className || ""}>
-					<SelectAccountListView
-						listViews={accounts.state.listViews}
-						onSelectListView={listView => {
-							accounts.selectListView(listView)
-						}}
-					/>
-					<AccountCards
-						accounts={accounts.getAccounts()}
-						fieldSet={props.fieldSet}
-					/>
+				<div className={classNames("account-list", props.className)}>
+					<div className="select-wrapper">
+						<SelectAccountListView
+							listViews={accounts.state.listViews}
+							onSelectListView={listView => {
+								accounts.selectListView(listView)
+							}}
+						/>
+						{accounts.isLoading() ? (
+							<img
+								alt="Loading..."
+								className="loading-spinner"
+								src={props.spinner}
+							/>
+						) : null}
+					</div>
+					<div className="account-card-list">
+						<AccountCards
+							accounts={accounts.getAccounts()}
+							fieldSet={props.fieldSet}
+						/>
+					</div>
 					<Pagination
 						currentPage={accounts.currentPageNumber()}
 						onSelectPage={p => accounts.fetchPage(p)}
@@ -131,24 +145,22 @@ function Pagination(props: {
 		onSelectPage(currentPage + 1)
 	}
 	return (
-		<div className="pagination">
-			<button
+		<footer className="pagination slds-p-around--medium">
+			<Button
 				disabled={currentPage <= 1}
+				label="Prev"
 				onClick={prev}
 				className="previousPage"
-			>
-				Prev
-			</button>
+			/>
 			<span>
 				Page {currentPage} of {pageCount}
 			</span>
-			<button
+			<Button
 				disabled={currentPage >= pageCount}
+				label="Next"
 				onClick={next}
 				className="nextPage"
-			>
-				Next
-			</button>
-		</div>
+			/>
+		</footer>
 	)
 }

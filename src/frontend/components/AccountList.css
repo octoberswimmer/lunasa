@@ -1,4 +1,27 @@
+.account-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-wrapper select {
+  width: 100%;
+}
+
+.select-wrapper {
+  display: flex;
+  align-items: center; /* center loading spinner vertically */
+  position: relative; /* set stacking context for loading spinner */
+}
+
+.select-wrapper .loading-spinner {
+  position: absolute;
+  right: 1.5em;
+  height: 2em;
+  width: 2em;
+}
+
 .pagination {
   display: flex;
+  align-items: center;
   justify-content: space-between;
 }

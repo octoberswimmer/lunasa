@@ -1,5 +1,8 @@
 /* @flow strict */
 
+import Toast from "@salesforce/design-system-react/components/toast"
+import ToastContainer from "@salesforce/design-system-react/components/toast/container"
+import classNames from "classnames"
 import React from "react"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
@@ -9,16 +12,18 @@ import "./App.css"
 import AccountList from "./AccountList"
 import CreateEvent from "./CreateEvent"
 import DroppableCalendar from "./DroppableCalendar"
-import Modal from "./Modal"
 
-type Props = {}
+type Props = {
+	spinner?: string // path to spinner image
+}
 
 const options = {
 	// Toolbar controls to be displayed in calendar header
 	header: {
 		left: "title",
 		right: "basicWeek,month today prev,next"
-	}
+	},
+	height: "auto"
 }
 
 export default function App(props: Props) {
@@ -26,20 +31,17 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const isLoading = accounts.isLoading() || events.isLoading()
-				const errors = accounts.state.errors.concat(events.state.errors)
 				return (
-					<div className="App">
-						<header className="App-header">
-							<h1 className="App-title">Lunasa</h1>
-						</header>
-						{isLoading ? "Loading..." : null}
-						{errors.length > 0
-							? errors.map((e, i) => <p key={i}>{e.message}</p>)
-							: null}
+					<div className={classNames("App", { loading: isLoading })}>
+						<ToastContainer>
+							<Errors container={accounts} />
+							<Errors container={events} />
+						</ToastContainer>
 						<div className="main">
 							<AccountList
 								className="accounts"
 								fieldSet={accounts.state.accountFieldSet}
+								spinner={props.spinner}
 							/>
 							<DroppableCalendar
 								className="calendar"
@@ -59,13 +61,7 @@ export default function App(props: Props) {
 								}}
 							/>
 							{events.state.newEvent ? (
-								<Modal
-									onRequestClose={() => {
-										events.discardNewEvent()
-									}}
-								>
-									<CreateEvent />
-								</Modal>
+								<CreateEvent spinner={props.spinner} />
 							) : null}
 						</div>
 					</div>
@@ -73,4 +69,22 @@ export default function App(props: Props) {
 			}}
 		</Subscribe>
 	)
+}
+
+interface ErrorReporter {
+	getErrors(): Error[];
+	dismissError(error: Error): any;
+}
+
+function Errors({ container }: { container: ErrorReporter }) {
+	return container
+		.getErrors()
+		.map((e, i) => (
+			<Toast
+				key={i}
+				labels={{ heading: e.message }}
+				onRequestClose={() => container.dismissError(e)}
+				variant="error"
+			/>
+		))
 }

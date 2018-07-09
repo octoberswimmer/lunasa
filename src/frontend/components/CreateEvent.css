@@ -1,9 +1,12 @@
-.create-event-form {
-  display: flex;
-  flex-direction: column;
+.create-event-modal-content {
+  min-height: 80%;
+}
+
+.create-event-modal-content label {
   width: 100%;
 }
 
-.create-event-form > * {
-  padding-bottom: 1em;
+footer .loading-spinner {
+  height: 2em;
+  margin-right: 1em;
 }

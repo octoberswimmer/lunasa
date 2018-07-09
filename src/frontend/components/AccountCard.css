@@ -1,8 +1,9 @@
-.account-card {
-  border: 2px solid black;
-  border-radius: 0.5em;
-}
+/*
+ * Styles here for lining up dt and dd elements come from a Stack Overflow
+ * answer:
+ * https://stackoverflow.com/a/50177309/103017
+ */
 
-.account-card dt {
-  font-weight: bold;
+.account-card {
+  padding: 0 1rem;
 }

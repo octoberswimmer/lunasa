@@ -1,6 +1,8 @@
 /* @flow strict */
 
 import { type ReactWrapper, type ShallowWrapper } from "enzyme"
+import moment from "moment"
+import resetDateCache from "reset-date-cache"
 
 /*
  * Returns a promise that resolves after the given timeout.
@@ -14,4 +16,49 @@ export function failIfMissing<T>(x: T): $NonMaybeType<T> {
 		throw new Error("a fixture is missing")
 	}
 	return x
+}
+
+/*
+ * Get an input HTML element from a React wrapper with the proper type.
+ */
+export function inputElement(wrapper: ReactWrapper): HTMLInputElement {
+	return (wrapper: any).getDOMNode()
+}
+
+/*
+ * Parses ISO 8601 datetime format according to local time zone.
+ */
+export function parseLocalDate(input: string): Date {
+	return moment(input, "YYYY-MM-DDTHH:mm:ss").toDate()
+}
+
+/*
+ * `moment` values created in the callback will have the given locale
+ */
+export async function withLocaleAndTz<T>(
+	locale: string,
+	tz: string,
+	cb: () => Promise<T>
+): Promise<T> {
+	const origLocale = moment.locale()
+	moment.locale(locale)
+	const result = await withTimezone(tz, cb)
+	moment.locale(origLocale)
+	return result
+}
+
+/*
+ * Sets the given time zone within the callback
+ */
+export async function withTimezone<T>(
+	tz: string,
+	cb: () => Promise<T>
+): Promise<T> {
+	const origTz = process.env.TZ
+	process.env.TZ = tz
+	resetDateCache()
+	const result = await cb()
+	process.env.TZ = origTz
+	resetDateCache()
+	return result
 }

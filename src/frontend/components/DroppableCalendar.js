@@ -8,6 +8,7 @@
  * @flow strict
  */
 
+import classNames from "classnames"
 import { type DragDropManager, type DragDropMonitor } from "dnd-core"
 import $ from "jquery"
 import moment from "moment"
@@ -23,6 +24,7 @@ type DropEvent = { date: moment$Moment, accountUrl: string }
 // Props required by `DroppableCalendar` in addition to props required by
 // `FullCalendar`
 type PublicDropProps = {
+	className?: string | string[],
 	onDrop(DropEvent): void
 }
 
@@ -134,9 +136,14 @@ export class DroppableCalendar extends React.Component<Props> {
 	}
 
 	render() {
-		const { connectDropTarget, dragDropManager, ...calendarProps } = this.props
+		const {
+			className,
+			connectDropTarget,
+			dragDropManager,
+			...calendarProps
+		} = this.props
 		return connectDropTarget(
-			<div>
+			<div className={classNames(className)}>
 				<FullCalendar {...calendarProps} ref={this.calendar} />
 			</div>
 		)

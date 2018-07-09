@@ -1,5 +1,7 @@
 /* @flow strict */
 
+import Button from "@salesforce/design-system-react/components/button"
+import Modal from "@salesforce/design-system-react/components/modal"
 import { Field, Form, Formik } from "formik"
 import * as React from "react"
 import { Subscribe } from "unstated"
@@ -9,13 +11,15 @@ import {
 	type SObjectDescription,
 	getPicklistValues
 } from "../models/SObjectDescription"
-import Autocomplete from "./forms/Autocomplete"
+import Combobox from "./forms/Combobox"
 import "./CreateEvent.css"
 import DateTime from "./forms/DateTime"
 
-type Props = {}
+type Props = {
+	spinner?: string // path to spinner image
+}
 
-export default function CreateEvent(type: Props) {
+export default function CreateEvent(props: Props) {
 	return (
 		<Subscribe to={[Events]}>
 			{events => {
@@ -31,16 +35,51 @@ export default function CreateEvent(type: Props) {
 							// TODO:
 							// actions.setErrors(submissionerrors)
 						}}
-						render={({ isSubmitting, values }) => (
-							<Form className="create-event-form">
-								{inputsForFieldSet(
-									events.state.eventCreateFieldSet,
-									events.state.eventDescription
-								)}
-								<button type="submit" disabled={isSubmitting}>
-									Create
-								</button>
-							</Form>
+						render={({ errors, handleSubmit, isSubmitting, values }) => (
+							<Modal
+								contentClassName={[
+									"create-event-modal-content",
+									"slds-p-around--medium"
+								]}
+								footer={[
+									events.isLoading() ? (
+										<img
+											alt="Loading..."
+											className="loading-spinner"
+											key="loading-spinner"
+											src={props.spinner}
+										/>
+									) : null,
+									<Button
+										key="cancel-button"
+										label="Cancel"
+										onClick={() => {
+											events.discardNewEvent()
+										}}
+										disabled={isSubmitting}
+									/>,
+									<Button
+										key="save-button"
+										label="Save"
+										variant="brand"
+										onClick={handleSubmit}
+										disabled={isSubmitting || hasErrors(errors)}
+									/>
+								]}
+								isOpen={true}
+								onRequestClose={() => {
+									events.discardNewEvent()
+								}}
+								size="large"
+								title="New Event"
+							>
+								<Form className="slds-form slds-form_stacked">
+									{inputsForFieldSet(
+										events.state.eventCreateFieldSet,
+										events.state.eventDescription
+									)}
+								</Form>
+							</Modal>
 						)}
 					/>
 				)
@@ -49,11 +88,46 @@ export default function CreateEvent(type: Props) {
 	)
 }
 
+function hasErrors(errors: { [field: string]: string }): boolean {
+	return Object.keys(errors).length > 0
+}
+
+// Get fields in pairs, and arrange inputs in a two-column grid
 function inputsForFieldSet(
 	fieldSet: FS.FieldSet,
 	description: ?SObjectDescription
 ): React.Node {
-	return fieldSet.map(field => inputFor(field, description))
+	const inputs = []
+	for (let i = 0; i < fieldSet.length; i += 2) {
+		const fields = fieldSet.slice(i, i + 2)
+		inputs.push(
+			<div
+				key={fields.map(field => field.name).join("-")}
+				className="slds-grid"
+			>
+				{fields.map(field => (
+					<div
+						className="slds-has-flexi-truncate slds-p-horizontal_medium"
+						key={field.name}
+					>
+						{inputFor(field, description)}
+					</div>
+				))}
+			</div>
+		)
+	}
+	return inputs
+}
+
+function FormElement(props: { children: React.Node, label: string }) {
+	return (
+		<div className="slds-form-element slds-p-vertical_xx-small">
+			<label>
+				<span className="slds-form-element__label">{props.label}</span>
+				<div className="slds-form-element__control">{props.children}</div>
+			</label>
+		</div>
+	)
 }
 
 function inputFor(
@@ -63,40 +137,42 @@ function inputFor(
 	switch (type) {
 		case "boolean":
 			return (
-				<label key={name}>
-					{label}: <Field type="checkbox" name={name} />
-				</label>
+				<FormElement label={label}>
+					<Field type="checkbox" name={name} />
+				</FormElement>
 			)
 		case "combobox":
-			const suggestions = (
-				(description && getPicklistValues(description, name)) ||
-				[]
-			).map(item => item.value)
+			const options =
+				(description && getPicklistValues(description, name)) || []
 			return (
-				<Autocomplete
-					key={name}
-					name={name}
+				<Combobox
+					classNameContainer="slds-p-vertical_xx-small"
 					label={label}
-					suggestions={suggestions}
+					name={name}
+					options={options}
 				/>
 			)
 		case "date":
 			return (
-				<label key={name}>
-					{label}: <DateTime name={name} timeFormat={false} />
-				</label>
+				<DateTime
+					containerClassName="slds-p-vertical_xx-small"
+					label={label}
+					name={name}
+					showTime={false}
+				/>
 			)
 		case "datetime":
 			return (
-				<label key={name}>
-					{label}: <DateTime name={name} />
-				</label>
+				<DateTime
+					containerClassName="slds-p-vertical_xx-small"
+					label={label}
+					name={name}
+				/>
 			)
 		case "picklist":
 			const values = (description && getPicklistValues(description, name)) || []
 			return (
-				<label key={name}>
-					{label}:{" "}
+				<FormElement label={label}>
 					<Field component="select" name={name}>
 						{values.map(({ label, value }) => (
 							<option key={value} value={value}>
@@ -104,19 +180,19 @@ function inputFor(
 							</option>
 						))}
 					</Field>
-				</label>
+				</FormElement>
 			)
 		case "textarea":
 			return (
-				<label key={name}>
-					{label}: <Field component="textarea" name={name} />
-				</label>
+				<FormElement label={label}>
+					<Field className="slds-textarea" component="textarea" name={name} />
+				</FormElement>
 			)
 		default:
 			return (
-				<label key={name}>
-					{label}: <Field type="text" name={name} />
-				</label>
+				<FormElement label={label}>
+					<Field type="text" name={name} />
+				</FormElement>
 			)
 	}
 }

@@ -11,7 +11,6 @@ import * as React from "react"
 const $: fullcalendar.JQueryStatic = (jQuery: any)
 
 export type Props = {
-	className?: string,
 	events?: fullcalendar.EventObjectInput[],
 	options?: fullcalendar.Options
 }
@@ -28,6 +27,7 @@ export default class FullCalendar extends React.Component<Props> {
 	componentDidMount() {
 		this.initializeCalendar()
 		this.displayEvents()
+		this.fixUpStyles()
 	}
 
 	componentDidUpdate(prevProps: Props) {
@@ -41,10 +41,16 @@ export default class FullCalendar extends React.Component<Props> {
 			instance.option(this.props.options || {})
 			this.displayEvents()
 		}
+		this.fixUpStyles()
 	}
 
 	componentWillUnmount() {
 		this.destroyCalendar()
+	}
+
+	fixUpStyles() {
+		const $root = $(this.getRootElement())
+		$root.find(".fc-left h2").addClass("slds-text-heading--medium")
 	}
 
 	getRootElement(): HTMLDivElement {
@@ -79,6 +85,6 @@ export default class FullCalendar extends React.Component<Props> {
 	}
 
 	render() {
-		return <div className={this.props.className || ""} ref={this.root} />
+		return <div ref={this.root} />
 	}
 }

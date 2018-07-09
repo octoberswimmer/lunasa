@@ -1,14 +1,15 @@
 /* @flow strict */
 
+import Datepicker from "@salesforce/design-system-react/components/date-picker"
+import Timepicker from "@salesforce/design-system-react/components/time-picker"
 import * as enzyme from "enzyme"
 import moment from "moment"
 import * as React from "react"
-import ReactDateTime from "react-datetime"
 import { Provider } from "unstated"
 import Events from "../containers/Events"
 import { eventCreateFieldSet } from "../models/Event.testFixtures"
-import { delay } from "../testHelpers"
-import Autocomplete from "./forms/Autocomplete"
+import { delay, inputElement } from "../testHelpers"
+import Combobox from "./forms/Combobox"
 import CreateEvent from "./CreateEvent"
 import DateTime from "./forms/DateTime"
 
@@ -49,11 +50,11 @@ it("presents inputs based on a given field set", async () => {
 
 	const inputA = wrapper.find("input[name='InputA']")
 	expect(inputA.props().type).toBe("text")
-	expect(inputA.closest("label").text()).toBe("Input A: ")
+	expect(inputA.closest("label").text()).toBe("Input A")
 
 	const inputB = wrapper.find("input[name='InputB']")
 	expect(inputB.props().type).toBe("text")
-	expect(inputB.closest("label").text()).toBe("Input B: ")
+	expect(inputB.closest("label").text()).toBe("Input B")
 })
 
 it("presents a checkbox input", async () => {
@@ -75,12 +76,28 @@ it("presents a combobox input", async () => {
 	})
 	await events.fetchEventDescription()
 	const wrapper = mount(<CreateEvent />, events)
-	const input = wrapper.find(Autocomplete)
+	const input = wrapper.find(Combobox)
 	expect(input.props()).toMatchObject({
 		name: "Subject",
 		label: "Subject",
-		// suggestion values from event fixtures
-		suggestions: ["Call", "Email", "Meeting", "Send Letter/Quote", "Other"]
+		// option values from event fixtures
+		options: [
+			{ active: true, defaultValue: false, label: "Call", value: "Call" },
+			{ active: true, defaultValue: false, label: "Email", value: "Email" },
+			{
+				active: true,
+				defaultValue: false,
+				label: "Meeting",
+				value: "Meeting"
+			},
+			{
+				active: true,
+				defaultValue: false,
+				label: "Send Letter/Quote",
+				value: "Send Letter/Quote"
+			},
+			{ active: true, defaultValue: false, label: "Other", value: "Other" }
+		]
 	})
 })
 
@@ -126,8 +143,9 @@ it("presents a date input", async () => {
 	})
 	const wrapper = mount(<CreateEvent />, events)
 	const input = wrapper.find(DateTime)
+	expect(input.props()).toHaveProperty("label", "Date")
 	expect(input.props()).toHaveProperty("name", "Date")
-	expect(input.props()).toHaveProperty("timeFormat", false)
+	expect(input.props()).toHaveProperty("showTime", false)
 })
 
 it("presents a datetime input", async () => {
@@ -138,6 +156,7 @@ it("presents a datetime input", async () => {
 	})
 	const wrapper = mount(<CreateEvent />, events)
 	const input = wrapper.find(DateTime)
+	expect(input.props()).toHaveProperty("label", "Start")
 	expect(input.props()).toHaveProperty("name", "StartDateTime")
 	expect(input.props()).not.toHaveProperty("timeFormat")
 })
@@ -146,11 +165,13 @@ it("gets a Date value from a datetime input", async () => {
 	const events = new Events(eventsOpts)
 	await events.newEvent(draft)
 	const wrapper = mount(<CreateEvent />, events)
-	const input = wrapper
-		.find(DateTime)
-		.filter("[name='StartDateTime']")
-		.find(ReactDateTime)
-	input.props().onChange(moment("2018-07-15T10:00-07:00"))
+	const dateTime = wrapper.find(DateTime).filter("[name='StartDateTime']")
+	const dateInput = dateTime.find(Datepicker).find("input")
+	inputElement(dateInput).value = moment("2018-07-15T10:00-07:00").format("L")
+	dateInput.simulate("change")
+	const timeInput = dateTime.find(Timepicker).find("input")
+	inputElement(timeInput).value = moment("2018-07-15T10:00-07:00").format("LT")
+	timeInput.simulate("change")
 	await submit(wrapper)
 	expect(events.state.events).toContainEqual(
 		expect.objectContaining({
@@ -168,6 +189,19 @@ it("presents a textarea input", async () => {
 	const wrapper = mount(<CreateEvent />, events)
 	const input = wrapper.find("textarea")
 	expect(input.props().name).toBe("Description")
+})
+
+it("gets a string value from a textarea input", async () => {
+	const events = new Events(eventsOpts)
+	await events.newEvent(draft)
+	const wrapper = mount(<CreateEvent />, events)
+	const input = wrapper.find("textarea")
+	inputElement(input).value = "some description"
+	input.simulate("change")
+	await submit(wrapper)
+	expect(events.state.events).toContainEqual(
+		expect.objectContaining({ Description: "some description" })
+	)
 })
 
 function mount(

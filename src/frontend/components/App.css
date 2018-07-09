@@ -1,11 +1,16 @@
+.App.loading {
+  cursor: progress;
+}
+
 .main {
   display: flex;
   align-items: flex-start;
 }
 
 .accounts {
-  padding: 0.5em;
-  width: 25em;
+  flex: 0 0 18rem;
+  padding: 0.5rem;
+  width: 18rem;
 }
 
 .calendar {
