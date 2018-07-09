@@ -20,6 +20,7 @@ import App from "./frontend/components/App"
 import Accounts from "./frontend/containers/Accounts"
 import Events from "./frontend/containers/Events"
 import { type FieldSet } from "./frontend/models/FieldSet"
+import { getAccountIds } from "./frontend/models/querystring"
 
 export function lunasa({
 	accountFieldSet,
@@ -39,6 +40,7 @@ export function lunasa({
 	sldsSettings.setAppElement(assistiveRoot)
 	const accounts = new Accounts({
 		accountFieldSet,
+		accountIds: getAccountIds(window.location),
 		restClient: RestApi(sessionToken)
 	})
 	const events = new Events({ eventCreateFieldSet })
