@@ -3,7 +3,7 @@
 	docType="html-5.0"
 	lightningStylesheets="true"
 	sidebar="false"
-	title="Lunasa"
+	title="Account Scheduler"
 	>
 	<apex:remoteObjects jsNamespace="Lunasa">
 		<apex:remoteObjectModel name="Event">
