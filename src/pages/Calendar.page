@@ -3,6 +3,8 @@
 	docType="html-5.0"
 	lightningStylesheets="true"
 	sidebar="false"
+	recordSetVar="accounts"
+	standardController="Account"
 	title="Account Scheduler"
 	>
 	<apex:remoteObjects jsNamespace="Lunasa">
@@ -33,6 +35,12 @@
 					type: "{!JSINHTMLENCODE(f.Type)}",
 					dbRequired: {!f.DBRequired}
 				},
+			</apex:repeat>
+			null
+			].filter(function(x) { return !!x; }),
+			accountIds: [
+			<apex:repeat value="{!selected}" var="account">
+				"{!JSINHTMLENCODE(account.Id)}",
 			</apex:repeat>
 			null
 			].filter(function(x) { return !!x; }),
