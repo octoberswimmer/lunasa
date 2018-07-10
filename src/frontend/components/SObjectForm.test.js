@@ -61,6 +61,20 @@ it("presents a checkbox input", () => {
 	expect(input.props().type).toBe("checkbox")
 })
 
+it("presents a checked checkbox when the corresponding value is `true`", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[
+				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
+			]}
+		/>,
+		{ IsAllDayEvent: true }
+	)
+	const input = wrapper.find("input[name='IsAllDayEvent']")
+	expect(input.props()).toHaveProperty("checked", true)
+})
+
 it("presents a combobox input", () => {
 	const wrapper = mount(
 		<SObjectForm

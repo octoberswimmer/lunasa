@@ -7,6 +7,7 @@ import {
 	type SObjectDescription,
 	getPicklistValues
 } from "../models/SObjectDescription"
+import Checkbox from "./forms/Checkbox"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
 
@@ -68,9 +69,11 @@ function inputFor(
 	switch (type) {
 		case "boolean":
 			return (
-				<FormElement label={label}>
-					<Field type="checkbox" name={name} />
-				</FormElement>
+				<Checkbox
+					className="slds-p-vertical_xx-small"
+					label={label}
+					name={name}
+				/>
 			)
 		case "combobox":
 			const options =
