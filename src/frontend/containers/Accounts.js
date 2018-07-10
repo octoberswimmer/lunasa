@@ -21,6 +21,7 @@ import {
 	whereClause
 } from "../models/ListView"
 import { type QueryResult } from "../models/QueryResult"
+import { stringifyCondition } from "../models/WhereCondition"
 import {
 	type AsyncActionState,
 	asyncAction,
@@ -28,8 +29,14 @@ import {
 	isLoading
 } from "./asyncAction"
 
+// To view accounts the user may select a predefined list view, or may select
+// an option to view accounts by account IDs given via URL query parameter.
+export const GIVEN_IDS = "givenIds"
+export type ListViewLike = ListView | { id: typeof GIVEN_IDS }
+
 export type State = AsyncActionState & {
 	accountFieldSet: FieldSet,
+	accountIds: ?(Id[]), // list of IDs provided via query parameter
 	accountQueryResult: QueryResult | null,
 	listViewDescriptions: { [key: Id]: ListViewDescription },
 	listViews: ListViews | null,
@@ -38,7 +45,7 @@ export type State = AsyncActionState & {
 	pageSize: number
 }
 
-type Request = { listView: ListView, limit: number, offset: number }
+type Request = { listView: ListViewLike, limit: number, offset: number }
 
 export default class AccountContainer extends Container<State> {
 	_restClient: Promise<RestApi>
@@ -46,6 +53,7 @@ export default class AccountContainer extends Container<State> {
 
 	constructor(opts: {|
 		accountFieldSet: FieldSet,
+		accountIds?: ?(Id[]),
 		pageSize?: number,
 		restClient: Promise<RestApi>
 	|}) {
@@ -55,6 +63,7 @@ export default class AccountContainer extends Container<State> {
 		this.state = {
 			...asyncActionInitState,
 			accountFieldSet: opts.accountFieldSet,
+			accountIds: opts.accountIds,
 			accountQueryResult: null,
 			listViewDescriptions: {},
 			listViews: null,
@@ -75,6 +84,17 @@ export default class AccountContainer extends Container<State> {
 		const result = this.state.accountQueryResult
 		if (result) {
 			return result.records
+		}
+	}
+
+	getListViews(): ?(ListViewLike[]) {
+		const listViews = this.state.listViews
+		const views = listViews && listViews.listviews
+		const ids = this.state.accountIds
+		if (ids && ids.length > 0) {
+			return [{ id: GIVEN_IDS }, ...(views || [])]
+		} else {
+			return views && [...views]
 		}
 	}
 
@@ -117,7 +137,7 @@ export default class AccountContainer extends Container<State> {
 		})
 	}
 
-	async selectListView(listView: ListView): Promise<void> {
+	async selectListView(listView: ListViewLike): Promise<void> {
 		const request = { listView, limit: this.state.pageSize, offset: 0 }
 		await Promise.all([
 			this._fetchAccounts(request),
@@ -156,7 +176,7 @@ export default class AccountContainer extends Container<State> {
 	}: Request): Promise<QueryResult> {
 		const client = await this._restClient
 		const fields = fieldList(this.state.accountFieldSet)
-		const where = whereClause(this._getDescription(listView))
+		const where = this._getWhereClause(listView)
 		const query = `SELECT ${fields} FROM Account ${where} ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
 		return client.query(query)
 	}
@@ -164,11 +184,32 @@ export default class AccountContainer extends Container<State> {
 	async _fetchRecordCount({ listView }: Request): Promise<void> {
 		await asyncAction(this, async () => {
 			const client = await this._restClient
-			const where = whereClause(this._getDescription(listView))
+			const where = this._getWhereClause(listView)
 			const query = `SELECT COUNT() FROM Account ${where}`
 			const result = await client.query(query)
 			await this.setState({ count: result.totalSize })
 		})
+	}
+
+	_getWhereClause(listView: ListViewLike): string {
+		if (listView.id === GIVEN_IDS) {
+			const ids = this.state.accountIds
+			if (!ids || ids.length < 1) {
+				throw new Error(
+					"There are no account IDs present in the URL query string."
+				)
+			}
+			return (
+				"WHERE " +
+				stringifyCondition({
+					field: "Id",
+					operator: "IN",
+					values: ids.map(id => `'${id}'`)
+				})
+			)
+		} else {
+			return whereClause(this._getDescription(listView))
+		}
 	}
 
 	_getDescription(listView: ListView): ListViewDescription {

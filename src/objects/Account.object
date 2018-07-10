@@ -270,4 +270,20 @@
         </displayedFields>
         <label>Calendar Card</label>
     </fieldSets>
+    <searchLayouts>
+        <listViewButtons>Schedule_Selected_Accounts</listViewButtons>
+    </searchLayouts>
+    <webLinks>
+        <fullName>Schedule_Selected_Accounts</fullName>
+        <availability>online</availability>
+        <description>Open the Account Scheduler view to schedule appointments with the accounts that you have selected.</description>
+        <displayType>massActionButton</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Schedule Selected Accounts</masterLabel>
+        <openType>noSidebar</openType>
+        <page>Calendar</page>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+    </webLinks>
 </CustomObject>

@@ -13,7 +13,7 @@ export function delay(ms: number = 0): Promise<void> {
 
 export function failIfMissing<T>(x: T): $NonMaybeType<T> {
 	if (x === null || typeof x === "undefined") {
-		throw new Error("a fixture is missing")
+		throw new Error("a required value is missing")
 	}
 	return x
 }
