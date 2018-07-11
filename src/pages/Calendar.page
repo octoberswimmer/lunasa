@@ -1,10 +1,10 @@
 <apex:page
 	contentType="text/html"
 	docType="html-5.0"
-	lightningStylesheets="true"
 	sidebar="false"
 	recordSetVar="accounts"
 	standardController="Account"
+	standardStylesheets="false"
 	title="Account Scheduler"
 	>
 	<apex:remoteObjects jsNamespace="Lunasa">
