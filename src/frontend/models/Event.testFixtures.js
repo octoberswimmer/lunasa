@@ -55,6 +55,11 @@ export const eventCreateFieldSet: FieldSet = [
 		name: "EventSubtype",
 		label: "Event Subtype",
 		type: "picklist"
+	},
+	{
+		name: "WhatId",
+		label: "What",
+		type: "reference"
 	}
 ]
 

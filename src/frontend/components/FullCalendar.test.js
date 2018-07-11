@@ -1,6 +1,6 @@
 /* @flow strict */
 
-import { type ReactWrapper, mount } from "enzyme"
+import * as enzyme from "enzyme"
 import { type JQuery, type JQueryStatic, Calendar } from "fullcalendar"
 import jQuery from "jquery"
 import * as React from "react"
@@ -42,6 +42,20 @@ it("destroys calendar when unmounting", () => {
 	expect($elem.fullCalendar("getCalendar")).toBeInstanceOf(Calendar)
 })
 
-function getCalendar(wrapper: ReactWrapper): Calendar {
+function getCalendar(wrapper: enzyme.ReactWrapper): Calendar {
 	return $(wrapper.getDOMNode()).fullCalendar("getCalendar")
+}
+
+// Unmount React tree after each test to avoid errors about missing `document`,
+// and to avoid slowdown from accumulated React trees.
+let _wrapper: enzyme.ReactWrapper
+afterEach(() => {
+	if (_wrapper) {
+		_wrapper.unmount()
+	}
+})
+
+function mount(component: React.Node): enzyme.ReactWrapper {
+	_wrapper = enzyme.mount(component)
+	return _wrapper
 }

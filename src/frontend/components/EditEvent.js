@@ -21,7 +21,6 @@ export default function EditEvent(props: Props) {
 	return (
 		<Subscribe to={[Events]}>
 			{events => {
-				events.fetchEventDescription()
 				const { eventDraft } = events.state
 				const title = events.isCreatingEvent()
 					? "New Event"
@@ -76,8 +75,11 @@ export default function EditEvent(props: Props) {
 								title={title}
 							>
 								<SObjectForm
-									description={events.state.eventDescription}
+									description={events.getEventDescription()}
 									fieldSet={events.state.eventCreateFieldSet}
+									getReference={fieldName =>
+										events.getReference(fieldName, eventDraft && eventDraft.Id)
+									}
 								/>
 							</Modal>
 						)}

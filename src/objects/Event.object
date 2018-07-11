@@ -52,22 +52,17 @@
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
         </availableFields>
-        <availableFields>
-            <field>Type</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
+        <description>Determines fields that are prompted when creating an event via the calendar app.</description>
+        <displayedFields>
             <field>WhatId</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
+        </displayedFields>
+        <displayedFields>
             <field>WhoId</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
-        </availableFields>
-        <description>Determines fields that are prompted when creating an event via the calendar app.</description>
+        </displayedFields>
         <displayedFields>
             <field>Subject</field>
             <isFieldManaged>false</isFieldManaged>

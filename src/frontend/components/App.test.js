@@ -23,12 +23,14 @@ import DroppableCalendar from "./DroppableCalendar"
 import EditEvent from "./EditEvent"
 import FullCalendar from "./FullCalendar"
 
+const restClient = RestApi("0000")
+
 const accountsOpts = {
 	accountFieldSet: af.accountFieldSet,
-	restClient: RestApi("0000")
+	restClient
 }
 
-const eventsOpts = { eventCreateFieldSet }
+const eventsOpts = { eventCreateFieldSet, restClient }
 
 var initializeCalendar: JestMockFn<[], void>
 
@@ -163,6 +165,15 @@ it("displays event form when a draft of changes to an existing event is present"
 	expect(form.find("h2").text()).toBe("Edit Meeting")
 })
 
+// Unmount React tree after each test to avoid errors about missing `document`,
+// and to avoid slowdown from accumulated React trees.
+let _wrapper: enzyme.ReactWrapper
+afterEach(() => {
+	if (_wrapper) {
+		_wrapper.unmount()
+	}
+})
+
 // Helper that wraps `<App/>` with a necessary `<Provider>` from unstated.
 function mount(
 	app: React.Node,
@@ -171,11 +182,12 @@ function mount(
 	const accounts =
 		(containers && containers.accounts) || new Accounts(accountsOpts)
 	const events = (containers && containers.events) || new Events(eventsOpts)
-	return enzyme.mount(
+	_wrapper = enzyme.mount(
 		<Provider inject={[accounts, events]}>
 			<DragDropContextProvider backend={TestBackend}>
 				{app}
 			</DragDropContextProvider>
 		</Provider>
 	)
+	return _wrapper
 }
