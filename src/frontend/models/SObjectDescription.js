@@ -96,3 +96,24 @@ export function getPicklistValues(
 	const field = getField(description, name)
 	return field && field.picklistValues
 }
+
+/*
+ * `getReferences` returns names of polymorphic reference fields
+ */
+export function getReferenceFieldNames(
+	description: SObjectDescription
+): string[] {
+	return description.fields.filter(f => f.type === "reference").map(f => f.name)
+}
+
+/*
+ * `getRelationshipName` gets the `relationName` property from the reference
+ * field with the given name.
+ */
+export function getRelationshipName(
+	description: SObjectDescription,
+	referenceField: string
+): ?string {
+	const field = getField(description, referenceField)
+	return field && field.relationshipName
+}

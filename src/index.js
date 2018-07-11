@@ -39,12 +39,13 @@ export function lunasa({
 	staticDirectory: string
 }) {
 	sldsSettings.setAppElement(assistiveRoot)
+	const restClient = RestApi(sessionToken)
 	const accounts = new Accounts({
 		accountFieldSet,
 		accountIds,
-		restClient: RestApi(sessionToken)
+		restClient
 	})
-	const events = new Events({ eventCreateFieldSet })
+	const events = new Events({ eventCreateFieldSet, restClient })
 	ReactDOM.render(
 		<Provider inject={[accounts, events]}>
 			<DragDropContextProvider backend={HTML5Backend}>

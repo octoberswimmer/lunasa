@@ -9,7 +9,8 @@ import {
 	eventCreateFieldSet,
 	eventDescription
 } from "../models/Event.testFixtures"
-import { delay } from "../testHelpers"
+import RestApi from "../api/RestApi"
+import { delay, failIfMissing } from "../testHelpers"
 import EditEvent from "./EditEvent"
 import SObjectForm from "./SObjectForm"
 
@@ -17,22 +18,28 @@ const draft = {
 	Subject: "Meeting with Account",
 	StartDateTime: new Date("2018-06-29T17:00Z"),
 	EndDateTime: new Date("2018-06-29T18:00Z"),
-	IsAllDayEvent: false
+	IsAllDayEvent: false,
+	WhatId: "001f200001XrDsvAAF"
 }
 
-const eventsOpts = { eventCreateFieldSet }
+const restClient = RestApi("0000")
+const eventsOpts = { eventCreateFieldSet, restClient }
+
+afterEach(() => {
+	jest.clearAllMocks()
+})
 
 it("requests event object description on mount", async () => {
 	const events = new Events(eventsOpts)
-	jest.spyOn(events, "fetchEventDescription")
+	jest.spyOn(events, "getEventDescription")
 	const wrapper = mount(<EditEvent />, events)
-	expect(events.fetchEventDescription).toHaveBeenCalled()
+	expect(events.getEventDescription).toHaveBeenCalled()
 })
 
 it("renders a form", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
-	await events.fetchEventDescription()
+	await events._fetchEventDescription()
 	const wrapper = mount(<EditEvent />, events)
 	const form = wrapper.find(SObjectForm)
 	expect(form.props()).toMatchObject({
@@ -77,11 +84,59 @@ it("discards event draft when the user clicks 'Cancel'", async () => {
 	expect(events.state.eventDraft).toBeFalsy()
 })
 
+it("displays account name when editing", async () => {
+	const referencedRecords = {
+		What: {
+			Name: "Edge Communications",
+			attributes: {
+				type: "Account",
+				url: "/services/data/v40.0/sobjects/Account/001f200001XrDsvAAF"
+			}
+		},
+		attributes: {
+			type: "Event",
+			url: "/services/data/v40.0/sobjects/Event/someEventId"
+		}
+	}
+	const client = await restClient
+	jest.spyOn(client, "query").mockImplementation(async query => {
+		expect(query).toBe(
+			"SELECT What.Name, Who.Name FROM Event WHERE Id = 'someEventId'"
+		)
+		return {
+			totalSize: 1,
+			done: true,
+			records: [referencedRecords]
+		}
+	})
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ ...draft, Id: "someEventId" })
+	const wrapper = mount(<EditEvent />, events)
+	await delay(100)
+	wrapper.update()
+	expect(events.state.errors).toEqual([])
+	expect(wrapper).toContainReact(
+		<a href="/lightning/r/Account/001f200001XrDsvAAF/view">
+			Edge Communications
+		</a>
+	)
+})
+
+// Unmount React tree after each test to avoid errors about missing `document`,
+// and to avoid slowdown from accumulated React trees.
+let _wrapper: enzyme.ReactWrapper
+afterEach(() => {
+	if (_wrapper) {
+		_wrapper.unmount()
+	}
+})
+
 function mount(
 	component: React.Node,
 	events: Events = new Events(eventsOpts)
 ): enzyme.ReactWrapper {
-	return enzyme.mount(<Provider inject={[events]}>{component}</Provider>)
+	_wrapper = enzyme.mount(<Provider inject={[events]}>{component}</Provider>)
+	return _wrapper
 }
 
 async function submit(wrapper: enzyme.ReactWrapper) {
