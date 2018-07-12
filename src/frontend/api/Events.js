@@ -1,5 +1,6 @@
 /* @flow strict */
 
+import moment from "moment"
 import { type Event } from "../models/Event"
 import { type SObject } from "./SObject"
 import RemoteObject from "./RemoteObject"
@@ -48,7 +49,7 @@ function dateToLocalTz<T: Date | number | void>(input: T): T {
 	if (!input) {
 		return input
 	}
-	const date = new Date(input)
+	const date = moment.utc(input).toDate()
 	return isMidnightUTC(date)
 		? new Date(
 				date.getUTCFullYear(),
