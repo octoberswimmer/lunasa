@@ -44,13 +44,19 @@ it("sets default start and end time for event draft", () => {
 	expect(start.isBefore(end))
 })
 
-it("produces data for a Full Calendar event", () => {
+it("produces data for a FullCalendar event", () => {
 	const event = forFullcalendar(testEvent)
 	expect(event).toMatchObject({
 		title: "Meeting",
 		start: testEvent.StartDateTime,
 		end: testEvent.EndDateTime,
+		allDay: false,
 		type: "Event",
 		id: "1"
 	})
+})
+
+it("sets the 'allDay' flag in FullCalendar if appropriate", () => {
+	const event = forFullcalendar({ ...testEvent, IsAllDayEvent: true })
+	expect(event).toHaveProperty("allDay", true)
 })

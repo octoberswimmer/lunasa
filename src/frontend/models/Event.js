@@ -24,6 +24,7 @@ export function forFullcalendar(event: Event): EventObjectInput {
 		title: event.Subject,
 		start: event.StartDateTime,
 		end: event.EndDateTime,
+		allDay: Boolean(event.IsAllDayEvent),
 		type: "Event",
 		id: event.Id
 	}
