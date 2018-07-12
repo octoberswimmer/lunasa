@@ -12,8 +12,11 @@
 			<!-- NOTE: List of fields here should include all available and
 				 displayed fields in the CreateEvent field set. -->
 			<apex:remoteObjectField name="AccountId" />
+			<apex:remoteObjectField name="Description" />
+			<apex:remoteObjectField name="EndDateTime" />
 			<apex:remoteObjectField name="EventSubtype" />
 			<apex:remoteObjectField name="GroupEventType" />
+			<apex:remoteObjectField name="IsAllDayEvent" />
 			<apex:remoteObjectField name="IsArchived" />
 			<apex:remoteObjectField name="IsGroupEvent" />
 			<apex:remoteObjectField name="IsPrivate" />
@@ -21,14 +24,10 @@
 			<apex:remoteObjectField name="Location" />
 			<apex:remoteObjectField name="OwnerId" />
 			<apex:remoteObjectField name="ReminderDateTime" />
-			<apex:remoteObjectField name="WhatId" />
-			<apex:remoteObjectField name="What.Type" />
-			<apex:remoteObjectField name="Who.Type" />
-			<apex:remoteObjectField name="Subject" />
 			<apex:remoteObjectField name="StartDateTime" />
-			<apex:remoteObjectField name="EndDateTime" />
-			<apex:remoteObjectField name="IsAllDayEvent" />
-			<apex:remoteObjectField name="Description" />
+			<apex:remoteObjectField name="Subject" />
+			<apex:remoteObjectField name="WhatId" />
+			<apex:remoteObjectField name="WhoId" />
 		</apex:remoteObjectModel>
 	</apex:remoteObjects>
 	<apex:stylesheet value="{!URLFOR($Resource.Calendar, 'static/css/main.css')}" />
