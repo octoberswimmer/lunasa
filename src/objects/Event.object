@@ -3,31 +3,6 @@
     <fieldSets>
         <fullName>CreateEvent</fullName>
         <availableFields>
-            <field>AccountId</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>>
-        <availableFields>
-            <field>EventSubtype</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
-            <field>GroupEventType</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
-            <field>IsArchived</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
-            <field>IsGroupEvent</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
             <field>IsPrivate</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
