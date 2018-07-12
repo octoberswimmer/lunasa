@@ -3,31 +3,38 @@
 import moment from "moment"
 import resetDateCache from "reset-date-cache"
 import EventModel from "../api/Events"
+import RestApi from "../api/RestApi"
 import * as ef from "../models/Event.testFixtures"
+import { type QueryResult } from "../models/QueryResult"
 import { visualforceDatetime } from "../models/serialization"
 import { delay, failIfMissing } from "../testHelpers"
 import Events from "./Events"
 
+const restClient = RestApi("0000")
+
 const eventsOpts = {
 	eventCreateFieldSet: ef.eventCreateFieldSet,
-	remoteObject: EventModel
+	remoteObject: EventModel,
+	restClient
 }
-
-const createSpy = jest.spyOn(EventModel, "create")
-const describeSpy = jest.spyOn(EventModel, "describe")
-const retrieveSpy = jest.spyOn(EventModel, "retrieve")
-const updateSpy = jest.spyOn(EventModel, "update")
 
 afterEach(() => {
 	jest.clearAllMocks()
+	// Remove spies from `EventModel`
+	for (const method of Object.values(EventModel)) {
+		if (method && typeof method.mockRestore === "function") {
+			method.mockRestore()
+		}
+	}
 })
 
 it("requests events by date range", () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
 	const today = moment()
 	events.getEventsByDateRange(today, today)
-	expect(EventModel.retrieve).toHaveBeenCalledTimes(1)
-	expect(EventModel.retrieve).toHaveBeenCalledWith({
+	expect(retrieve).toHaveBeenCalledTimes(1)
+	expect(retrieve).toHaveBeenCalledWith({
 		where: {
 			and: {
 				StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
@@ -38,6 +45,7 @@ it("requests events by date range", () => {
 })
 
 it("sets time range to start and end of day in the local time zone", () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
 	const origTz = process.env.TZ
 
@@ -81,7 +89,7 @@ it("sets time range to start and end of day in the local time zone", () => {
 		process.env.TZ = tz
 		resetDateCache()
 		events.getEventsByDateRange(moment.utc(inputTime), moment.utc(inputTime))
-		expect(EventModel.retrieve).toHaveBeenCalledWith({
+		expect(retrieve).toHaveBeenCalledWith({
 			where: {
 				and: {
 					StartDateTime: { lt: expectedEnd },
@@ -96,12 +104,13 @@ it("sets time range to start and end of day in the local time zone", () => {
 })
 
 it("avoids making the same query twice in a row", () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
 	const today = moment()
 	events.getEventsByDateRange(today, today)
 	events.getEventsByDateRange(today, today)
-	expect(EventModel.retrieve).toHaveBeenCalledTimes(1)
-	expect(EventModel.retrieve).toHaveBeenCalledWith({
+	expect(retrieve).toHaveBeenCalledTimes(1)
+	expect(retrieve).toHaveBeenCalledWith({
 		where: {
 			and: {
 				StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
@@ -113,18 +122,76 @@ it("avoids making the same query twice in a row", () => {
 
 it("requests event sObject description", async () => {
 	const events = new Events(eventsOpts)
-	await events.fetchEventDescription()
-	expect(events.state.eventDescription).toEqual(ef.eventDescription)
+	events.getEventDescription() // trigger fetch
+	await delay() // wait for fetch to complete
+	const description = events.getEventDescription()
+	expect(description).toEqual(ef.eventDescription)
 })
 
 it("does not transmit event description request more than once", async () => {
+	const describe = jest.spyOn(EventModel, "describe")
 	const events = new Events(eventsOpts)
 	await Promise.all([
-		events.fetchEventDescription(),
-		events.fetchEventDescription(),
-		events.fetchEventDescription()
+		events.getEventDescription(),
+		events.getEventDescription(),
+		events.getEventDescription()
 	])
-	expect(describeSpy).toHaveBeenCalledTimes(1)
+	expect(describe).toHaveBeenCalledTimes(1)
+})
+
+it("gets data from a referenced record", async () => {
+	expect.assertions(3)
+	const referencedRecords = {
+		What: {
+			Name: "Account Name",
+			attributes: {
+				type: "Account",
+				url: "https://host/accounts/someAccountId"
+			}
+		},
+		attributes: {
+			type: "Event",
+			url: "https://host/accounts/someEventId"
+		}
+	}
+	const client = await restClient
+	jest.spyOn(client, "query").mockImplementation(
+		async (query: string): Promise<QueryResult> => {
+			expect(query).toMatch(
+				/SELECT.*What\.Name.*FROM Event.*WHERE Id = 'someEventId'/
+			)
+			return {
+				done: true,
+				totalSize: 1,
+				records: [referencedRecords]
+			}
+		}
+	)
+	const events = new Events(eventsOpts)
+	events.getReference("WhatId", "someEventId") // trigger fetch
+	await delay() // wait for fetch to complete
+	const what = events.getReference("WhatId", "someEventId")
+	expect(events.state.errors).toEqual([])
+	expect(what).toEqual(referencedRecords.What)
+})
+
+it("does not transmit reference request more than once per event ID", async () => {
+	const client = await restClient
+	const query = jest.spyOn(client, "query")
+	const events = new Events(eventsOpts)
+	events.getReference("WhatId", "1")
+	events.getReference("WhoId", "1")
+	events.getReference("WhatId", "2")
+	events.getReference("WhatId", "2")
+	events.getReference("WhatId", "1")
+	await delay()
+	expect(query).toHaveBeenCalledTimes(2)
+	expect(query).toHaveBeenCalledWith(
+		expect.stringMatching(/SELECT.*FROM Event.*WHERE Id = '1'/)
+	)
+	expect(query).toHaveBeenCalledWith(
+		expect.stringMatching(/SELECT.*FROM Event.*WHERE Id = '2'/)
+	)
 })
 
 it("initiates new event creation", async () => {
@@ -163,19 +230,21 @@ it("discards the event draft", async () => {
 })
 
 it("creates a new event from a draft", async () => {
+	const create = jest.spyOn(EventModel, "create")
 	const events = new Events(eventsOpts)
 	const draft = { Subject: "event draft" }
 	await events.setEventDraft(draft)
 	await events.saveDraft()
-	expect(createSpy).toHaveBeenCalledWith(draft)
+	expect(create).toHaveBeenCalledWith(draft)
 })
 
 it("updates an existing event based on changes in a draft", async () => {
+	const update = jest.spyOn(EventModel, "update")
 	const events = new Events(eventsOpts)
 	const draft = { Id: "1", Subject: "event draft" }
 	await events.setEventDraft(draft)
 	await events.saveDraft()
-	expect(updateSpy).toHaveBeenCalledWith(["1"], draft)
+	expect(update).toHaveBeenCalledWith(["1"], draft)
 })
 
 it("removes draft event from state on successful create", async () => {

@@ -3,6 +3,7 @@
 import { Field, Form } from "formik"
 import * as React from "react"
 import * as FS from "../models/FieldSet"
+import { type Record } from "../models/QueryResult"
 import {
 	type SObjectDescription,
 	getPicklistValues
@@ -13,13 +14,18 @@ import DateTime from "./forms/DateTime"
 
 type Props = {
 	description: ?SObjectDescription, // description may be loading when form renders
-	fieldSet: FS.FieldSet
+	fieldSet: FS.FieldSet,
+	getReference?: (fieldName: string) => ?Record
 }
 
-export default function SObjectForm({ description, fieldSet }: Props) {
+export default function SObjectForm({
+	description,
+	fieldSet,
+	getReference
+}: Props) {
 	return (
 		<Form className="slds-form slds-form_stacked">
-			{inputsForFieldSet(fieldSet, description)}
+			{inputsForFieldSet(fieldSet, description, getReference)}
 		</Form>
 	)
 }
@@ -27,7 +33,8 @@ export default function SObjectForm({ description, fieldSet }: Props) {
 // Get fields in pairs, and arrange inputs in a two-column grid
 function inputsForFieldSet(
 	fieldSet: FS.FieldSet,
-	description: ?SObjectDescription
+	description: ?SObjectDescription,
+	getReference: ?(fieldName: string) => ?Record
 ): React.Node {
 	const inputs = []
 	for (let i = 0; i < fieldSet.length; i += 2) {
@@ -42,7 +49,7 @@ function inputsForFieldSet(
 						className="slds-has-flexi-truncate slds-p-horizontal_medium"
 						key={field.name}
 					>
-						{inputFor(field, description)}
+						{inputFor(field, description, getReference)}
 					</div>
 				))}
 			</div>
@@ -64,7 +71,8 @@ function FormElement(props: { children: React.Node, label: string }) {
 
 function inputFor(
 	{ label, name, type }: FS.Field,
-	description: ?SObjectDescription
+	description: ?SObjectDescription,
+	getReference: ?(fieldName: string) => ?Record
 ): React.Node {
 	switch (type) {
 		case "boolean":
@@ -116,6 +124,17 @@ function inputFor(
 					</Field>
 				</FormElement>
 			)
+		case "reference":
+			const record = getReference && getReference(name)
+			const href = record && hrefFromApiUrl(record.attributes.url)
+			return (
+				<div className="slds-form-element slds-p-vertical_xx-small">
+					<span className="slds-form-element__label">{label}</span>
+					<div className="slds-form-element__control">
+						{record ? <a href={href}>{record.Name}</a> : "-"}
+					</div>
+				</div>
+			)
 		case "textarea":
 			return (
 				<FormElement label={label}>
@@ -128,5 +147,13 @@ function inputFor(
 					<Field type="text" name={name} />
 				</FormElement>
 			)
+	}
+}
+
+const hrefPattern = /\/[A-Za-z_-]+\/[^/]+$/
+function hrefFromApiUrl(url: string): ?string {
+	const matches = url.match(hrefPattern)
+	if (matches) {
+		return `/lightning/r${matches[0]}/view`
 	}
 }
