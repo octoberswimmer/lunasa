@@ -60,3 +60,22 @@ it("sets the 'allDay' flag in FullCalendar if appropriate", () => {
 	const event = forFullcalendar({ ...testEvent, IsAllDayEvent: true })
 	expect(event).toHaveProperty("allDay", true)
 })
+
+/*
+ * There is a bug in FullCalendar that causes an all-day event to displayed
+ * ending one day earlier than it should. For example if the `start` and `end`
+ * are on the same day the event is not displayed at all - its duration is zero.
+ *
+ * To work around this we add one day to the `end` date when displaying all-day
+ * events.
+ *
+ * See: https://github.com/fullcalendar/fullcalendar/issues/3854
+ */
+it("adds one day to the `end` date for all-day events", () => {
+	const event = forFullcalendar({
+		...testEvent,
+		EndDateTime: new Date("2018-07-12T00:00-07:00"),
+		IsAllDayEvent: true
+	})
+	expect(event.end).toEqual(new Date("2018-07-13T00:00-07:00"))
+})
