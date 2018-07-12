@@ -1,5 +1,6 @@
 /* @flow strict */
 
+import Timepicker from "@salesforce/design-system-react/components/time-picker"
 import * as enzyme from "enzyme"
 import { Formik } from "formik"
 import * as React from "react"
@@ -120,6 +121,22 @@ it("displays account name when editing", async () => {
 			Edge Communications
 		</a>
 	)
+})
+
+it("hides time inputs if 'IsAllDay' is selected", async () => {
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ ...draft, IsAllDayEvent: true })
+	const wrapper = mount(<EditEvent />, events)
+	expect(wrapper.find(Timepicker).exists()).toBe(false)
+
+	const formik = wrapper.find(Formik).instance()
+	formik.setFieldValue("IsAllDayEvent", false)
+	wrapper.update()
+	expect(wrapper.find(Timepicker).exists()).toBe(true)
+
+	formik.setFieldValue("IsAllDayEvent", true)
+	wrapper.update()
+	expect(wrapper.find(Timepicker).exists()).toBe(false)
 })
 
 // Unmount React tree after each test to avoid errors about missing `document`,

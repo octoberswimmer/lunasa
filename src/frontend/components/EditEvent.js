@@ -10,6 +10,7 @@ import { Formik } from "formik"
 import * as React from "react"
 import { Subscribe } from "unstated"
 import Events from "../containers/Events"
+import { type FieldSet } from "../models/FieldSet"
 import "./EditEvent.css"
 import SObjectForm from "./SObjectForm"
 
@@ -76,7 +77,10 @@ export default function EditEvent(props: Props) {
 							>
 								<SObjectForm
 									description={events.getEventDescription()}
-									fieldSet={events.state.eventCreateFieldSet}
+									fieldSet={toggleTimeInputs(
+										Boolean(values.IsAllDayEvent),
+										events.state.eventCreateFieldSet
+									)}
 									getReference={fieldName =>
 										events.getReference(fieldName, eventDraft && eventDraft.Id)
 									}
@@ -92,4 +96,21 @@ export default function EditEvent(props: Props) {
 
 function hasErrors(errors: { [field: string]: string }): boolean {
 	return Object.keys(errors).length > 0
+}
+
+/*
+ * If "All-Day Event" is selected, show start and end date inputs as "date"
+ * instead of "datetime" fields.
+ */
+function toggleTimeInputs(isAllDay: boolean, fieldSet: FieldSet): FieldSet {
+	if (!isAllDay) {
+		return fieldSet
+	}
+	return fieldSet.map(field => {
+		if (field.name === "StartDateTime" || field.name === "EndDateTime") {
+			return { ...field, type: "date" }
+		} else {
+			return field
+		}
+	})
 }
