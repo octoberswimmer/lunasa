@@ -3,11 +3,6 @@
     <fieldSets>
         <fullName>CreateEvent</fullName>
         <availableFields>
-            <field>GroupEventType</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
             <field>IsPrivate</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>

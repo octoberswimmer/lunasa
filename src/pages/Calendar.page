@@ -13,7 +13,6 @@
 				 displayed fields in the CreateEvent field set. -->
 			<apex:remoteObjectField name="Description" />
 			<apex:remoteObjectField name="EndDateTime" />
-			<apex:remoteObjectField name="GroupEventType" />
 			<apex:remoteObjectField name="IsAllDayEvent" />
 			<apex:remoteObjectField name="IsPrivate" />
 			<apex:remoteObjectField name="IsReminderSet" />
