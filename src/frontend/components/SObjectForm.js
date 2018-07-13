@@ -144,7 +144,7 @@ function inputFor(
 		default:
 			return (
 				<FormElement label={label}>
-					<Field type="text" name={name} />
+					<Field className="slds-input" type="text" name={name} />
 				</FormElement>
 			)
 	}
