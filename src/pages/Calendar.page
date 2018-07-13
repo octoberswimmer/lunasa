@@ -11,14 +11,9 @@
 		<apex:remoteObjectModel name="Event">
 			<!-- NOTE: List of fields here should include all available and
 				 displayed fields in the CreateEvent field set. -->
-			<apex:remoteObjectField name="AccountId" />
 			<apex:remoteObjectField name="Description" />
 			<apex:remoteObjectField name="EndDateTime" />
-			<apex:remoteObjectField name="EventSubtype" />
-			<apex:remoteObjectField name="GroupEventType" />
 			<apex:remoteObjectField name="IsAllDayEvent" />
-			<apex:remoteObjectField name="IsArchived" />
-			<apex:remoteObjectField name="IsGroupEvent" />
 			<apex:remoteObjectField name="IsPrivate" />
 			<apex:remoteObjectField name="IsReminderSet" />
 			<apex:remoteObjectField name="Location" />
