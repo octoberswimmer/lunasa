@@ -165,6 +165,15 @@ it("displays event form when a draft of changes to an existing event is present"
 	expect(form.find("h2").text()).toBe("Edit Meeting")
 })
 
+it("assumes that error messages have already been HTML-escaped", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const events = new Events(eventsOpts)
+	await events.setState({ errors: [new Error("I can&#39;t do that.")] })
+	await events.setEventDraft({ Id: "1", Subject: "Meeting" })
+	const wrapper = mount(<App />, { accounts, events })
+	expect(wrapper.text()).toMatch("I can't do that.")
+})
+
 // Unmount React tree after each test to avoid errors about missing `document`,
 // and to avoid slowdown from accumulated React trees.
 let _wrapper: enzyme.ReactWrapper

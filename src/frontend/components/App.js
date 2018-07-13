@@ -4,6 +4,7 @@ import Toast from "@salesforce/design-system-react/components/toast"
 import ToastContainer from "@salesforce/design-system-react/components/toast/container"
 import classNames from "classnames"
 import React from "react"
+import unescape from "unescape"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
@@ -82,13 +83,15 @@ interface ErrorReporter {
 	dismissError(error: Error): any;
 }
 
+// unescape error messages before rendering because Salesforce has already
+// escaped special HTML characters.
 function Errors({ container }: { container: ErrorReporter }) {
 	return container
 		.getErrors()
 		.map((e, i) => (
 			<Toast
 				key={i}
-				labels={{ heading: e.message }}
+				labels={{ heading: unescape(e.message) }}
 				onRequestClose={() => container.dismissError(e)}
 				variant="error"
 			/>
