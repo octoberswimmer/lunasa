@@ -3,11 +3,6 @@
     <fieldSets>
         <fullName>CreateEvent</fullName>
         <availableFields>
-            <field>IsPrivate</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
-        <availableFields>
             <field>IsReminderSet</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
@@ -27,14 +22,14 @@
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
         </availableFields>
+        <availableFields>
+            <field>WhoId</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </availableFields>
         <description>Determines fields that are prompted when creating an event via the calendar app.</description>
         <displayedFields>
             <field>WhatId</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <displayedFields>
-            <field>WhoId</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
         </displayedFields>
