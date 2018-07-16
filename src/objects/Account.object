@@ -187,11 +187,6 @@
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
         </availableFields>
-        <availableFields>
-            <field>YearStarted</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </availableFields>
         <description>Determines fields displayed in account cards in the Account Scheduler</description>
         <displayedFields>
             <field>Name</field>
