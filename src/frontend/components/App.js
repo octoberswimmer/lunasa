@@ -26,7 +26,7 @@ export default function App(props: Props) {
 					// Toolbar controls to be displayed in calendar header
 					header: {
 						left: "title",
-						right: "basicWeek,month today prev,next"
+						right: "agendaWeek,month today prev,next"
 					},
 					height: "auto",
 					timezone: "local",
@@ -47,7 +47,8 @@ export default function App(props: Props) {
 						events.updateStartEnd({
 							eventId: event.id,
 							startDelta: delta,
-							endDelta: delta
+							endDelta: delta,
+							isAllDay: !(event.start: any).hasTime()
 						})
 					},
 

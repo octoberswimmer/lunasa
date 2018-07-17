@@ -174,11 +174,22 @@ it("saves changes when an event is dragged to a different date", async () => {
 	const wrapper = mount(<App />, { accounts, events })
 	const delta = moment.duration(1, "day")
 	const calendar = wrapper.find(DroppableCalendar)
-	calendar.prop("options").eventDrop({ id: event.Id }, delta)
+	calendar.prop("options").eventDrop(
+		{
+			id: event.Id,
+			start: {
+				hasTime() {
+					return true
+				}
+			}
+		},
+		delta
+	)
 	expect(events.updateStartEnd).toHaveBeenCalledWith({
 		eventId: event.Id,
 		startDelta: delta,
-		endDelta: delta
+		endDelta: delta,
+		isAllDay: false
 	})
 })
 
@@ -191,7 +202,17 @@ it("saves changes when an all-day event is resized by dragging its right edge", 
 	const wrapper = mount(<App />, { accounts, events })
 	const delta = moment.duration(1, "day")
 	const calendar = wrapper.find(DroppableCalendar)
-	calendar.prop("options").eventResize({ id: event.Id }, delta)
+	calendar.prop("options").eventResize(
+		{
+			id: event.Id,
+			start: {
+				hasTime() {
+					return false
+				}
+			}
+		},
+		delta
+	)
 	expect(events.updateStartEnd).toHaveBeenCalledWith({
 		eventId: event.Id,
 		endDelta: delta
