@@ -165,6 +165,39 @@ it("displays event form when a draft of changes to an existing event is present"
 	expect(form.find("h2").text()).toBe("Edit Meeting")
 })
 
+it("saves changes when an event is dragged to a different date", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const events = new Events(eventsOpts)
+	jest.spyOn(events, "updateStartEnd")
+	const event = eventFixtures[0]
+	await events.setState({ events: [event] })
+	const wrapper = mount(<App />, { accounts, events })
+	const delta = moment.duration(1, "day")
+	const calendar = wrapper.find(DroppableCalendar)
+	calendar.prop("options").eventDrop({ id: event.Id }, delta)
+	expect(events.updateStartEnd).toHaveBeenCalledWith({
+		eventId: event.Id,
+		startDelta: delta,
+		endDelta: delta
+	})
+})
+
+it("saves changes when an all-day event is resized by dragging its right edge", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const events = new Events(eventsOpts)
+	jest.spyOn(events, "updateStartEnd")
+	const event = eventFixtures[0]
+	await events.setState({ events: [event] })
+	const wrapper = mount(<App />, { accounts, events })
+	const delta = moment.duration(1, "day")
+	const calendar = wrapper.find(DroppableCalendar)
+	calendar.prop("options").eventResize({ id: event.Id }, delta)
+	expect(events.updateStartEnd).toHaveBeenCalledWith({
+		eventId: event.Id,
+		endDelta: delta
+	})
+})
+
 it("assumes that error messages have already been HTML-escaped", async () => {
 	const accounts = new Accounts(accountsOpts)
 	const events = new Events(eventsOpts)

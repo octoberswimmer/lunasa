@@ -9,6 +9,7 @@
  * @flow strict
  */
 
+import moment from "moment"
 import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
@@ -257,13 +258,7 @@ export default class EventContainer extends Container<State> {
 			const event = draft.Id
 				? await this._update(draft)
 				: await this._create(draft)
-			await this.setState(state => {
-				const events = state.events.filter(e => e.Id !== event.Id)
-				return {
-					events: events.concat([event]),
-					eventDraft: null
-				}
-			})
+			await this._mergeChangedEvent(event)
 		})
 	}
 
@@ -278,5 +273,56 @@ export default class EventContainer extends Container<State> {
 			throw new Error("An error occurred saving changes to the event")
 		}
 		return draft
+	}
+
+	async _mergeChangedEvent(event: Event): Promise<void> {
+		await this.setState(state => {
+			const events = state.events.filter(e => e.Id !== event.Id)
+			return {
+				events: events.concat([event]),
+				eventDraft: null
+			}
+		})
+	}
+
+	async updateStartEnd({
+		eventId,
+		startDelta,
+		endDelta
+	}: {
+		eventId: Id | number | void,
+		startDelta?: moment$MomentDuration,
+		endDelta?: moment$MomentDuration
+	}): Promise<void> {
+		await asyncAction(this, async () => {
+			const event = this.getEvent(eventId)
+			try {
+				if (!event) {
+					throw new Error("Could not locate event record.")
+				}
+				const draft = { ...event }
+				if (startDelta) {
+					draft.StartDateTime = moment(event.StartDateTime)
+						.add(startDelta)
+						.toDate()
+				}
+				if (endDelta) {
+					draft.EndDateTime = moment(event.EndDateTime)
+						.add(endDelta)
+						.toDate()
+				}
+				// Update display immediately to avoid event snapping back for
+				// a moment after dragging.
+				this._mergeChangedEvent(draft)
+				const updatedEvent = await this._update(draft)
+				await this._mergeChangedEvent(updatedEvent)
+			} catch (error) {
+				// Restore the previous version of the event
+				if (event) {
+					this._mergeChangedEvent(event)
+				}
+				throw error
+			}
+		})
 	}
 }
