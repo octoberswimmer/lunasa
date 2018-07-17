@@ -26,6 +26,7 @@
     "fullcalendar": "^3.9.0",
     "is-arrayish": "^0.3.2",
     "jquery": "3",
+    "lodash.sortby": "^4.7.0",
     "moment": "2",
     "react": "^16.4.0",
     "react-dnd": "^5.0.0",

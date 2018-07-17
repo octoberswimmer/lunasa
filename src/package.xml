@@ -2,6 +2,10 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
 	<types>
 		<members>*</members>
+		<name>ApexClass</name>
+	</types>
+	<types>
+		<members>*</members>
 		<name>ApexPage</name>
 	</types>
 	<types>
@@ -9,8 +13,13 @@
 		<name>CustomLabels</name>
 	</types>
 	<types>
+		<members>*</members>
+		<name>CustomMetadata</name>
+	</types>
+	<types>
 		<members>Account</members>
 		<members>Event</members>
+		<members>*</members>
 		<name>CustomObject</name>
 	</types>
 	<types>

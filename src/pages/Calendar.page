@@ -1,6 +1,7 @@
 <apex:page
 	contentType="text/html"
 	docType="html-5.0"
+	extensions="CalendarController"
 	sidebar="false"
 	recordSetVar="accounts"
 	standardController="Account"
@@ -67,6 +68,7 @@
 			root: document.getElementById("root"),
 			assistiveRoot: document.getElementById("mount"),
 			sessionToken: "{!JSINHTMLENCODE($Api.Session_ID)}",
+			sortFields: {!sortFieldsAsJson},
 			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}"
 		});
 	</script>
