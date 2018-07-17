@@ -288,11 +288,13 @@ export default class EventContainer extends Container<State> {
 	async updateStartEnd({
 		eventId,
 		startDelta,
-		endDelta
+		endDelta,
+		isAllDay
 	}: {
 		eventId: Id | number | void,
 		startDelta?: moment$MomentDuration,
-		endDelta?: moment$MomentDuration
+		endDelta?: moment$MomentDuration,
+		isAllDay?: boolean
 	}): Promise<void> {
 		await asyncAction(this, async () => {
 			const event = this.getEvent(eventId)
@@ -310,6 +312,9 @@ export default class EventContainer extends Container<State> {
 					draft.EndDateTime = moment(event.EndDateTime)
 						.add(endDelta)
 						.toDate()
+				}
+				if (typeof isAllDay === "boolean") {
+					draft.IsAllDayEvent = isAllDay
 				}
 				// Update display immediately to avoid event snapping back for
 				// a moment after dragging.
