@@ -91,7 +91,11 @@ export default function DateTime({
 							moment(inputStr, "L", true).toDate()
 						}
 						triggerClassName="slds-col"
-						value={field.value}
+						value={
+							moment.isDate(field.value)
+								? field.value
+								: moment(field.value).toDate()
+						}
 					/>
 					{showTime !== false ? (
 						<Timepicker
@@ -120,7 +124,11 @@ export default function DateTime({
 								// for the user's locale.
 								moment(input, "LT", true).toDate()
 							}
-							value={field.value}
+							value={
+								moment.isDate(field.value)
+									? field.value
+									: moment(field.value).toDate()
+							}
 						/>
 					) : null}
 				</FieldSet>

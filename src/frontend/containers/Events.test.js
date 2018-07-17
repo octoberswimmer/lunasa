@@ -7,7 +7,7 @@ import RestApi from "../api/RestApi"
 import * as ef from "../models/Event.testFixtures"
 import { type QueryResult } from "../models/QueryResult"
 import { visualforceDatetime } from "../models/serialization"
-import { delay, failIfMissing } from "../testHelpers"
+import { delay, failIfMissing, withTimezone } from "../testHelpers"
 import Events from "./Events"
 
 const restClient = RestApi("0000")
@@ -298,4 +298,120 @@ it("it updates events list with updated event", async () => {
 	await events.saveDraft()
 	expect(events.state.events).toHaveLength(1)
 	expect(events.state.events[0]).toHaveProperty("Subject", "Call")
+})
+
+it("changes the start and end times of an event", async () => {
+	const inputs = [
+		{
+			origStart: "2018-07-17T10:00+02:00",
+			origEnd: "2018-07-17T11:00+02:00",
+			expectedStart: "2018-07-15T10:00+02:00",
+			expectedEnd: "2018-07-15T11:00+02:00",
+			tz: "Europe/Berlin"
+		},
+		{
+			origStart: "2018-07-17T10:00-07:00",
+			origEnd: "2018-07-17T11:00-07:00",
+			expectedStart: "2018-07-15T10:00-07:00",
+			expectedEnd: "2018-07-15T11:00-07:00",
+			tz: "America/Los_Angeles"
+		},
+		{
+			origStart: "2018-07-17T10:00Z",
+			origEnd: "2018-07-17T11:00Z",
+			expectedStart: "2018-07-15T10:00Z",
+			expectedEnd: "2018-07-15T11:00Z",
+			tz: "UTC"
+		}
+	]
+	expect.assertions(inputs.length * 2)
+	for (const { origStart, origEnd, expectedStart, expectedEnd, tz } of inputs) {
+		await withTimezone(tz, async () => {
+			const events = new Events(eventsOpts)
+			const StartDateTime = new Date(origStart)
+			const EndDateTime = new Date(origEnd)
+			const event = ef.events[0]
+			await events.setState({
+				events: [{ ...event, StartDateTime, EndDateTime }]
+			})
+			await events.updateStartEnd({
+				eventId: event.Id,
+				startDelta: moment.duration(-2, "days"),
+				endDelta: moment.duration(-2, "days")
+			})
+
+			expect(events.state.events).toHaveLength(1)
+			expect(events.state.events[0]).toMatchObject({
+				StartDateTime: new Date(expectedStart),
+				EndDateTime: new Date(expectedEnd)
+			})
+		})
+	}
+})
+
+it("changes the end date of an event", async () => {
+	const inputs = [
+		{
+			start: "2018-07-17T10:00+02:00",
+			origEnd: "2018-07-17T11:00+02:00",
+			expectedEnd: "2018-07-18T11:00+02:00",
+			tz: "Europe/Berlin"
+		},
+		{
+			start: "2018-07-17T10:00-07:00",
+			origEnd: "2018-07-17T11:00-07:00",
+			expectedEnd: "2018-07-18T11:00-07:00",
+			tz: "America/Los_Angeles"
+		},
+		{
+			start: "2018-07-17T10:00Z",
+			origEnd: "2018-07-17T11:00Z",
+			expectedEnd: "2018-07-18T11:00Z",
+			tz: "UTC"
+		}
+	]
+	expect.assertions(inputs.length * 2)
+	for (const { start, origEnd, expectedEnd, tz } of inputs) {
+		await withTimezone(tz, async () => {
+			const events = new Events(eventsOpts)
+			const StartDateTime = new Date(start)
+			const EndDateTime = new Date(origEnd)
+			const event = ef.events[0]
+			await events.setState({
+				events: [{ ...event, StartDateTime, EndDateTime }]
+			})
+			await events.updateStartEnd({
+				eventId: event.Id,
+				endDelta: moment.duration(1, "days")
+			})
+
+			expect(events.state.events).toHaveLength(1)
+			expect(events.state.events[0]).toMatchObject({
+				StartDateTime: new Date(start),
+				EndDateTime: new Date(expectedEnd)
+			})
+		})
+	}
+})
+
+it("reverts a change if an error occurs updating event start and end times", async () => {
+	jest
+		.spyOn(EventModel, "update")
+		.mockReturnValue(Promise.reject(new Error("Error sending update.")))
+	const events = new Events(eventsOpts)
+	const event = ef.events[0]
+	const StartDateTime = new Date("2018-07-17T10:00-07:00")
+	const EndDateTime = new Date("2018-07-17T11:00-07:00")
+	await events.setState({
+		events: [{ ...event, StartDateTime, EndDateTime }]
+	})
+	await events.updateStartEnd({
+		eventId: event.Id,
+		startDelta: moment.duration(1, "days"),
+		endDelta: moment.duration(1, "days")
+	})
+	expect(events.state.events[0]).toMatchObject({
+		StartDateTime,
+		EndDateTime
+	})
 })

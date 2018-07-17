@@ -18,19 +18,50 @@ type Props = {
 	spinner?: string // path to spinner image
 }
 
-const options = {
-	// Toolbar controls to be displayed in calendar header
-	header: {
-		left: "title",
-		right: "basicWeek,month today prev,next"
-	},
-	height: "auto"
-}
-
 export default function App(props: Props) {
 	return (
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
+				const options = {
+					// Toolbar controls to be displayed in calendar header
+					header: {
+						left: "title",
+						right: "basicWeek,month today prev,next"
+					},
+					height: "auto",
+					timezone: "local",
+
+					// `eventClick` is called when the user clicks on a calendar
+					// event.
+					eventClick(event) {
+						const sfEvent = events.getEvent(event.id)
+						if (sfEvent) {
+							events.setEventDraft(sfEvent)
+						}
+					},
+
+					// `eventDrop` is called when a calendar event is dragged
+					// from a position on the calendar, and dropped on
+					// a different date or time.
+					eventDrop(event, delta) {
+						events.updateStartEnd({
+							eventId: event.id,
+							startDelta: delta,
+							endDelta: delta
+						})
+					},
+
+					eventResize(event, delta) {
+						events.updateStartEnd({ eventId: event.id, endDelta: delta })
+					},
+
+					// `viewRender` is called when the user switches between
+					// month and week calendar views, or selects a different
+					// date range to display.
+					viewRender(view) {
+						events.getEventsByDateRange(view.start, view.end)
+					}
+				}
 				const isLoading = accounts.isLoading() || events.isLoading()
 				return (
 					<div className={classNames("App", { loading: isLoading })}>
@@ -48,24 +79,15 @@ export default function App(props: Props) {
 								className="calendar"
 								events={events.state.events.map(forFullcalendar)}
 								onDrop={({ accountUrl, date }) => {
+									// Called when an account card is dropped on
+									// the calendar.
 									const account = accounts.getAccount(accountUrl)
 									if (account) {
 										const draft = newEvent({ account, date })
 										events.setEventDraft(draft)
 									}
 								}}
-								options={{
-									...options,
-									eventClick(event) {
-										const sfEvent = events.getEvent(event.id)
-										if (sfEvent) {
-											events.setEventDraft(sfEvent)
-										}
-									},
-									viewRender(view) {
-										events.getEventsByDateRange(view.start, view.end)
-									}
-								}}
+								options={options}
 							/>
 							{events.isCreatingEvent() || events.isEditingEvent() ? (
 								<EditEvent spinner={props.spinner} />

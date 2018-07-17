@@ -25,9 +25,10 @@ export function forFullcalendar(event: Event): EventObjectInput {
 		title: event.Subject,
 		start: event.StartDateTime,
 		end: event.IsAllDayEvent
-			? endDateWorkaround(event.EndDateTime)
+			? endDateForFullcalendar(event.EndDateTime)
 			: event.EndDateTime,
 		allDay: Boolean(event.IsAllDayEvent),
+		editable: true,
 		type: "Event",
 		id: event.Id
 	}
@@ -43,7 +44,7 @@ export function forFullcalendar(event: Event): EventObjectInput {
  *
  * See: https://github.com/fullcalendar/fullcalendar/issues/3854
  */
-function endDateWorkaround(date: Date | number): Date {
+function endDateForFullcalendar(date: Date | number): Date {
 	return moment(date)
 		.add(1, "day")
 		.toDate()

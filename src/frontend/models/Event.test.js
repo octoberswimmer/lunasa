@@ -51,6 +51,7 @@ it("produces data for a FullCalendar event", () => {
 		start: testEvent.StartDateTime,
 		end: testEvent.EndDateTime,
 		allDay: false,
+		editable: true,
 		type: "Event",
 		id: "1"
 	})
