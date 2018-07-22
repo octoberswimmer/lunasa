@@ -41,6 +41,22 @@ it("formats dates according to the user's locale", () => {
 	expect(output).toMatch(/06\/01\/2018|01\/06\/2018/)
 })
 
+it("renders an image when given an image tag", () => {
+	const wrapper = mount(
+		<AccountCard
+			fieldSet={fieldSet}
+			record={{
+				...record,
+				Site:
+					"<img src='/public/image.png' alt='an image' style='width:20px' />"
+			}}
+		/>
+	)
+	expect(wrapper).toContainReact(
+		<img src="/public/image.png" alt="an image" style={{ width: "20px" }} />
+	)
+})
+
 it("identifies an account by URL when dragging", () => {
 	const wrapper = mount(<AccountCard fieldSet={fieldSet} record={record} />)
 	const draggable = wrapper.find(Draggable)
