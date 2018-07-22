@@ -7,7 +7,12 @@ import { Subscribe } from "unstated"
 import Accounts, { type ListViewLike, GIVEN_IDS } from "../containers/Accounts"
 import { type Account } from "../models/Account"
 import { type FieldSet } from "../models/FieldSet"
-import { type SortField } from "../models/SortField"
+import {
+	type SortDirection,
+	type SortField,
+	ASCENDING,
+	DESCENDING
+} from "../models/SortField"
 import AccountCard from "./AccountCard"
 import "./AccountList.css"
 
@@ -38,10 +43,14 @@ export default function AccountList(props: Props) {
 						) : null}
 					</div>
 					<SelectSortField
+						onSelectSortDirection={dir => {
+							accounts.selectSortDirection(dir)
+						}}
 						onSelectSortField={sortField => {
 							accounts.selectSortField(sortField)
 						}}
 						selected={accounts.state.selectedSortField}
+						sortDirection={accounts.state.sortDirection}
 						sortFields={accounts.state.sortFields}
 					/>
 					<div className="account-card-list">
@@ -131,8 +140,10 @@ function labelFor(listView: ListViewLike): string {
 }
 
 function SelectSortField(props: {
-	onSelectSortField: (s: SortField) => void,
+	onSelectSortDirection(dir: SortDirection): void,
+	onSelectSortField(s: SortField): void,
 	selected?: ?SortField,
+	sortDirection: SortDirection,
 	sortFields: SortField[]
 }) {
 	const selectedId = props.selected ? props.selected.Id : ""
@@ -152,9 +163,16 @@ function SelectSortField(props: {
 		}
 	}
 
+	function onToggleSortDirection(event: SyntheticEvent<>) {
+		const newDir = [ASCENDING, DESCENDING].filter(
+			dir => dir !== props.sortDirection
+		)[0]
+		props.onSelectSortDirection(newDir)
+	}
+
 	return (
 		<label className="slds-form-element slds-grid slds-grid_vertical-align-center slds-p-vertical_xx-small">
-			<span className="slds-form-element__label slds-col slds-size_1-of-6">
+			<span className="slds-form-element__label slds-col slds-grow-none">
 				Sort by
 			</span>
 			<div className="slds-form-element__control slds-col">
@@ -166,6 +184,19 @@ function SelectSortField(props: {
 					{options}
 				</select>
 			</div>
+			<span className="slds-col slds-grow-none">
+				<Button
+					assistiveText="Toggle sort direction"
+					className="toggle-sort-direction"
+					iconCategory="utility"
+					iconName={
+						props.sortDirection === DESCENDING ? "arrowdown" : "arrowup"
+					}
+					iconVariant="border"
+					onClick={onToggleSortDirection}
+					variant="icon"
+				/>
+			</span>
 		</label>
 	)
 }

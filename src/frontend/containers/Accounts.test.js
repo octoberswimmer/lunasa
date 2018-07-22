@@ -3,6 +3,7 @@
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
 import * as lvf from "../models/ListView.testFixtures"
+import { DESCENDING } from "../models/SortField"
 import * as sff from "../models/SortField.testFixtures"
 import { delay, failIfMissing } from "../testHelpers"
 import Accounts, { GIVEN_IDS } from "./Accounts"
@@ -118,7 +119,7 @@ it("sorts results when a list view is selected", async () => {
 	const sortField = failIfMissing(
 		sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
 	)
-	await accounts.setState({ selectedSortField: sortField })
+	await accounts.selectSortField(sortField)
 
 	const listView = failIfMissing(
 		lvf.accountListViews.listviews.find(v => v.id === "00Bf20000080l1oEAA")
@@ -206,6 +207,46 @@ it("changes result sorting when requested", async () => {
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
 })
 
+it("toggles sort direction", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts(opts)
+	const listView = failIfMissing(
+		lvf.accountListViews.listviews.find(v => v.id === "00Bf20000080l1oEAA")
+	)
+	await accounts.fetchListViews()
+	await accounts.selectListView(listView)
+	await accounts.selectSortDirection(DESCENDING)
+
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE CreatedDate = THIS_WEEK\s+ORDER BY Account.Name DESC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+		)
+	)
+})
+
+it("preserves sort direction when changing list views", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts(opts)
+	const newThisWeek = failIfMissing(
+		lvf.accountListViews.listviews.find(v => v.id === "00Bf20000080l1oEAA")
+	)
+	const newLastWeek = failIfMissing(
+		lvf.accountListViews.listviews.find(v => v.id === "00Bf20000080l1zEAA")
+	)
+	await accounts.fetchListViews()
+	await accounts.selectListView(newThisWeek)
+	await accounts.selectSortDirection(DESCENDING)
+	await accounts.selectListView(newLastWeek)
+
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE CreatedDate = LAST_WEEK\s+ORDER BY Account.Name DESC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+		)
+	)
+})
+
 it("fetches pages of results", async () => {
 	const { querySpy } = await spies
 	const accounts = new Accounts(opts)
@@ -263,7 +304,7 @@ it("sorts results when fetching pages", async () => {
 	const sortField = failIfMissing(
 		sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
 	)
-	await accounts.setState({ selectedSortField: sortField })
+	await accounts.selectSortField(sortField)
 	await accounts.selectListView({ id: GIVEN_IDS })
 	await accounts.fetchPage(2)
 	expect(accounts.state.errors).toEqual([])
