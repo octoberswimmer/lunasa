@@ -48,10 +48,10 @@ function copyAssets(inputDir, outputDir) {
 		if (typeof assetPath !== "string") {
 			throw new Error("expected asset path to be a string")
 		}
-		// Remove dynamically-generated cache-busting component from js and css
-		// file names so that those files can be referenced in an Apex page.
+		// Remove dynamically-generated cache-busting component from main js and
+		// css file names so that those files can be referenced in an Apex page.
 		const destPath =
-			assetName.endsWith(".js") || assetName.endsWith(".css")
+			assetName === "main.js" || assetName === "main.css"
 				? stripCacheBusting(assetPath)
 				: assetPath
 		mkdirp(path.join(outputDir, path.dirname(destPath)))

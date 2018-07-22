@@ -17,4 +17,8 @@ public class CalendarController {
 		return JSON.serialize(sortFields);
 	}
 
+	public String getLocale() {
+		return userInfo.getLocale();
+	}
+
 }

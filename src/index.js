@@ -26,6 +26,7 @@ export function lunasa({
 	accountFieldSet,
 	accountIds,
 	eventCreateFieldSet,
+	language,
 	root,
 	assistiveRoot,
 	sessionToken,
@@ -35,12 +36,19 @@ export function lunasa({
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
 	eventCreateFieldSet: FieldSet,
+	language?: string,
 	root: HTMLElement,
 	assistiveRoot: HTMLElement,
 	sessionToken: string,
 	sortFields: SortField[],
 	staticDirectory: string
 }) {
+	// Set base path for requests for lazily-loaded Javascript chunks.
+	declare var __webpack_public_path__: string
+	if (staticDirectory) {
+		__webpack_public_path__ = staticDirectory + "/"
+	}
+
 	sldsSettings.setAppElement(assistiveRoot)
 	const restClient = RestApi(sessionToken)
 	const accounts = new Accounts({
@@ -57,7 +65,10 @@ export function lunasa({
 					standardSprite={resolveAsset(staticDirectory, standardSprite)}
 					utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
 				>
-					<App spinner={resolveAsset(staticDirectory, spinner)} />
+					<App
+						language={language}
+						spinner={resolveAsset(staticDirectory, spinner)}
+					/>
 				</IconSettings>
 			</DragDropContextProvider>
 		</Provider>,
@@ -84,6 +95,7 @@ if (process.env.NODE_ENV !== "production") {
 		lunasa({
 			accountFieldSet: accountFixtures.accountFieldSet,
 			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
+			language: navigator.language,
 			root,
 			assistiveRoot,
 			sessionToken: "0000",
