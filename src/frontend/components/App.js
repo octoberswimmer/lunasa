@@ -15,6 +15,7 @@ import DroppableCalendar from "./DroppableCalendar"
 import EditEvent from "./EditEvent"
 
 type Props = {
+	language?: ?string, // e.g. "en_US"
 	spinner?: string // path to spinner image
 }
 
@@ -79,6 +80,7 @@ export default function App(props: Props) {
 							<DroppableCalendar
 								className="calendar"
 								events={events.state.events.map(forFullcalendar)}
+								language={props.language}
 								onDrop={({ accountUrl, date }) => {
 									// Called when an account card is dropped on
 									// the calendar.

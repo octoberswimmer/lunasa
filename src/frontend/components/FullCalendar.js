@@ -12,6 +12,7 @@ const $: fullcalendar.JQueryStatic = (jQuery: any)
 
 export type Props = {
 	events?: fullcalendar.EventObjectInput[],
+	language?: ?string,
 	options?: fullcalendar.Options
 }
 
@@ -60,7 +61,15 @@ export default class FullCalendar extends React.Component<Props> {
 		return this.root.current
 	}
 
-	initializeCalendar() {
+	async initializeCalendar() {
+		const options: fullcalendar.Options = { ...this.props.options }
+		const locale =
+			this.props.language && lookupFullcalendarLocale(this.props.language)
+		if (locale) {
+			// $FlowFixMe: do not type-check dynamically-computed module path.
+			await import(`fullcalendar/dist/locale/${locale}`)
+			options.locale = locale
+		}
 		// Do not call `new Calendar()` directly because there is some necessary
 		// logic in `$.fn.fullCalendar()`.
 		const $elem = $(this.getRootElement())
@@ -87,4 +96,88 @@ export default class FullCalendar extends React.Component<Props> {
 	render() {
 		return <div ref={this.root} />
 	}
+}
+
+// This list is based on file names in
+// `node_modules/fullcalendar/dist/locale/`
+const availableLanguages = [
+	"af",
+	"ar-dz",
+	"ar",
+	"ar-kw",
+	"ar-ly",
+	"ar-ma",
+	"ar-sa",
+	"ar-tn",
+	"bg",
+	"bs",
+	"ca",
+	"cs",
+	"da",
+	"de-at",
+	"de-ch",
+	"de",
+	"el",
+	"en-au",
+	"en-ca",
+	"en-gb",
+	"en-ie",
+	"en-nz",
+	"es-do",
+	"es",
+	"es-us",
+	"et",
+	"eu",
+	"fa",
+	"fi",
+	"fr-ca",
+	"fr-ch",
+	"fr",
+	"gl",
+	"he",
+	"hi",
+	"hr",
+	"hu",
+	"id",
+	"is",
+	"it",
+	"ja",
+	"ka",
+	"kk",
+	"ko",
+	"lb",
+	"lt",
+	"lv",
+	"mk",
+	"ms",
+	"ms-my",
+	"nb",
+	"nl-be",
+	"nl",
+	"nn",
+	"pl",
+	"pt-br",
+	"pt",
+	"ro",
+	"ru",
+	"sk",
+	"sl",
+	"sq",
+	"sr-cyrl",
+	"sr",
+	"sv",
+	"th",
+	"tr",
+	"uk",
+	"vi",
+	"zh-cn",
+	"zh-tw"
+]
+
+export function lookupFullcalendarLocale(lang: string): ?string {
+	const userLang = lang.toLowerCase().replace("_", "-")
+	return (
+		availableLanguages.find(l => userLang === l) ||
+		availableLanguages.find(l => userLang.startsWith(l))
+	)
 }

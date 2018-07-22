@@ -4,7 +4,8 @@ import * as enzyme from "enzyme"
 import { type JQuery, type JQueryStatic, Calendar } from "fullcalendar"
 import jQuery from "jquery"
 import * as React from "react"
-import FullCalendar from "./FullCalendar"
+import { delay } from "../testHelpers"
+import FullCalendar, { lookupFullcalendarLocale } from "./FullCalendar"
 
 // Use the jQuery interface exported by fullcalendar, which adds the
 // `$.fn.fullCalendar()` function.
@@ -40,6 +41,27 @@ it("destroys calendar when unmounting", () => {
 	expect($elem.fullCalendar("getCalendar")).toBeInstanceOf(Calendar)
 	wrapper.setProps({ showCalendar: false })
 	expect($elem.fullCalendar("getCalendar")).toBeInstanceOf(Calendar)
+})
+
+it("sets locale and dynamically loads appropriate locale file", async () => {
+	const wrapper = mount(<FullCalendar language="fr_FR" />)
+	await delay()
+	expect(wrapper).toIncludeText("Aujourd'hui")
+})
+
+it("maps Salesforce language setting to a Fullcalendar locale", () => {
+	const inputs = [
+		{ lang: "en_US", expected: undefined }, // default locale, no special file or setting
+		{ lang: "de_DE", expected: "de" },
+		{ lang: "de", expected: "de" },
+		{ lang: "de_CH", expected: "de-ch" },
+		{ lang: "de-ch", expected: "de-ch" },
+		{ lang: "fr-CA", expected: "fr-ca" },
+		{ lang: "xx_XX", expected: undefined }
+	]
+	for (const { lang, expected } of inputs) {
+		expect(lookupFullcalendarLocale(lang)).toEqual(expected)
+	}
 })
 
 function getCalendar(wrapper: enzyme.ReactWrapper): Calendar {
