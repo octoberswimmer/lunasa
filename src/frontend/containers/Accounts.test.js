@@ -68,13 +68,13 @@ it("sorts sort fields by precedence", () => {
 		...opts,
 		sortFields
 	})
-	expect(accounts.state.sortFields).toEqual([
-		expect.objectContaining({ Field__c: "Account.Name" }),
-		expect.objectContaining({ oscal__Field__c: "Account.CreatedDate" })
-	])
-	expect(accounts.state.selectedSortField).toMatchObject({
-		Field__c: "Account.Name"
-	})
+	expect(accounts.state.sortFields).toHaveLength(2)
+	expect(SortField.getField(accounts.state.sortFields[0])).toBe("Account.Name")
+	expect(SortField.getField(accounts.state.sortFields[1])).toBe(
+		"Account.CreatedDate"
+	)
+	const selected = accounts.state.selectedSortField
+	expect(selected && SortField.getField(selected)).toBe("Account.Name")
 })
 
 it("requests Account list views", async () => {

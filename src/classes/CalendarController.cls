@@ -17,6 +17,7 @@ public class CalendarController {
 				Object__c,
 				Precedence__c
 			FROM Account_Scheduler_Sort_Field__mdt
+			ORDER BY Precedence__c
 		];
 		return JSON.serialize(sortFields);
 	}

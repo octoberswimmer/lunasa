@@ -71,7 +71,9 @@ export default class AccountContainer extends Container<State> {
 		super()
 		this._restClient = opts.restClient
 		this.fetchListViews()
-		const sortFields = sortBy(opts.sortFields || [], ["Precedence__c"])
+		const sortFields = sortBy(opts.sortFields || [], [
+			s => SortField.getPrecedence(s)
+		])
 		this.state = {
 			...asyncActionInitState,
 			accountFieldSet: opts.accountFieldSet,
