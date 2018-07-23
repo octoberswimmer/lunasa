@@ -7,6 +7,7 @@ import RestApi from "../api/RestApi"
 import Accounts, { GIVEN_IDS } from "../containers/Accounts"
 import * as af from "../models/Account.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
+import * as SortField from "../models/SortField"
 import * as sff from "../models/SortField.testFixtures"
 import { failIfMissing } from "../testHelpers"
 import AccountCard from "./AccountCard"
@@ -19,10 +20,10 @@ const accountsOpts = {
 }
 
 const sortByName = failIfMissing(
-	sff.sortFields.find(s => s.Field__c === "Account.Name")
+	sff.sortFields.find(s => SortField.getField(s) === "Account.Name")
 )
 const sortByCreatedDate = failIfMissing(
-	sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
+	sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
 )
 
 it("displays list views in a select", async () => {

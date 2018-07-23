@@ -3,6 +3,7 @@
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
 import * as lvf from "../models/ListView.testFixtures"
+import * as SortField from "../models/SortField"
 import * as sff from "../models/SortField.testFixtures"
 import { delay, failIfMissing } from "../testHelpers"
 import Accounts, { GIVEN_IDS } from "./Accounts"
@@ -69,7 +70,7 @@ it("sorts sort fields by precedence", () => {
 	})
 	expect(accounts.state.sortFields).toEqual([
 		expect.objectContaining({ Field__c: "Account.Name" }),
-		expect.objectContaining({ Field__c: "Account.CreatedDate" })
+		expect.objectContaining({ oscal__Field__c: "Account.CreatedDate" })
 	])
 	expect(accounts.state.selectedSortField).toMatchObject({
 		Field__c: "Account.Name"
@@ -116,7 +117,7 @@ it("sorts results when a list view is selected", async () => {
 	const { querySpy } = await spies
 	const accounts = new Accounts(opts)
 	const sortField = failIfMissing(
-		sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
+		sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
 	)
 	await accounts.setState({ selectedSortField: sortField })
 
@@ -194,7 +195,7 @@ it("changes result sorting when requested", async () => {
 	await accounts.selectListView({ id: GIVEN_IDS })
 	await accounts.selectSortField(
 		failIfMissing(
-			sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
+			sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
 		)
 	)
 	expect(accounts.state.errors).toEqual([])
@@ -261,7 +262,7 @@ it("sorts results when fetching pages", async () => {
 		]
 	})
 	const sortField = failIfMissing(
-		sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
+		sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
 	)
 	await accounts.setState({ selectedSortField: sortField })
 	await accounts.selectListView({ id: GIVEN_IDS })

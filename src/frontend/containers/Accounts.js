@@ -22,12 +22,7 @@ import {
 	whereClause
 } from "../models/ListView"
 import { type QueryResult } from "../models/QueryResult"
-import {
-	type SortDirection,
-	type SortField,
-	ASCENDING,
-	DESCENDING
-} from "../models/SortField"
+import * as SortField from "../models/SortField"
 import { stringifyCondition } from "../models/WhereCondition"
 import {
 	type AsyncActionState,
@@ -50,8 +45,8 @@ export type State = AsyncActionState & {
 	count: number | null,
 	offset: number,
 	pageSize: number,
-	selectedSortField: ?SortField,
-	sortFields: SortField[]
+	selectedSortField: ?SortField.SortField,
+	sortFields: SortField.SortField[]
 }
 
 type Request = {
@@ -59,7 +54,7 @@ type Request = {
 	limit: number,
 	offset: number,
 	sortBy: string,
-	sortDirection: SortDirection
+	sortDirection: SortField.SortDirection
 }
 
 export default class AccountContainer extends Container<State> {
@@ -71,7 +66,7 @@ export default class AccountContainer extends Container<State> {
 		accountIds?: ?(Id[]),
 		pageSize?: number,
 		restClient: Promise<RestApi>,
-		sortFields?: SortField[]
+		sortFields?: SortField.SortField[]
 	|}) {
 		super()
 		this._restClient = opts.restClient
@@ -162,8 +157,10 @@ export default class AccountContainer extends Container<State> {
 			listView,
 			limit: this.state.pageSize,
 			offset: 0,
-			sortBy: sortField ? sortField.Field__c : "Account.Name",
-			sortDirection: sortField ? sortField.Default_Sort_Order__c : ASCENDING
+			sortBy: sortField ? SortField.getField(sortField) : "Account.Name",
+			sortDirection: sortField
+				? SortField.getDefaultSortOrder(sortField)
+				: SortField.ASCENDING
 		}
 		await Promise.all([
 			this._fetchAccounts(request),
@@ -171,15 +168,15 @@ export default class AccountContainer extends Container<State> {
 		])
 	}
 
-	async selectSortField(sortField: SortField): Promise<void> {
+	async selectSortField(sortField: SortField.SortField): Promise<void> {
 		const lastRequest = this._lastRequest
 		if (!lastRequest) {
 			return
 		}
 		const fetchPromise = this._fetchAccounts({
 			...lastRequest,
-			sortBy: sortField.Field__c,
-			sortDirection: sortField.Default_Sort_Order__c
+			sortBy: SortField.getField(sortField),
+			sortDirection: SortField.getDefaultSortOrder(sortField)
 		})
 		const updateStatePromise = this.setState({
 			selectedSortField: sortField
@@ -220,7 +217,7 @@ export default class AccountContainer extends Container<State> {
 		const client = await this._restClient
 		const fields = fieldList(this.state.accountFieldSet)
 		const where = this._getWhereClause(listView)
-		const orderDir = sortDirection === DESCENDING ? "DESC" : "ASC"
+		const orderDir = sortDirection === SortField.DESCENDING ? "DESC" : "ASC"
 		const query = `SELECT ${fields} FROM Account ${where} ORDER BY ${sortBy} ${orderDir} NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
 		return client.query(query)
 	}

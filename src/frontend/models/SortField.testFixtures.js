@@ -3,6 +3,7 @@
 import { type SortField } from "./SortField"
 
 export const sortFields: SortField[] = [
+	// One fixture with no prefix
 	{
 		attributes: {
 			type: "Account_Scheduler_Sort_Field__mdt",
@@ -16,17 +17,18 @@ export const sortFields: SortField[] = [
 		Precedence__c: 1.0,
 		Id: "m00f2000000kRjSAAU"
 	},
+	// One fixture with a managed package prefix
 	{
 		attributes: {
-			type: "Account_Scheduler_Sort_Field__mdt",
+			type: "oscal__Account_Scheduler_Sort_Field__mdt",
 			url:
-				"/services/data/v43.0/sobjects/Account_Scheduler_Sort_Field__mdt/m00f2000000kRjSAAX"
+				"/services/data/v43.0/sobjects/oscal__Account_Scheduler_Sort_Field__mdt/m00f2000000kRjSAAX"
 		},
-		Default_Sort_Order__c: "Descending",
-		Field__c: "Account.CreatedDate",
+		oscal__Default_Sort_Order__c: "Descending",
+		oscal__Field__c: "Account.CreatedDate",
 		Label: "Account Created Date",
-		Object__c: "Account",
-		Precedence__c: 2.0,
+		oscal__Object__c: "Account",
+		oscal__Precedence__c: 2.0,
 		Id: "m00f2000000kRjSAAX"
 	}
 ]
