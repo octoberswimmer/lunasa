@@ -4,6 +4,7 @@ import Card from "@salesforce/design-system-react/components/card"
 import Icon from "@salesforce/design-system-react/components/icon"
 import moment from "moment"
 import * as React from "react"
+import ReactHtmlParser from "react-html-parser"
 import { type FieldSet, type FieldType } from "../models/FieldSet"
 import { type Record } from "../models/QueryResult"
 import "./AccountCard.css"
@@ -19,7 +20,9 @@ export type DraggableItem = {
 	url: string
 }
 
-function format(type: FieldType, value: any): string {
+const imagePattern = /^\s*<img .*>\s*$/i
+
+function format(type: FieldType, value: any): React.Node {
 	if (value == null) {
 		return "-"
 	}
@@ -31,6 +34,12 @@ function format(type: FieldType, value: any): string {
 			return moment(value).format("L")
 		case "datetime":
 			return moment(value).calendar()
+		case "string":
+			if (typeof value === "string" && value.match(imagePattern)) {
+				return ReactHtmlParser(value)
+			} else {
+				return String(value)
+			}
 		default:
 			return String(value)
 	}
