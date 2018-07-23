@@ -7,6 +7,7 @@ import { Subscribe } from "unstated"
 import Accounts, { type ListViewLike, GIVEN_IDS } from "../containers/Accounts"
 import { type Account } from "../models/Account"
 import { type FieldSet } from "../models/FieldSet"
+import { type SortField } from "../models/SortField"
 import AccountCard from "./AccountCard"
 import "./AccountList.css"
 
@@ -36,6 +37,13 @@ export default function AccountList(props: Props) {
 							/>
 						) : null}
 					</div>
+					<SelectSortField
+						onSelectSortField={sortField => {
+							accounts.selectSortField(sortField)
+						}}
+						selected={accounts.state.selectedSortField}
+						sortFields={accounts.state.sortFields}
+					/>
 					<div className="account-card-list">
 						<AccountCards
 							accounts={accounts.getAccounts()}
@@ -90,7 +98,11 @@ class SelectAccountListView extends React.Component<SelectProps> {
 			  ))
 			: []
 		return (
-			<select className="slds-select" onInput={this.onInput} ref={this.select}>
+			<select
+				className="slds-select select-list-view"
+				onInput={this.onInput}
+				ref={this.select}
+			>
 				{listViewOptions}
 			</select>
 		)
@@ -116,6 +128,46 @@ function labelFor(listView: ListViewLike): string {
 	} else {
 		return listView.label
 	}
+}
+
+function SelectSortField(props: {
+	onSelectSortField: (s: SortField) => void,
+	selected?: ?SortField,
+	sortFields: SortField[]
+}) {
+	const selectedId = props.selected ? props.selected.Id : ""
+
+	const options = props.sortFields.map(({ Id, Label }) => (
+		<option value={Id} key={Id}>
+			{Label}
+		</option>
+	))
+
+	function onChange(event: SyntheticInputEvent<>) {
+		const select = event.target
+		const sortField =
+			select && props.sortFields.find(s => s.Id === select.value)
+		if (sortField) {
+			props.onSelectSortField(sortField)
+		}
+	}
+
+	return (
+		<label className="slds-form-element slds-grid slds-grid_vertical-align-center slds-p-vertical_xx-small">
+			<span className="slds-form-element__label slds-col slds-size_1-of-6">
+				Sort by
+			</span>
+			<div className="slds-form-element__control slds-col">
+				<select
+					className="slds-select select-sort-field"
+					onChange={onChange}
+					value={selectedId}
+				>
+					{options}
+				</select>
+			</div>
+		</label>
+	)
 }
 
 function AccountCards({
