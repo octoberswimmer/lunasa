@@ -20,6 +20,7 @@ import App from "./frontend/components/App"
 import Accounts from "./frontend/containers/Accounts"
 import Events from "./frontend/containers/Events"
 import { type FieldSet } from "./frontend/models/FieldSet"
+import { type SortField } from "./frontend/models/SortField"
 
 export function lunasa({
 	accountFieldSet,
@@ -29,6 +30,7 @@ export function lunasa({
 	root,
 	assistiveRoot,
 	sessionToken,
+	sortFields,
 	staticDirectory
 }: {
 	accountFieldSet: FieldSet,
@@ -38,6 +40,7 @@ export function lunasa({
 	root: HTMLElement,
 	assistiveRoot: HTMLElement,
 	sessionToken: string,
+	sortFields: SortField[],
 	staticDirectory: string
 }) {
 	// Set base path for requests for lazily-loaded Javascript chunks.
@@ -51,7 +54,8 @@ export function lunasa({
 	const accounts = new Accounts({
 		accountFieldSet,
 		accountIds,
-		restClient
+		restClient,
+		sortFields
 	})
 	const events = new Events({ eventCreateFieldSet, restClient })
 	ReactDOM.render(
@@ -85,8 +89,9 @@ if (process.env.NODE_ENV !== "production") {
 	}
 	Promise.all([
 		import("./frontend/models/Account.testFixtures"),
-		import("./frontend/models/Event.testFixtures")
-	]).then(([accountFixtures, eventFixtures]) => {
+		import("./frontend/models/Event.testFixtures"),
+		import("./frontend/models/SortField.testFixtures")
+	]).then(([accountFixtures, eventFixtures, sortFieldFixtures]) => {
 		lunasa({
 			accountFieldSet: accountFixtures.accountFieldSet,
 			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
@@ -94,6 +99,7 @@ if (process.env.NODE_ENV !== "production") {
 			root,
 			assistiveRoot,
 			sessionToken: "0000",
+			sortFields: sortFieldFixtures.sortFields,
 			staticDirectory: ""
 		})
 	})

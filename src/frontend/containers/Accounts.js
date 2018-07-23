@@ -9,6 +9,7 @@
  * @flow strict
  */
 
+import sortBy from "lodash.sortby"
 import { Container } from "unstated"
 import { type RestApi } from "../api/RestApi"
 import { type Account } from "../models/Account"
@@ -21,6 +22,7 @@ import {
 	whereClause
 } from "../models/ListView"
 import { type QueryResult } from "../models/QueryResult"
+import * as SortField from "../models/SortField"
 import { stringifyCondition } from "../models/WhereCondition"
 import {
 	type AsyncActionState,
@@ -42,10 +44,18 @@ export type State = AsyncActionState & {
 	listViews: ListViews | null,
 	count: number | null,
 	offset: number,
-	pageSize: number
+	pageSize: number,
+	selectedSortField: ?SortField.SortField,
+	sortFields: SortField.SortField[]
 }
 
-type Request = { listView: ListViewLike, limit: number, offset: number }
+type Request = {
+	listView: ListViewLike,
+	limit: number,
+	offset: number,
+	sortBy: string,
+	sortDirection: SortField.SortDirection
+}
 
 export default class AccountContainer extends Container<State> {
 	_restClient: Promise<RestApi>
@@ -55,11 +65,15 @@ export default class AccountContainer extends Container<State> {
 		accountFieldSet: FieldSet,
 		accountIds?: ?(Id[]),
 		pageSize?: number,
-		restClient: Promise<RestApi>
+		restClient: Promise<RestApi>,
+		sortFields?: SortField.SortField[]
 	|}) {
 		super()
 		this._restClient = opts.restClient
 		this.fetchListViews()
+		const sortFields = sortBy(opts.sortFields || [], [
+			s => SortField.getPrecedence(s)
+		])
 		this.state = {
 			...asyncActionInitState,
 			accountFieldSet: opts.accountFieldSet,
@@ -69,7 +83,9 @@ export default class AccountContainer extends Container<State> {
 			listViews: null,
 			count: null,
 			offset: 0,
-			pageSize: opts.pageSize || 5
+			pageSize: opts.pageSize || 5,
+			selectedSortField: sortFields[0],
+			sortFields
 		}
 	}
 
@@ -138,11 +154,36 @@ export default class AccountContainer extends Container<State> {
 	}
 
 	async selectListView(listView: ListViewLike): Promise<void> {
-		const request = { listView, limit: this.state.pageSize, offset: 0 }
+		const sortField = this.state.selectedSortField
+		const request = {
+			listView,
+			limit: this.state.pageSize,
+			offset: 0,
+			sortBy: sortField ? SortField.getField(sortField) : "Account.Name",
+			sortDirection: sortField
+				? SortField.getDefaultSortOrder(sortField)
+				: SortField.ASCENDING
+		}
 		await Promise.all([
 			this._fetchAccounts(request),
 			this._fetchRecordCount(request)
 		])
+	}
+
+	async selectSortField(sortField: SortField.SortField): Promise<void> {
+		const lastRequest = this._lastRequest
+		if (!lastRequest) {
+			return
+		}
+		const fetchPromise = this._fetchAccounts({
+			...lastRequest,
+			sortBy: SortField.getField(sortField),
+			sortDirection: SortField.getDefaultSortOrder(sortField)
+		})
+		const updateStatePromise = this.setState({
+			selectedSortField: sortField
+		})
+		await Promise.all([fetchPromise, updateStatePromise])
 	}
 
 	async fetchPage(pageNumber: number): Promise<void> {
@@ -152,8 +193,7 @@ export default class AccountContainer extends Container<State> {
 		}
 		const pageSize = this.state.pageSize
 		const offset = (pageNumber - 1) * pageSize // page numbers start at 1
-		const listView = lastRequest.listView
-		const request = { listView, limit: pageSize, offset }
+		const request = { ...lastRequest, limit: pageSize, offset }
 		return this._fetchAccounts(request)
 	}
 
@@ -172,12 +212,15 @@ export default class AccountContainer extends Container<State> {
 	async _queryAccounts({
 		listView,
 		limit,
-		offset
+		offset,
+		sortBy,
+		sortDirection
 	}: Request): Promise<QueryResult> {
 		const client = await this._restClient
 		const fields = fieldList(this.state.accountFieldSet)
 		const where = this._getWhereClause(listView)
-		const query = `SELECT ${fields} FROM Account ${where} ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
+		const orderDir = sortDirection === SortField.DESCENDING ? "DESC" : "ASC"
+		const query = `SELECT ${fields} FROM Account ${where} ORDER BY ${sortBy} ${orderDir} NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
 		return client.query(query)
 	}
 

@@ -3,6 +3,8 @@
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
 import * as lvf from "../models/ListView.testFixtures"
+import * as SortField from "../models/SortField"
+import * as sff from "../models/SortField.testFixtures"
 import { delay, failIfMissing } from "../testHelpers"
 import Accounts, { GIVEN_IDS } from "./Accounts"
 
@@ -23,7 +25,8 @@ const accountFieldSet = [
 
 const opts = {
 	accountFieldSet,
-	restClient
+	restClient,
+	sortFields: sff.sortFields
 }
 
 afterEach(() => {
@@ -58,6 +61,22 @@ it("does not include special list view when account IDs are *not* provided via q
 	expect(listViews[0]).not.toHaveProperty("id", GIVEN_IDS)
 })
 
+it("sorts sort fields by precedence", () => {
+	const sortFields = sff.sortFields.slice()
+	sortFields.reverse()
+	const accounts = new Accounts({
+		...opts,
+		sortFields
+	})
+	expect(accounts.state.sortFields).toHaveLength(2)
+	expect(SortField.getField(accounts.state.sortFields[0])).toBe("Account.Name")
+	expect(SortField.getField(accounts.state.sortFields[1])).toBe(
+		"Account.CreatedDate"
+	)
+	const selected = accounts.state.selectedSortField
+	expect(selected && SortField.getField(selected)).toBe("Account.Name")
+})
+
 it("requests Account list views", async () => {
 	const { listViewsSpy } = await spies
 	const accounts = new Accounts(opts)
@@ -83,7 +102,7 @@ it("requests accounts and record count when an account list view is selected", a
 	expect(accounts.state.errors).toEqual([])
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
-			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE CreatedDate = THIS_WEEK\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE CreatedDate = THIS_WEEK\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
 		)
 	)
 	expect(querySpy).toHaveBeenCalledWith(
@@ -92,6 +111,28 @@ it("requests accounts and record count when an account list view is selected", a
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
+it("sorts results when a list view is selected", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts(opts)
+	const sortField = failIfMissing(
+		sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+	)
+	await accounts.setState({ selectedSortField: sortField })
+
+	const listView = failIfMissing(
+		lvf.accountListViews.listviews.find(v => v.id === "00Bf20000080l1oEAA")
+	)
+	await accounts.fetchListViews()
+	await accounts.selectListView(listView)
+
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE CreatedDate = THIS_WEEK\s+ORDER BY Account.CreatedDate DESC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+		)
+	)
 })
 
 it("requests accounts and record count when the 'given IDs' view is selected", async () => {
@@ -108,7 +149,7 @@ it("requests accounts and record count when the 'given IDs' view is selected", a
 	expect(accounts.state.errors).toEqual([])
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
-			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
 		)
 	)
 	expect(querySpy).toHaveBeenCalledWith(
@@ -141,6 +182,31 @@ it("includes scope clause in account query", async () => {
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
 })
 
+it("changes result sorting when requested", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts({
+		...opts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	await accounts.selectListView({ id: GIVEN_IDS })
+	await accounts.selectSortField(
+		failIfMissing(
+			sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+		)
+	)
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Account.CreatedDate DESC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+		)
+	)
+	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
 it("fetches pages of results", async () => {
 	const { querySpy } = await spies
 	const accounts = new Accounts(opts)
@@ -158,7 +224,7 @@ it("fetches pages of results", async () => {
 	expect(accounts.state.errors).toEqual([])
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
-			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
@@ -179,7 +245,32 @@ it("fetches pages of results when the 'given IDs' view is selected", async () =>
 	expect(accounts.state.errors).toEqual([])
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
-			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
+		)
+	)
+	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
+it("sorts results when fetching pages", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts({
+		...opts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	const sortField = failIfMissing(
+		sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+	)
+	await accounts.setState({ selectedSortField: sortField })
+	await accounts.selectListView({ id: GIVEN_IDS })
+	await accounts.fetchPage(2)
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Account.CreatedDate DESC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
