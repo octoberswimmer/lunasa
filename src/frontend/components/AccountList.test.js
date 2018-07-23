@@ -1,5 +1,6 @@
 /* @flow strict */
 
+import Button from "@salesforce/design-system-react/components/button"
 import * as enzyme from "enzyme"
 import * as React from "react"
 import { Provider } from "unstated"
@@ -7,13 +8,24 @@ import RestApi from "../api/RestApi"
 import Accounts, { GIVEN_IDS } from "../containers/Accounts"
 import * as af from "../models/Account.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
+import { ASCENDING, DESCENDING } from "../models/SortField"
+import * as sff from "../models/SortField.testFixtures"
+import { delay, failIfMissing } from "../testHelpers"
 import AccountCard from "./AccountCard"
 import AccountList from "./AccountList"
 
 const accountsOpts = {
 	accountFieldSet: af.accountFieldSet,
-	restClient: RestApi("0000")
+	restClient: RestApi("0000"),
+	sortFields: sff.sortFields
 }
+
+const sortByName = failIfMissing(
+	sff.sortFields.find(s => s.Field__c === "Account.Name")
+)
+const sortByCreatedDate = failIfMissing(
+	sff.sortFields.find(s => s.Field__c === "Account.CreatedDate")
+)
 
 it("displays list views in a select", async () => {
 	expect.assertions(lf.accountListViews.listviews.length + 1)
@@ -23,7 +35,7 @@ it("displays list views in a select", async () => {
 	})
 	await accounts.fetchListViews()
 	wrapper.update()
-	const options = wrapper.find("option")
+	const options = wrapper.find("select.select-list-view option")
 	expect(options.length).toBe(lf.accountListViews.listviews.length)
 	for (const view of lf.accountListViews.listviews) {
 		const option = options.find(`[value="${view.id}"]`)
@@ -92,11 +104,79 @@ it("updates state container when a list view is selected", async () => {
 	if (!listView) {
 		throw new Error("a fixture is missing")
 	}
-	const select = wrapper.find("select")
+	const select = wrapper.find("select.select-list-view")
 	select.instance().value = listView.id
 	select.simulate("input")
 	expect(selectListView).toHaveBeenCalledTimes(2) // once on initialization
 	expect(selectListView).toHaveBeenCalledWith(listView)
+})
+
+it("presents sort options", () => {
+	const accounts = new Accounts(accountsOpts)
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	const select = wrapper.find("select.select-sort-field")
+	expect(select).toContainReact(
+		<option value={sortByName.Id}>Account Name</option>
+	)
+	expect(select).toContainReact(
+		<option value={sortByCreatedDate.Id}>Account Created Date</option>
+	)
+})
+
+it("updates accounts state when a sort option is selected", () => {
+	const accounts = new Accounts(accountsOpts)
+	jest.spyOn(accounts, "selectSortField")
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	const select = wrapper.find("select.select-sort-field")
+	select.instance().value = sortByCreatedDate.Id
+	select.simulate("change")
+	expect(accounts.selectSortField).toHaveBeenCalledWith(sortByCreatedDate)
+})
+
+it("updates accounts state when a sort direction is selected", async () => {
+	const accounts = new Accounts(accountsOpts)
+	jest.spyOn(accounts, "selectSortDirection")
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	wrapper
+		.find(Button)
+		.filter(".toggle-sort-direction")
+		.simulate("click")
+	expect(accounts.selectSortDirection).toHaveBeenCalledWith(DESCENDING)
+
+	await delay()
+	wrapper
+		.find(Button)
+		.filter(".toggle-sort-direction")
+		.simulate("click")
+	expect(accounts.selectSortDirection).toHaveBeenCalledWith(ASCENDING)
+})
+
+it("selects the sort option that is selected in accounts state", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	await accounts.setState({ selectedSortField: sortByCreatedDate })
+	wrapper.update()
+	const select = wrapper.find("select.select-sort-field")
+	expect(select).toHaveProp("value", sortByCreatedDate.Id)
+})
+
+it("selects the sort direction that is selected in accounts state", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const wrapper = mount(<AccountList fieldSet={af.accountFieldSet} />, {
+		accounts
+	})
+	await accounts.selectSortDirection(DESCENDING)
+	wrapper.update()
+	const button = wrapper.find(Button).filter(".toggle-sort-direction")
+	expect(button).toHaveProp("iconName", "arrowdown")
 })
 
 it("displays accounts", async () => {

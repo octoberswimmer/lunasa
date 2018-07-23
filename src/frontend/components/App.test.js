@@ -74,6 +74,12 @@ it("displays events in calendar", async () => {
 	)
 })
 
+it("provides language setting to calendar", async () => {
+	const wrapper = mount(<App language="de_DE" />)
+	const calendar = wrapper.find(FullCalendar)
+	expect(calendar).toHaveProp("language", "de_DE")
+})
+
 it("sets an event draft when a calendar event is clicked", async () => {
 	initializeCalendar.mockRestore()
 	const events = new Events(eventsOpts)

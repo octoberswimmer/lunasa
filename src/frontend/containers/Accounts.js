@@ -9,6 +9,7 @@
  * @flow strict
  */
 
+import sortBy from "lodash.sortby"
 import { Container } from "unstated"
 import { type RestApi } from "../api/RestApi"
 import { type Account } from "../models/Account"
@@ -21,6 +22,12 @@ import {
 	whereClause
 } from "../models/ListView"
 import { type QueryResult } from "../models/QueryResult"
+import {
+	type SortDirection,
+	type SortField,
+	ASCENDING,
+	DESCENDING
+} from "../models/SortField"
 import { stringifyCondition } from "../models/WhereCondition"
 import {
 	type AsyncActionState,
@@ -42,10 +49,19 @@ export type State = AsyncActionState & {
 	listViews: ListViews | null,
 	count: number | null,
 	offset: number,
-	pageSize: number
+	pageSize: number,
+	selectedSortField: ?SortField,
+	sortFields: SortField[],
+	sortDirection: SortDirection
 }
 
-type Request = { listView: ListViewLike, limit: number, offset: number }
+type Request = {|
+	listView: ListViewLike,
+	limit: number,
+	offset: number,
+	sortBy: string,
+	sortDirection: SortDirection
+|}
 
 export default class AccountContainer extends Container<State> {
 	_restClient: Promise<RestApi>
@@ -55,11 +71,14 @@ export default class AccountContainer extends Container<State> {
 		accountFieldSet: FieldSet,
 		accountIds?: ?(Id[]),
 		pageSize?: number,
-		restClient: Promise<RestApi>
+		restClient: Promise<RestApi>,
+		sortFields?: SortField[]
 	|}) {
 		super()
 		this._restClient = opts.restClient
 		this.fetchListViews()
+		const sortFields = sortBy(opts.sortFields || [], ["Precedence__c"])
+		const defaultSortField = sortFields[0]
 		this.state = {
 			...asyncActionInitState,
 			accountFieldSet: opts.accountFieldSet,
@@ -69,7 +88,12 @@ export default class AccountContainer extends Container<State> {
 			listViews: null,
 			count: null,
 			offset: 0,
-			pageSize: opts.pageSize || 5
+			pageSize: opts.pageSize || 5,
+			selectedSortField: defaultSortField,
+			sortFields,
+			sortDirection: defaultSortField
+				? defaultSortField.Default_Sort_Order__c
+				: ASCENDING
 		}
 	}
 
@@ -138,26 +162,54 @@ export default class AccountContainer extends Container<State> {
 	}
 
 	async selectListView(listView: ListViewLike): Promise<void> {
-		const request = { listView, limit: this.state.pageSize, offset: 0 }
+		const request = {
+			listView,
+			offset: 0
+		}
 		await Promise.all([
 			this._fetchAccounts(request),
-			this._fetchRecordCount(request)
+			this._fetchRecordCount(listView)
 		])
 	}
 
+	async selectSortDirection(dir: SortDirection): Promise<void> {
+		const fetchPromise = this._fetchAccounts({
+			sortDirection: dir
+		})
+		const updateStatePromise = this.setState({
+			sortDirection: dir
+		})
+		await Promise.all([fetchPromise, updateStatePromise])
+	}
+
+	async selectSortField(sortField: SortField): Promise<void> {
+		const fetchPromise = this._fetchAccounts({
+			sortBy: sortField.Field__c,
+			sortDirection: sortField.Default_Sort_Order__c
+		})
+		const updateStatePromise = this.setState({
+			selectedSortField: sortField,
+			sortDirection: sortField.Default_Sort_Order__c
+		})
+		await Promise.all([fetchPromise, updateStatePromise])
+	}
+
 	async fetchPage(pageNumber: number): Promise<void> {
-		const lastRequest = this._lastRequest
-		if (!lastRequest) {
-			throw new Error("cannot fetch a page before a list view is selected")
-		}
 		const pageSize = this.state.pageSize
 		const offset = (pageNumber - 1) * pageSize // page numbers start at 1
-		const listView = lastRequest.listView
-		const request = { listView, limit: pageSize, offset }
+		const request = { limit: pageSize, offset }
 		return this._fetchAccounts(request)
 	}
 
-	async _fetchAccounts(request: Request): Promise<void> {
+	async _fetchAccounts(requestOptions: $Shape<Request>): Promise<void> {
+		const request = {
+			...this._getDefaultRequestOptions(),
+			...this._lastRequest,
+			...requestOptions
+		}
+		if (!request.listView) {
+			return
+		}
 		this._lastRequest = request
 		await asyncAction(this, async () => {
 			const accountQueryResult = await this._queryAccounts(request)
@@ -169,19 +221,32 @@ export default class AccountContainer extends Container<State> {
 		})
 	}
 
+	_getDefaultRequestOptions(): $Shape<Request> {
+		const sortField = this.state.selectedSortField
+		return {
+			limit: this.state.pageSize,
+			offset: 0,
+			sortBy: sortField ? sortField.Field__c : "Account.Name",
+			sortDirection: this.state.sortDirection
+		}
+	}
+
 	async _queryAccounts({
 		listView,
 		limit,
-		offset
+		offset,
+		sortBy,
+		sortDirection
 	}: Request): Promise<QueryResult> {
 		const client = await this._restClient
 		const fields = fieldList(this.state.accountFieldSet)
 		const where = this._getWhereClause(listView)
-		const query = `SELECT ${fields} FROM Account ${where} ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
+		const orderDir = sortDirection === DESCENDING ? "DESC" : "ASC"
+		const query = `SELECT ${fields} FROM Account ${where} ORDER BY ${sortBy} ${orderDir} NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
 		return client.query(query)
 	}
 
-	async _fetchRecordCount({ listView }: Request): Promise<void> {
+	async _fetchRecordCount(listView: ListViewLike): Promise<void> {
 		await asyncAction(this, async () => {
 			const client = await this._restClient
 			const where = this._getWhereClause(listView)

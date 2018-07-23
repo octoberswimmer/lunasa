@@ -20,30 +20,42 @@ import App from "./frontend/components/App"
 import Accounts from "./frontend/containers/Accounts"
 import Events from "./frontend/containers/Events"
 import { type FieldSet } from "./frontend/models/FieldSet"
+import { type SortField } from "./frontend/models/SortField"
 
 export function lunasa({
 	accountFieldSet,
 	accountIds,
 	eventCreateFieldSet,
+	language,
 	root,
 	assistiveRoot,
 	sessionToken,
+	sortFields,
 	staticDirectory
 }: {
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
 	eventCreateFieldSet: FieldSet,
+	language?: string,
 	root: HTMLElement,
 	assistiveRoot: HTMLElement,
 	sessionToken: string,
+	sortFields: SortField[],
 	staticDirectory: string
 }) {
+	// Set base path for requests for lazily-loaded Javascript chunks.
+	declare var __webpack_public_path__: string
+	if (staticDirectory) {
+		__webpack_public_path__ = staticDirectory + "/"
+	}
+
 	sldsSettings.setAppElement(assistiveRoot)
 	const restClient = RestApi(sessionToken)
 	const accounts = new Accounts({
 		accountFieldSet,
 		accountIds,
-		restClient
+		restClient,
+		sortFields
 	})
 	const events = new Events({ eventCreateFieldSet, restClient })
 	ReactDOM.render(
@@ -53,7 +65,10 @@ export function lunasa({
 					standardSprite={resolveAsset(staticDirectory, standardSprite)}
 					utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
 				>
-					<App spinner={resolveAsset(staticDirectory, spinner)} />
+					<App
+						language={language}
+						spinner={resolveAsset(staticDirectory, spinner)}
+					/>
 				</IconSettings>
 			</DragDropContextProvider>
 		</Provider>,
@@ -74,14 +89,17 @@ if (process.env.NODE_ENV !== "production") {
 	}
 	Promise.all([
 		import("./frontend/models/Account.testFixtures"),
-		import("./frontend/models/Event.testFixtures")
-	]).then(([accountFixtures, eventFixtures]) => {
+		import("./frontend/models/Event.testFixtures"),
+		import("./frontend/models/SortField.testFixtures")
+	]).then(([accountFixtures, eventFixtures, sortFieldFixtures]) => {
 		lunasa({
 			accountFieldSet: accountFixtures.accountFieldSet,
 			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
+			language: navigator.language,
 			root,
 			assistiveRoot,
 			sessionToken: "0000",
+			sortFields: sortFieldFixtures.sortFields,
 			staticDirectory: ""
 		})
 	})
