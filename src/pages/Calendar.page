@@ -69,6 +69,7 @@
 			root: document.getElementById("root"),
 			assistiveRoot: document.getElementById("mount"),
 			sessionToken: "{!JSINHTMLENCODE($Api.Session_ID)}",
+			sortFields: {!sortFieldsAsJson},
 			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}"
 		});
 	</script>
