@@ -65,6 +65,7 @@
 			</apex:repeat>
 			null
 			].filter(function(x) { return !!x; }),
+			labels: {!labelsAsJson},
 			language: "{!JSINHTMLENCODE(locale)}",
 			root: document.getElementById("root"),
 			assistiveRoot: document.getElementById("mount"),

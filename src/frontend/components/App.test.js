@@ -10,6 +10,7 @@ import RestApi from "../api/RestApi"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
 import * as af from "../models/Account.testFixtures"
+import * as clf from "../models/CustomLabel.testFixtures"
 import { forFullcalendar } from "../models/Event"
 import {
 	events as eventFixtures,
@@ -22,6 +23,7 @@ import AccountList from "./AccountList"
 import DroppableCalendar from "./DroppableCalendar"
 import EditEvent from "./EditEvent"
 import FullCalendar from "./FullCalendar"
+import { Label, LabelProvider } from "./i18n/Label"
 
 const restClient = RestApi("0000")
 
@@ -158,7 +160,7 @@ it("displays event form when a new event draft is present", async () => {
 	const wrapper = mount(<App />, { accounts, events })
 	const form = wrapper.find(EditEvent)
 	expect(form.exists()).toBe(true)
-	expect(form.find("h2").text()).toBe("New Event")
+	expect(form.find("h2").text()).toBe("Edit Meeting")
 })
 
 it("displays event form when a draft of changes to an existing event is present", async () => {
@@ -254,7 +256,7 @@ function mount(
 	_wrapper = enzyme.mount(
 		<Provider inject={[accounts, events]}>
 			<DragDropContextProvider backend={TestBackend}>
-				{app}
+				<LabelProvider value={clf.labels}>{app}</LabelProvider>
 			</DragDropContextProvider>
 		</Provider>
 	)

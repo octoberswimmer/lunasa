@@ -3,6 +3,24 @@ public class CalendarController {
 	public CalendarController(ApexPages.StandardSetController stdController) {
 	}
 
+	public String getLabelsAsJson() {
+		Map<String, String> labels = new Map<String, String>();
+		labels.put('Cancel_Editing', System.Label.Cancel_Editing);
+		labels.put('Date', System.Label.Date);
+		labels.put('Edit_Event', System.Label.Edit_Event);
+		labels.put('Event', System.Label.Event);
+		labels.put('Loading', System.Label.Loading);
+		labels.put('Next_Page', System.Label.Next_Page);
+		labels.put('Page_Number_With_Page_Count', System.Label.Page_Number_With_Page_Count);
+		labels.put('Previous_Page', System.Label.Previous_Page);
+		labels.put('Save_Event', System.Label.Save_Event);
+		labels.put('Selected_Accounts', System.Label.Selected_Accounts);
+		labels.put('Sort_by', System.Label.Sort_by);
+		labels.put('Time', System.Label.Time);
+		labels.put('Toggle_Sort_Direction', System.Label.Toggle_Sort_Direction);
+		return JSON.serialize(labels);
+	}
+
 	public String getLocale() {
 		return userInfo.getLocale();
 	}

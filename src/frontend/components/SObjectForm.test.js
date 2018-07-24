@@ -6,6 +6,7 @@ import * as enzyme from "enzyme"
 import { Formik } from "formik"
 import moment from "moment"
 import * as React from "react"
+import * as clf from "../models/CustomLabel.testFixtures"
 import { type Event } from "../models/Event"
 import {
 	eventCreateFieldSet,
@@ -15,6 +16,7 @@ import { delay, inputElement } from "../testHelpers"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
 import SObjectForm from "./SObjectForm"
+import { LabelProvider } from "./i18n/Label"
 
 const draft = {
 	Subject: "Meeting with Account",
@@ -228,7 +230,9 @@ function mount(
 		<Formik
 			initialValues={initialValues}
 			onSubmit={onSubmit}
-			render={() => component}
+			render={() => (
+				<LabelProvider value={clf.labels}>{component}</LabelProvider>
+			)}
 		/>
 	)
 }
