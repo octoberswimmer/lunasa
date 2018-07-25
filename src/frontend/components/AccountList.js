@@ -15,6 +15,7 @@ import {
 } from "../models/SortField"
 import AccountCard from "./AccountCard"
 import "./AccountList.css"
+import { Label } from "./i18n/Label"
 
 type Props = {
 	className?: string | string[],
@@ -36,7 +37,7 @@ export default function AccountList(props: Props) {
 						/>
 						{accounts.isLoading() ? (
 							<img
-								alt="Loading..."
+								alt={<Label>Loading</Label>}
 								className="loading-spinner"
 								src={props.spinner}
 							/>
@@ -131,9 +132,9 @@ class SelectAccountListView extends React.Component<SelectProps> {
 	}
 }
 
-function labelFor(listView: ListViewLike): string {
+function labelFor(listView: ListViewLike): React.Node {
 	if (listView.id === GIVEN_IDS) {
-		return "Selected Accounts"
+		return <Label>Selected_Accounts</Label>
 	} else {
 		return listView.label
 	}
@@ -173,7 +174,7 @@ function SelectSortField(props: {
 	return (
 		<label className="slds-form-element slds-grid slds-grid_vertical-align-center slds-p-vertical_xx-small">
 			<span className="slds-form-element__label slds-col slds-grow-none">
-				Sort by
+				<Label>Sort_by</Label>
 			</span>
 			<div className="slds-form-element__control slds-col">
 				<select
@@ -186,7 +187,7 @@ function SelectSortField(props: {
 			</div>
 			<span className="slds-col slds-grow-none">
 				<Button
-					assistiveText="Toggle sort direction"
+					assistiveText={<Label>Toggle_Sort_Direction</Label>}
 					className="toggle-sort-direction"
 					iconCategory="utility"
 					iconName={
@@ -240,16 +241,18 @@ function Pagination(props: {
 		<footer className="pagination slds-p-around--medium">
 			<Button
 				disabled={currentPage <= 1}
-				label="Prev"
+				label={<Label>Previous_Page</Label>}
 				onClick={prev}
 				className="previousPage"
 			/>
 			<span>
-				Page {currentPage} of {pageCount}
+				<Label with={{ current: currentPage, total: pageCount }}>
+					Page_Number_With_Page_Count
+				</Label>
 			</span>
 			<Button
 				disabled={currentPage >= pageCount}
-				label="Next"
+				label={<Label>Next_Page</Label>}
 				onClick={next}
 				className="nextPage"
 			/>

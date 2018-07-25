@@ -17,6 +17,7 @@ import ReactDOM from "react-dom"
 import { Provider } from "unstated"
 import RestApi from "./frontend/api/RestApi"
 import App from "./frontend/components/App"
+import { LabelProvider } from "./frontend/components/i18n/Label"
 import Accounts from "./frontend/containers/Accounts"
 import Events from "./frontend/containers/Events"
 import { type FieldSet } from "./frontend/models/FieldSet"
@@ -26,6 +27,7 @@ export function lunasa({
 	accountFieldSet,
 	accountIds,
 	eventCreateFieldSet,
+	labels,
 	language,
 	root,
 	assistiveRoot,
@@ -36,6 +38,7 @@ export function lunasa({
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
 	eventCreateFieldSet: FieldSet,
+	labels: { [key: string]: string },
 	language?: string,
 	root: HTMLElement,
 	assistiveRoot: HTMLElement,
@@ -65,10 +68,13 @@ export function lunasa({
 					standardSprite={resolveAsset(staticDirectory, standardSprite)}
 					utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
 				>
-					<App
-						language={language}
-						spinner={resolveAsset(staticDirectory, spinner)}
-					/>
+					<LabelProvider value={labels}>
+						<App
+							labels={labels}
+							language={language}
+							spinner={resolveAsset(staticDirectory, spinner)}
+						/>
+					</LabelProvider>
 				</IconSettings>
 			</DragDropContextProvider>
 		</Provider>,
@@ -89,18 +95,22 @@ if (process.env.NODE_ENV !== "production") {
 	}
 	Promise.all([
 		import("./frontend/models/Account.testFixtures"),
+		import("./frontend/models/CustomLabel.testFixtures"),
 		import("./frontend/models/Event.testFixtures"),
 		import("./frontend/models/SortField.testFixtures")
-	]).then(([accountFixtures, eventFixtures, sortFieldFixtures]) => {
-		lunasa({
-			accountFieldSet: accountFixtures.accountFieldSet,
-			eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
-			language: navigator.language,
-			root,
-			assistiveRoot,
-			sessionToken: "0000",
-			sortFields: sortFieldFixtures.sortFields,
-			staticDirectory: ""
-		})
-	})
+	]).then(
+		([accountFixtures, labelFixtures, eventFixtures, sortFieldFixtures]) => {
+			lunasa({
+				accountFieldSet: accountFixtures.accountFieldSet,
+				eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
+				labels: labelFixtures.labels,
+				language: navigator.language,
+				root,
+				assistiveRoot,
+				sessionToken: "0000",
+				sortFields: sortFieldFixtures.sortFields,
+				staticDirectory: ""
+			})
+		}
+	)
 }

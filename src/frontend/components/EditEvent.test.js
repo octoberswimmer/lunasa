@@ -6,6 +6,7 @@ import { Formik } from "formik"
 import * as React from "react"
 import { Provider } from "unstated"
 import Events from "../containers/Events"
+import * as clf from "../models/CustomLabel.testFixtures"
 import {
 	eventCreateFieldSet,
 	eventDescription
@@ -14,6 +15,7 @@ import RestApi from "../api/RestApi"
 import { delay, failIfMissing } from "../testHelpers"
 import EditEvent from "./EditEvent"
 import SObjectForm from "./SObjectForm"
+import { LabelProvider } from "./i18n/Label"
 
 const draft = {
 	Subject: "Meeting with Account",
@@ -152,7 +154,11 @@ function mount(
 	component: React.Node,
 	events: Events = new Events(eventsOpts)
 ): enzyme.ReactWrapper {
-	_wrapper = enzyme.mount(<Provider inject={[events]}>{component}</Provider>)
+	_wrapper = enzyme.mount(
+		<Provider inject={[events]}>
+			<LabelProvider value={clf.labels}>{component}</LabelProvider>
+		</Provider>
+	)
 	return _wrapper
 }
 

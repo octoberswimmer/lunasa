@@ -12,6 +12,7 @@ import { Subscribe } from "unstated"
 import Events from "../containers/Events"
 import { type FieldSet } from "../models/FieldSet"
 import "./EditEvent.css"
+import { Label } from "./i18n/Label"
 import SObjectForm from "./SObjectForm"
 
 type Props = {
@@ -23,9 +24,6 @@ export default function EditEvent(props: Props) {
 		<Subscribe to={[Events]}>
 			{events => {
 				const { eventDraft } = events.state
-				const title = events.isCreatingEvent()
-					? "New Event"
-					: `Edit ${(eventDraft && eventDraft.Subject) || "Event"}`
 				return (
 					<Formik
 						enableReinitialize={false}
@@ -46,7 +44,7 @@ export default function EditEvent(props: Props) {
 								footer={[
 									events.isLoading() ? (
 										<img
-											alt="Loading..."
+											alt={<Label>Loading</Label>}
 											className="loading-spinner"
 											key="loading-spinner"
 											src={props.spinner}
@@ -54,7 +52,7 @@ export default function EditEvent(props: Props) {
 									) : null,
 									<Button
 										key="cancel-button"
-										label="Cancel"
+										label={<Label>Cancel_Editing</Label>}
 										onClick={() => {
 											events.discardEventDraft()
 										}}
@@ -62,7 +60,7 @@ export default function EditEvent(props: Props) {
 									/>,
 									<Button
 										key="save-button"
-										label="Save"
+										label={<Label>Save_Event</Label>}
 										variant="brand"
 										onClick={handleSubmit}
 										disabled={isSubmitting || hasErrors(errors)}
@@ -73,7 +71,20 @@ export default function EditEvent(props: Props) {
 									events.discardEventDraft()
 								}}
 								size="large"
-								title={title}
+								title={
+									<Label
+										with={{
+											subject:
+												typeof values.Subject === "string" ? (
+													values.Subject
+												) : (
+													<Label>Event</Label>
+												)
+										}}
+									>
+										Edit_Event
+									</Label>
+								}
 							>
 								<SObjectForm
 									description={events.getEventDescription()}

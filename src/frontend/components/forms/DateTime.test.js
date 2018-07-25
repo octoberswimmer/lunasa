@@ -6,6 +6,7 @@ import * as enzyme from "enzyme"
 import { Form, Formik } from "formik"
 import moment from "moment"
 import * as React from "react"
+import * as clf from "../../models/CustomLabel.testFixtures"
 import {
 	delay,
 	inputElement,
@@ -13,6 +14,7 @@ import {
 	withLocaleAndTz,
 	withTimezone
 } from "../../testHelpers"
+import { LabelProvider } from "../i18n/Label"
 import DateTime from "./DateTime"
 
 const onSubmit = jest.fn()
@@ -277,7 +279,11 @@ function mount(
 		<Formik
 			{...formikProps}
 			onSubmit={onSubmit}
-			render={() => <Form>{component}</Form>}
+			render={() => (
+				<LabelProvider value={clf.labels}>
+					<Form>{component}</Form>
+				</LabelProvider>
+			)}
 		/>
 	)
 }

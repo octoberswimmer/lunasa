@@ -7,12 +7,14 @@ import { Provider } from "unstated"
 import RestApi from "../api/RestApi"
 import Accounts, { GIVEN_IDS } from "../containers/Accounts"
 import * as af from "../models/Account.testFixtures"
+import * as clf from "../models/CustomLabel.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
 import * as SortField from "../models/SortField"
 import * as sff from "../models/SortField.testFixtures"
 import { delay, failIfMissing } from "../testHelpers"
 import AccountCard from "./AccountCard"
 import AccountList from "./AccountList"
+import { LabelProvider } from "./i18n/Label"
 
 const accountsOpts = {
 	accountFieldSet: af.accountFieldSet,
@@ -253,5 +255,9 @@ function mount(
 ): enzyme.ReactWrapper {
 	const accounts =
 		(containers && containers.accounts) || new Accounts(accountsOpts)
-	return enzyme.mount(<Provider inject={[accounts]}>{component}</Provider>)
+	return enzyme.mount(
+		<Provider inject={[accounts]}>
+			<LabelProvider value={clf.labels}>{component}</LabelProvider>
+		</Provider>
+	)
 }

@@ -1,6 +1,13 @@
 @isTest
 private class CalendarControllerTest {
 
+	@isTest static void getLabelsAsJson_returns_serialized_map() {
+		CalendarController calendarController = new CalendarController(null);
+		String labels = calendarController.getLabelsAsJson();
+		System.assert(Pattern.matches('.*"Edit_Event"\\s*:".*', labels),
+				'serialized map includes the key "Edit_Event"');
+	}
+
 	@isTest static void getLocale_returns_a_locale() {
 		CalendarController calendarController = new CalendarController(null);
 		String locale = calendarController.getLocale();

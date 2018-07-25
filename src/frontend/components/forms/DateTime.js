@@ -15,6 +15,7 @@ import classNames from "classnames"
 import { Field } from "formik"
 import moment from "moment"
 import * as React from "react"
+import { Label } from "../i18n/Label"
 
 // Patch the Datepicker calendar so that it does not steal focus from the text
 // input. This change makes it possible to change the date by editing the text
@@ -64,7 +65,7 @@ export default function DateTime({
 					label={label}
 				>
 					<Datepicker
-						labels={{ label: "Date" }}
+						labels={{ label: <Label>Date</Label> }}
 						onChange={(
 							event,
 							{
@@ -99,7 +100,7 @@ export default function DateTime({
 					/>
 					{showTime !== false ? (
 						<Timepicker
-							label="Time"
+							label={<Label>Time</Label>}
 							onDateChange={(time: Date, inputStr: string) => {
 								if (!isValidDate(time)) {
 									addFieldError(form, name, "Invalid time")
