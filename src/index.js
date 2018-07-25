@@ -11,8 +11,6 @@ import utilitySprite from "@salesforce-ux/design-system/assets/icons/utility-spr
 import spinner from "@salesforce-ux/design-system/assets/images/spinners/slds_spinner.gif"
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css"
 import React from "react"
-import { DragDropContextProvider } from "react-dnd"
-import HTML5Backend from "react-dnd-html5-backend"
 import ReactDOM from "react-dom"
 import { Provider } from "unstated"
 import RestApi from "./frontend/api/RestApi"
@@ -63,20 +61,18 @@ export function lunasa({
 	const events = new Events({ eventCreateFieldSet, restClient })
 	ReactDOM.render(
 		<Provider inject={[accounts, events]}>
-			<DragDropContextProvider backend={HTML5Backend}>
-				<IconSettings
-					standardSprite={resolveAsset(staticDirectory, standardSprite)}
-					utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
-				>
-					<LabelProvider value={labels}>
-						<App
-							labels={labels}
-							language={language}
-							spinner={resolveAsset(staticDirectory, spinner)}
-						/>
-					</LabelProvider>
-				</IconSettings>
-			</DragDropContextProvider>
+			<IconSettings
+				standardSprite={resolveAsset(staticDirectory, standardSprite)}
+				utilitySprite={resolveAsset(staticDirectory, utilitySprite)}
+			>
+				<LabelProvider value={labels}>
+					<App
+						labels={labels}
+						language={language}
+						spinner={resolveAsset(staticDirectory, spinner)}
+					/>
+				</LabelProvider>
+			</IconSettings>
 		</Provider>,
 		root
 	)

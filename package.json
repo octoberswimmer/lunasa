@@ -26,11 +26,10 @@
     "fullcalendar": "^3.9.0",
     "is-arrayish": "^0.3.2",
     "jquery": "3",
+    "jquery-ui": "^1.12.1",
     "lodash.sortby": "^4.7.0",
     "moment": "2",
     "react": "^16.4.0",
-    "react-dnd": "^5.0.0",
-    "react-dnd-html5-backend": "^5.0.1",
     "react-dom": "^16.4.0",
     "react-html-parser": "^2.0.2",
     "react-scripts": "1.1.4",
@@ -39,6 +38,7 @@
     "unstated": "^2.1.1"
   },
   "devDependencies": {
+    "caller": "^1.0.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "npm:enzyme-react-adapter-future",
     "flow-bin": "^0.74.0",
@@ -47,7 +47,6 @@
     "jest-enzyme": "^6.0.2",
     "prettier": "^1.13.4",
     "react-app-rewired": "^1.5.2",
-    "react-dnd-test-backend": "^5.0.1",
     "reset-date-cache": "^1.0.4",
     "traverse": "^0.6.6"
   },

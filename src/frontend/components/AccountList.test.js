@@ -248,6 +248,15 @@ it("disables the next page button on the first page", async () => {
 	expect(next.props()).toHaveProperty("disabled", true)
 })
 
+// Unmount React tree after each test to avoid errors about missing `document`,
+// and to avoid slowdown from accumulated React trees.
+let _wrapper: enzyme.ReactWrapper
+afterEach(() => {
+	if (_wrapper) {
+		_wrapper.unmount()
+	}
+})
+
 // Helper that wraps `<App/>` with a necessary `<Provider>` from unstated.
 function mount(
 	component: React.Node,
@@ -255,9 +264,10 @@ function mount(
 ): enzyme.ReactWrapper {
 	const accounts =
 		(containers && containers.accounts) || new Accounts(accountsOpts)
-	return enzyme.mount(
+	_wrapper = enzyme.mount(
 		<Provider inject={[accounts]}>
 			<LabelProvider value={clf.labels}>{component}</LabelProvider>
 		</Provider>
 	)
+	return _wrapper
 }

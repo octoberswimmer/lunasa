@@ -11,7 +11,8 @@ import Events from "../containers/Events"
 import { forFullcalendar, newEvent } from "../models/Event"
 import "./App.css"
 import AccountList from "./AccountList"
-import DroppableCalendar from "./DroppableCalendar"
+import { getIdentifierFromDraggable } from "./Draggable"
+import FullCalendar from "./FullCalendar"
 import EditEvent from "./EditEvent"
 
 type Props = {
@@ -24,6 +25,7 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const options = {
+					droppable: true,
 					// Toolbar controls to be displayed in calendar header
 					header: {
 						left: "title",
@@ -31,6 +33,21 @@ export default function App(props: Props) {
 					},
 					height: "auto",
 					timezone: "local",
+
+					// `drop` is called when an external draggable (e.g. an
+					// account card) is dropped on the calendar.
+					drop(date, event) {
+						const data = getIdentifierFromDraggable(event.target)
+						const account =
+							data &&
+							data.type === "Account" &&
+							data.url &&
+							accounts.getAccount(data.url)
+						if (account) {
+							const draft = newEvent({ account, date })
+							events.setEventDraft(draft)
+						}
+					},
 
 					// `eventClick` is called when the user clicks on a calendar
 					// event.
@@ -77,19 +94,10 @@ export default function App(props: Props) {
 								fieldSet={accounts.state.accountFieldSet}
 								spinner={props.spinner}
 							/>
-							<DroppableCalendar
+							<FullCalendar
 								className="calendar"
 								events={events.state.events.map(forFullcalendar)}
 								language={props.language}
-								onDrop={({ accountUrl, date }) => {
-									// Called when an account card is dropped on
-									// the calendar.
-									const account = accounts.getAccount(accountUrl)
-									if (account) {
-										const draft = newEvent({ account, date })
-										events.setEventDraft(draft)
-									}
-								}}
 								options={options}
 							/>
 							{events.isCreatingEvent() || events.isEditingEvent() ? (

@@ -16,6 +16,11 @@ export type Event = {
 	WhatId?: Id
 }
 
+export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(
+	1,
+	"hour"
+)
+
 /*
  * Convert a Salesforce Event record into a value that can be given to
  * Fullcalendar for display.
@@ -57,21 +62,19 @@ export function newEvent({
 	account: Account,
 	date: moment$Moment
 }): $Shape<Event> {
+	// $FlowFixMe: the `hasTime` method is added by Fullcalendar
+	const start = date.hasTime()
+		? date
+		: date
+				.clone()
+				.local()
+				.hours(10)
+				.minutes(0)
+				.startOf("minute")
+	const end = start.clone().add(defaultTimedEventDuration)
 	return {
 		WhatId: getId(account),
-		StartDateTime: date
-			.clone()
-			.local()
-			.hours(10)
-			.minutes(0)
-			.startOf("minute")
-			.toDate(),
-		EndDateTime: date
-			.clone()
-			.local()
-			.hours(11)
-			.minutes(0)
-			.startOf("minute")
-			.toDate()
+		StartDateTime: start.toDate(),
+		EndDateTime: end.toDate()
 	}
 }
