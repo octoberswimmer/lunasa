@@ -10,6 +10,10 @@ import { configure } from "enzyme"
 import Adapter from "enzyme-adapter-react-16"
 import "jest-enzyme"
 
+// jQuery UI uses AMD to load dependencies. That works fine in production
+// because Webpack provides an AMD loader. But in testing we need a shim.
+import "./frontend/amdShim.testHelper.js"
+
 configure({ adapter: new Adapter() })
 
 // Create an element for rendering assistive-technology-supporting elements.

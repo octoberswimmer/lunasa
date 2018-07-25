@@ -65,7 +65,9 @@ it("maps Salesforce language setting to a Fullcalendar locale", () => {
 })
 
 function getCalendar(wrapper: enzyme.ReactWrapper): Calendar {
-	return $(wrapper.getDOMNode()).fullCalendar("getCalendar")
+	return $(wrapper.find(".calendar-mount-point").getDOMNode()).fullCalendar(
+		"getCalendar"
+	)
 }
 
 // Unmount React tree after each test to avoid errors about missing `document`,

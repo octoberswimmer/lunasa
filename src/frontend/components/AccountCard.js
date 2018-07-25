@@ -2,6 +2,7 @@
 
 import Card from "@salesforce/design-system-react/components/card"
 import Icon from "@salesforce/design-system-react/components/icon"
+import $ from "jquery"
 import moment from "moment"
 import * as React from "react"
 import ReactHtmlParser from "react-html-parser"
@@ -13,11 +14,6 @@ import Draggable from "./Draggable"
 type Props = {
 	fieldSet: FieldSet,
 	record: Record
-}
-
-export type DraggableItem = {
-	type: "Account",
-	url: string
 }
 
 const imagePattern = /^\s*<img .*>\s*$/i
@@ -47,7 +43,7 @@ function format(type: FieldType, value: any): React.Node {
 
 export default function AccountCard({ fieldSet, record }: Props) {
 	const fields: React.Node[] = []
-	var accountName: string
+	var accountName: ?string
 	for (const { name, label, type } of fieldSet) {
 		if (name === "Name") {
 			accountName = record[name]
@@ -73,29 +69,37 @@ export default function AccountCard({ fieldSet, record }: Props) {
 			)
 		}
 	}
-	// `draggableItem` identifies the item being dragged to a drop target.
-	const draggableItem: DraggableItem = {
-		type: "Account",
-		url: record.attributes.url
-	}
 	return (
-		<Draggable item={draggableItem}>
-			{({ isDragging }) => (
-				<div>
-					<Card
-						className="slds-card__tile"
-						bodyClassName="account-card"
-						heading={accountName || "Account"}
-						icon={<Icon category="standard" name="account" size="small" />}
-					>
-						<article className="slds-tile">
-							<div className="slds-tile__detail">
-								<dl className="slds-list_horizontal slds-wrap">{fields}</dl>
-							</div>
-						</article>
-					</Card>
-				</div>
-			)}
+		<Draggable
+			identifier={{
+				type: "Account",
+				url: record.attributes.url
+			}}
+			options={{
+				helper: "clone", // clone card when dragging, leave original in list
+				opacity: 0.35,
+				start(event, ui) {
+					// Fixes width of the dragged element so that it matches the
+					// width of the original account card. Without this callback
+					// the dragged version of the account card appears to be too
+					// wide.
+					ui.helper.width($(event.target).width())
+				},
+				zIndex: 100
+			}}
+		>
+			<Card
+				className="slds-card__tile"
+				bodyClassName="account-card"
+				heading={accountName || "Account"}
+				icon={<Icon category="standard" name="account" size="small" />}
+			>
+				<article className="slds-tile">
+					<div className="slds-tile__detail">
+						<dl className="slds-list_horizontal slds-wrap">{fields}</dl>
+					</div>
+				</article>
+			</Card>
 		</Draggable>
 	)
 }
