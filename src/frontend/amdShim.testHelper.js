@@ -12,7 +12,17 @@
 import caller from "caller"
 import * as path from "path"
 
-function define(depNames: string[], factory: Function) {
+/*
+ * possible signatures are:
+ *
+ *     define(moduleName: string, depNames: string[], factory: Function)
+ *     define(depNames: string[], factory: Function)
+ *
+ */
+function define(...args: any[]) {
+	const moduleName: ?string = typeof args[0] === "string" ? args.shift() : null
+	const depNames: string[] = args.shift()
+	const factory: Function = args.shift()
 	const referenceDir = path.dirname(caller())
 	const deps = depNames.map(n => {
 		// $FlowFixMe: do not attempt to type-check dynamic import
