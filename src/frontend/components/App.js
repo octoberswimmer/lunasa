@@ -62,16 +62,11 @@ export default function App(props: Props) {
 					// from a position on the calendar, and dropped on
 					// a different date or time.
 					eventDrop(event, delta) {
-						events.updateStartEnd({
-							eventId: event.id,
-							startDelta: delta,
-							endDelta: delta,
-							isAllDay: !(event.start: any).hasTime()
-						})
+						events.updateStartEnd({ calEvent: event, delta })
 					},
 
 					eventResize(event, delta) {
-						events.updateStartEnd({ eventId: event.id, endDelta: delta })
+						events.updateEnd({ calEvent: event, delta })
 					},
 
 					// `viewRender` is called when the user switches between

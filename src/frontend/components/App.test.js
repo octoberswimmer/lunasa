@@ -184,48 +184,40 @@ it("saves changes when an event is dragged to a different date", async () => {
 	const wrapper = mount(<App />, { accounts, events })
 	const delta = moment.duration(1, "day")
 	const calendar = wrapper.find(FullCalendar)
+	const newStart = moment()
 	calendar.prop("options").eventDrop(
 		{
 			id: event.Id,
-			start: {
-				hasTime() {
-					return true
-				}
-			}
+			start: newStart
 		},
 		delta
 	)
 	expect(events.updateStartEnd).toHaveBeenCalledWith({
-		eventId: event.Id,
-		startDelta: delta,
-		endDelta: delta,
-		isAllDay: false
+		calEvent: { id: event.Id, start: newStart },
+		delta
 	})
 })
 
 it("saves changes when an all-day event is resized by dragging its right edge", async () => {
 	const accounts = new Accounts(accountsOpts)
 	const events = new Events(eventsOpts)
-	jest.spyOn(events, "updateStartEnd")
+	jest.spyOn(events, "updateEnd")
 	const event = eventFixtures[0]
 	await events.setState({ events: [event] })
 	const wrapper = mount(<App />, { accounts, events })
 	const delta = moment.duration(1, "day")
 	const calendar = wrapper.find(FullCalendar)
+	const newStart = moment()
 	calendar.prop("options").eventResize(
 		{
 			id: event.Id,
-			start: {
-				hasTime() {
-					return false
-				}
-			}
+			start: newStart
 		},
 		delta
 	)
-	expect(events.updateStartEnd).toHaveBeenCalledWith({
-		eventId: event.Id,
-		endDelta: delta
+	expect(events.updateEnd).toHaveBeenCalledWith({
+		calEvent: { id: event.Id, start: newStart },
+		delta
 	})
 })
 

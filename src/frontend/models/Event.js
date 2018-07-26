@@ -78,3 +78,65 @@ export function newEvent({
 		EndDateTime: end.toDate()
 	}
 }
+
+export function updateStartEnd({
+	event,
+	calEvent,
+	delta
+}: {
+	event: Event,
+	calEvent: EventObjectInput, // data from Fullcalendar `eventDrop` callback
+	delta: moment$MomentDuration
+}): Event {
+	// The way that Fullcalendar reports start and end times for
+	// all-day events is problematic. So in that case we transform
+	// times by the given delta instead.
+	if (calEvent.allDay) {
+		return {
+			...event,
+			StartDateTime: moment(event.StartDateTime)
+				.add(delta)
+				.toDate(),
+			EndDateTime: moment(event.EndDateTime)
+				.add(delta)
+				.toDate(),
+			IsAllDayEvent: calEvent.allDay
+		}
+	}
+
+	const origStart = moment(event.StartDateTime)
+	const origEnd = moment(event.EndDateTime)
+	const duration = moment.duration(origEnd.diff(origStart))
+	const start = calEvent.start ? moment(calEvent.start) : origStart
+
+	return {
+		...event,
+		StartDateTime: start.toDate(),
+		EndDateTime: start
+			.clone()
+			// When switching from an all-day event to a non-all-day event, use
+			// the default event duration. Otherwise preserve the previously-defined
+			// event duration.
+			.add(event.IsAllDayEvent ? defaultTimedEventDuration : duration)
+			.toDate(),
+		IsAllDayEvent: calEvent.allDay
+	}
+}
+
+/*
+ * `updateEnd` moves the event's end time according to the given delta.
+ */
+export function updateEnd({
+	event,
+	delta
+}: {
+	event: Event,
+	delta: moment$MomentDuration
+}): Event {
+	return {
+		...event,
+		EndDateTime: moment(event.EndDateTime)
+			.add(delta)
+			.toDate()
+	}
+}
