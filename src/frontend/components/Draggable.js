@@ -3,6 +3,7 @@
 import $ from "jquery"
 import "jquery-ui/ui/widgets/draggable"
 import "jquery-ui/themes/base/draggable.css"
+import { defaultTimedEventDuration } from "../models/Event"
 
 import * as React from "react"
 
@@ -14,6 +15,7 @@ export type Identifier = {
 
 type Props = {
 	children: React.Node,
+	duration?: moment$MomentDuration, // Event duration to show when hovering over Fullcalendar
 	identifier?: Identifier, // data to attach to draggable that can be read by a droppable handler
 	options?: Object // for options see http://api.jqueryui.com/draggable/
 }
@@ -37,6 +39,7 @@ export default class Draggable extends React.Component<Props> {
 			if (this.props.identifier) {
 				$elem.data({ identifier: this.props.identifier })
 			}
+			$elem.data({ duration: this.props.duration || defaultTimedEventDuration })
 		}
 	}
 

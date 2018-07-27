@@ -1,6 +1,7 @@
 /* @flow strict */
 
 import * as enzyme from "enzyme"
+import $ from "jquery"
 import * as React from "react"
 import * as f from "../models/Account.testFixtures"
 import AccountCard from "./AccountCard"
@@ -62,6 +63,13 @@ it("identifies an account by URL when dragging", () => {
 		type: "Account",
 		url: record.attributes.url
 	})
+})
+
+it("signals a duration to Fullcalendar so that highlight effect on hover looks correct", () => {
+	const wrapper = mount(<AccountCard fieldSet={fieldSet} record={record} />)
+	const draggable = wrapper.find(Draggable)
+	const duration = $(draggable.getDOMNode()).data("duration")
+	expect(duration.toISOString()).toBe("PT1H") // "PT1H" is one hour in ISO 8601 notation.
 })
 
 function mount(component: React.Node): enzyme.ReactWrapper {
