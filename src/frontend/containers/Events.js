@@ -9,12 +9,13 @@
  * @flow strict
  */
 
-import moment from "moment"
+import { type EventObjectInput } from "fullcalendar"
 import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
 import { type RestApi } from "../api/RestApi"
 import { type Criteria } from "../api/SObject"
+import { updateStartEnd, updateEnd } from "../models/Event"
 import { type FieldSet } from "../models/FieldSet"
 import { visualforceDatetime } from "../models/serialization"
 import {
@@ -286,36 +287,38 @@ export default class EventContainer extends Container<State> {
 	}
 
 	async updateStartEnd({
-		eventId,
-		startDelta,
-		endDelta,
-		isAllDay
+		calEvent,
+		delta
 	}: {
-		eventId: Id | number | void,
-		startDelta?: moment$MomentDuration,
-		endDelta?: moment$MomentDuration,
-		isAllDay?: boolean
+		calEvent: EventObjectInput, // data from Fullcalendar `eventDrop` callback
+		delta: moment$MomentDuration
 	}): Promise<void> {
+		return this._updateEvent(calEvent.id, event =>
+			updateStartEnd({ event, calEvent, delta })
+		)
+	}
+
+	async updateEnd({
+		calEvent,
+		delta
+	}: {
+		calEvent: EventObjectInput,
+		delta: moment$MomentDuration
+	}): Promise<void> {
+		return this._updateEvent(calEvent.id, event => updateEnd({ event, delta }))
+	}
+
+	async _updateEvent(
+		eventId: Id | number | void,
+		fn: (event: Event) => Event
+	): Promise<void> {
 		await asyncAction(this, async () => {
 			const event = this.getEvent(eventId)
+			if (!event) {
+				throw new Error("Could not locate event record.")
+			}
+			const draft = fn(event)
 			try {
-				if (!event) {
-					throw new Error("Could not locate event record.")
-				}
-				const draft = { ...event }
-				if (startDelta) {
-					draft.StartDateTime = moment(event.StartDateTime)
-						.add(startDelta)
-						.toDate()
-				}
-				if (endDelta) {
-					draft.EndDateTime = moment(event.EndDateTime)
-						.add(endDelta)
-						.toDate()
-				}
-				if (typeof isAllDay === "boolean") {
-					draft.IsAllDayEvent = isAllDay
-				}
 				// Update display immediately to avoid event snapping back for
 				// a moment after dragging.
 				this._mergeChangedEvent(draft)

@@ -335,9 +335,11 @@ it("changes the start and end times of an event", async () => {
 				events: [{ ...event, StartDateTime, EndDateTime }]
 			})
 			await events.updateStartEnd({
-				eventId: event.Id,
-				startDelta: moment.duration(-2, "days"),
-				endDelta: moment.duration(-2, "days")
+				calEvent: ({
+					id: event.Id,
+					start: moment(expectedStart)
+				}: any),
+				delta: moment.duration(-2, "days")
 			})
 
 			expect(events.state.events).toHaveLength(1)
@@ -380,9 +382,11 @@ it("changes the end date of an event", async () => {
 			await events.setState({
 				events: [{ ...event, StartDateTime, EndDateTime }]
 			})
-			await events.updateStartEnd({
-				eventId: event.Id,
-				endDelta: moment.duration(1, "days")
+			await events.updateEnd({
+				calEvent: ({
+					id: event.Id
+				}: any),
+				delta: moment.duration(1, "days")
 			})
 
 			expect(events.state.events).toHaveLength(1)
@@ -406,9 +410,11 @@ it("reverts a change if an error occurs updating event start and end times", asy
 		events: [{ ...event, StartDateTime, EndDateTime }]
 	})
 	await events.updateStartEnd({
-		eventId: event.Id,
-		startDelta: moment.duration(1, "days"),
-		endDelta: moment.duration(1, "days")
+		calEvent: ({
+			id: event.Id,
+			start: moment("2018-07-18T10:00-07:00")
+		}: any),
+		delta: moment.duration(1, "days")
 	})
 	expect(events.state.events[0]).toMatchObject({
 		StartDateTime,

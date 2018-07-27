@@ -3,12 +3,18 @@
 import Toast from "@salesforce/design-system-react/components/toast"
 import ToastContainer from "@salesforce/design-system-react/components/toast/container"
 import classNames from "classnames"
+import * as fullcalendar from "fullcalendar"
 import React from "react"
 import unescape from "unescape"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
-import { forFullcalendar, newEvent } from "../models/Event"
+import {
+	defaultTimedEventDuration,
+	forFullcalendar,
+	newEvent
+} from "../models/Event"
+import { hasTime } from "../util/moment"
 import "./App.css"
 import AccountList from "./AccountList"
 import { getIdentifierFromDraggable } from "./Draggable"
@@ -36,7 +42,9 @@ export default function App(props: Props) {
 
 					// `drop` is called when an external draggable (e.g. an
 					// account card) is dropped on the calendar.
-					drop(date, event) {
+					drop(date, event, ui, view) {
+						const allDay =
+							!hasTime(date) && !(view instanceof fullcalendar.MonthView)
 						const data = getIdentifierFromDraggable(event.target)
 						const account =
 							data &&
@@ -44,7 +52,7 @@ export default function App(props: Props) {
 							data.url &&
 							accounts.getAccount(data.url)
 						if (account) {
-							const draft = newEvent({ account, date })
+							const draft = newEvent({ account, allDay, date })
 							events.setEventDraft(draft)
 						}
 					},
@@ -62,16 +70,11 @@ export default function App(props: Props) {
 					// from a position on the calendar, and dropped on
 					// a different date or time.
 					eventDrop(event, delta) {
-						events.updateStartEnd({
-							eventId: event.id,
-							startDelta: delta,
-							endDelta: delta,
-							isAllDay: !(event.start: any).hasTime()
-						})
+						events.updateStartEnd({ calEvent: event, delta })
 					},
 
 					eventResize(event, delta) {
-						events.updateStartEnd({ eventId: event.id, endDelta: delta })
+						events.updateEnd({ calEvent: event, delta })
 					},
 
 					// `viewRender` is called when the user switches between
@@ -96,6 +99,7 @@ export default function App(props: Props) {
 							/>
 							<FullCalendar
 								className="calendar"
+								defaultTimedEventDuration={defaultTimedEventDuration}
 								events={events.state.events.map(forFullcalendar)}
 								language={props.language}
 								options={options}

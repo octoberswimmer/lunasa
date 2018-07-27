@@ -12,6 +12,7 @@ import "./FullCalendar.css"
 const $: fullcalendar.JQueryStatic = (jQuery: any)
 
 export type Props = {
+	defaultTimedEventDuration?: moment$MomentDuration,
 	events?: fullcalendar.EventObjectInput[],
 	language?: ?string,
 	options?: fullcalendar.Options
@@ -76,6 +77,9 @@ export default class FullCalendar extends React.Component<Props> {
 		const $elem = $(this.getRootElement())
 		$elem.fullCalendar(this.props.options || {})
 		this.instance = $elem.fullCalendar("getCalendar")
+		if (this.props.defaultTimedEventDuration) {
+			this.instance.defaultTimedEventDuration = this.props.defaultTimedEventDuration
+		}
 	}
 
 	destroyCalendar() {
