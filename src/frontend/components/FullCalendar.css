@@ -1,0 +1,4 @@
+/* Workaround for issue where a scrollbar sometimes appears in the calendar */
+.fc-scroller {
+  overflow: hidden !important;
+}

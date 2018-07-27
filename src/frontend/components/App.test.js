@@ -3,8 +3,6 @@
 import * as enzyme from "enzyme"
 import moment from "moment"
 import * as React from "react"
-import { DragDropContextProvider } from "react-dnd"
-import TestBackend from "react-dnd-test-backend"
 import { Provider } from "unstated"
 import RestApi from "../api/RestApi"
 import Accounts from "../containers/Accounts"
@@ -19,8 +17,8 @@ import {
 import * as lf from "../models/ListView.testFixtures"
 import { delay, failIfMissing } from "../testHelpers"
 import App from "./App"
+import AccountCard from "./AccountCard"
 import AccountList from "./AccountList"
-import DroppableCalendar from "./DroppableCalendar"
 import EditEvent from "./EditEvent"
 import FullCalendar from "./FullCalendar"
 import { Label, LabelProvider } from "./i18n/Label"
@@ -139,13 +137,17 @@ it("creates a new event draft when an account card is dropped on the calendar", 
 	const accounts = new Accounts(accountsOpts)
 	const events = new Events(eventsOpts)
 	const wrapper = mount(<App />, { accounts, events })
-	const calendar = wrapper.find(DroppableCalendar)
+	const calendar = wrapper.find(FullCalendar)
 	const account = failIfMissing(
 		af.accountQueryResult.records.find(r => r.Name === "United Oil & Gas, UK")
 	)
 	await accounts.setState({ accountQueryResult: af.accountQueryResult })
+	wrapper.update()
+	const accountCard = wrapper
+		.find(AccountCard)
+		.filterWhere(n => n.props().record.Name === account.Name)
 	const date = moment()
-	calendar.props().onDrop({ accountUrl: account.attributes.url, date })
+	calendar.props().options.drop(date, { target: accountCard.getDOMNode() })
 	await delay()
 	expect(events.state.eventDraft).toMatchObject({
 		StartDateTime: expect.any(Date),
@@ -181,7 +183,7 @@ it("saves changes when an event is dragged to a different date", async () => {
 	await events.setState({ events: [event] })
 	const wrapper = mount(<App />, { accounts, events })
 	const delta = moment.duration(1, "day")
-	const calendar = wrapper.find(DroppableCalendar)
+	const calendar = wrapper.find(FullCalendar)
 	calendar.prop("options").eventDrop(
 		{
 			id: event.Id,
@@ -209,7 +211,7 @@ it("saves changes when an all-day event is resized by dragging its right edge", 
 	await events.setState({ events: [event] })
 	const wrapper = mount(<App />, { accounts, events })
 	const delta = moment.duration(1, "day")
-	const calendar = wrapper.find(DroppableCalendar)
+	const calendar = wrapper.find(FullCalendar)
 	calendar.prop("options").eventResize(
 		{
 			id: event.Id,
@@ -255,9 +257,7 @@ function mount(
 	const events = (containers && containers.events) || new Events(eventsOpts)
 	_wrapper = enzyme.mount(
 		<Provider inject={[accounts, events]}>
-			<DragDropContextProvider backend={TestBackend}>
-				<LabelProvider value={clf.labels}>{app}</LabelProvider>
-			</DragDropContextProvider>
+			<LabelProvider value={clf.labels}>{app}</LabelProvider>
 		</Provider>
 	)
 	return _wrapper

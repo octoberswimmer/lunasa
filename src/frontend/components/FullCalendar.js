@@ -4,6 +4,7 @@ import * as fullcalendar from "fullcalendar"
 import "fullcalendar/dist/fullcalendar.css"
 import jQuery from "jquery"
 import * as React from "react"
+import "./FullCalendar.css"
 
 // Use the jQuery interface exported by fullcalendar, which adds the
 // `$.fn.fullCalendar()` function. This is just a type-level distinction: in
@@ -94,7 +95,11 @@ export default class FullCalendar extends React.Component<Props> {
 	}
 
 	render() {
-		return <div ref={this.root} />
+		return (
+			<div className="calendar">
+				<div className="calendar-mount-point" ref={this.root} />
+			</div>
+		)
 	}
 }
 
