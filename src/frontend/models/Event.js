@@ -2,6 +2,7 @@
 
 import { type EventObjectInput } from "fullcalendar"
 import moment from "moment"
+import { hasTime } from "../util/moment"
 import { type Account, getId } from "./Account"
 
 type Id = string
@@ -57,25 +58,30 @@ function endDateForFullcalendar(date: Date | number): Date {
 
 export function newEvent({
 	account,
+	allDay = false,
 	date
 }: {
 	account: Account,
+	allDay?: boolean,
 	date: moment$Moment
 }): $Shape<Event> {
-	// $FlowFixMe: the `hasTime` method is added by Fullcalendar
-	const start = date.hasTime()
-		? date
-		: date
-				.clone()
-				.local()
-				.hours(10)
-				.minutes(0)
-				.startOf("minute")
-	const end = start.clone().add(defaultTimedEventDuration)
+	const start =
+		!hasTime(date) && !allDay
+			? date
+					.clone()
+					.local()
+					.hours(10)
+					.minutes(0)
+					.startOf("minute")
+			: date.clone().local()
+	const end = allDay
+		? start.clone()
+		: start.clone().add(defaultTimedEventDuration)
 	return {
 		WhatId: getId(account),
 		StartDateTime: start.toDate(),
-		EndDateTime: end.toDate()
+		EndDateTime: end.toDate(),
+		IsAllDayEvent: allDay
 	}
 }
 

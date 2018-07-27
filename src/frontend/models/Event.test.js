@@ -44,6 +44,39 @@ it("sets default start and end time for event draft", () => {
 	expect(start.isBefore(end))
 })
 
+it("sets `IsAllDayEvent` if given the `allDay` flag", () => {
+	const date = moment()
+	const event = newEvent({ account, allDay: true, date })
+	expect(event.IsAllDayEvent).toBe(true)
+})
+
+it("sets default start and end time if given date has ambiguous time", () => {
+	const date = moment()
+	// $FlowFixMe
+	date.hasTime = () => false
+	const event = newEvent({ account, date })
+	expect(
+		moment(event.StartDateTime)
+			.local()
+			.hours()
+	).toBe(10)
+	expect(
+		moment(event.StartDateTime)
+			.local()
+			.minutes()
+	).toBe(0)
+	expect(
+		moment(event.EndDateTime)
+			.local()
+			.hours()
+	).toBe(11)
+	expect(
+		moment(event.EndDateTime)
+			.local()
+			.minutes()
+	).toBe(0)
+})
+
 it("produces data for a FullCalendar event", () => {
 	const event = forFullcalendar(testEvent)
 	expect(event).toMatchObject({
