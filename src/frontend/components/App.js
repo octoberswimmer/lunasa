@@ -9,7 +9,11 @@ import unescape from "unescape"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
-import { forFullcalendar, newEvent } from "../models/Event"
+import {
+	defaultTimedEventDuration,
+	forFullcalendar,
+	newEvent
+} from "../models/Event"
 import { hasTime } from "../util/moment"
 import "./App.css"
 import AccountList from "./AccountList"
@@ -95,6 +99,7 @@ export default function App(props: Props) {
 							/>
 							<FullCalendar
 								className="calendar"
+								defaultTimedEventDuration={defaultTimedEventDuration}
 								events={events.state.events.map(forFullcalendar)}
 								language={props.language}
 								options={options}
