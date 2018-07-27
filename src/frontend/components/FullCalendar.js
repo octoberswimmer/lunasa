@@ -97,7 +97,7 @@ export default class FullCalendar extends React.Component<Props> {
 	render() {
 		return (
 			<div className="calendar">
-				<div ref={this.root} />
+				<div className="calendar-mount-point" ref={this.root} />
 			</div>
 		)
 	}
