@@ -2,6 +2,7 @@
 
 import Card from "@salesforce/design-system-react/components/card"
 import Icon from "@salesforce/design-system-react/components/icon"
+import $ from "jquery"
 import moment from "moment"
 import * as React from "react"
 import ReactHtmlParser from "react-html-parser"
@@ -75,9 +76,15 @@ export default function AccountCard({ fieldSet, record }: Props) {
 				url: record.attributes.url
 			}}
 			options={{
+				helper: "clone", // clone card when dragging, leave original in list
 				opacity: 0.35,
-				revert: true,
-				revertDuration: 250,
+				start(event, ui) {
+					// Fixes width of the dragged element so that it matches the
+					// width of the original account card. Without this callback
+					// the dragged version of the account card appears to be too
+					// wide.
+					ui.helper.width($(event.target).width())
+				},
 				zIndex: 100
 			}}
 		>
