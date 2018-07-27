@@ -148,12 +148,9 @@ export default class EventContainer extends Container<State> {
 	 * component will rerender, and it will call this method again.
 	 */
 	getReference(referenceField: string, eventId: ?Id): ?Record {
-		if (!eventId) {
-			return
-		}
-		const data = this.state.referenceData[eventId]
+		const data = this.state.referenceData[eventId || "draft"]
 		const description = this.state.eventDescription
-		if (!data) {
+		if (!data && eventId) {
 			this._fetchReferenceData(eventId)
 		}
 		if (!description) {
@@ -237,13 +234,26 @@ export default class EventContainer extends Container<State> {
 	/*
 	 * Create or update a draft event
 	 */
-	async setEventDraft(details: $Shape<Event>): Promise<void> {
-		await this.setState({ eventDraft: details })
+	async setEventDraft(details: $Shape<Event>, account?: Record): Promise<void> {
+		await this.setState(state => {
+			const referenceData = account
+				? { ...state.referenceData, draft: { What: account } }
+				: state.referenceData
+			return {
+				eventDraft: details,
+				referenceData
+			}
+		})
 	}
 
 	async discardEventDraft(): Promise<void> {
-		await this.setState({
-			eventDraft: null
+		await this.setState(state => {
+			const referenceData = { ...state.referenceData }
+			delete referenceData.draft
+			return {
+				eventDraft: null,
+				referenceData
+			}
 		})
 	}
 
@@ -279,9 +289,12 @@ export default class EventContainer extends Container<State> {
 	async _mergeChangedEvent(event: Event): Promise<void> {
 		await this.setState(state => {
 			const events = state.events.filter(e => e.Id !== event.Id)
+			const referenceData = { ...state.referenceData }
+			delete referenceData.draft
 			return {
 				events: events.concat([event]),
-				eventDraft: null
+				eventDraft: null,
+				referenceData
 			}
 		})
 	}

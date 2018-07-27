@@ -4,6 +4,7 @@ import moment from "moment"
 import resetDateCache from "reset-date-cache"
 import EventModel from "../api/Events"
 import RestApi from "../api/RestApi"
+import * as af from "../models/Account.testFixtures"
 import * as ef from "../models/Event.testFixtures"
 import { type QueryResult } from "../models/QueryResult"
 import { visualforceDatetime } from "../models/serialization"
@@ -207,6 +208,18 @@ it("initiates new event creation", async () => {
 	expect(events.isEditingEvent()).toBe(false)
 })
 
+it("stores account information for display with new event", async () => {
+	const events = new Events(eventsOpts)
+	const account = failIfMissing(
+		af.accountQueryResult.records.find(a => a.Name === "Edge Communications")
+	)
+	const draft = { Subject: "event draft" }
+	await events.setEventDraft(draft, account)
+	events.getReference("WhatId", undefined) // trigger fetch for event description
+	await delay()
+	expect(events.getReference("WhatId", undefined)).toEqual(account)
+})
+
 it("sets a draft to update an existing event", async () => {
 	const events = new Events(eventsOpts)
 	const draft = { Id: "1", Subject: "event draft" }
@@ -229,6 +242,18 @@ it("discards the event draft", async () => {
 	expect(events.state.eventDraft).toBeFalsy()
 })
 
+it("clears link to referenced account when discarding draft", async () => {
+	const events = new Events(eventsOpts)
+	const account = failIfMissing(
+		af.accountQueryResult.records.find(a => a.Name === "Edge Communications")
+	)
+	const draft = { Subject: "event draft" }
+	await events.setEventDraft(draft, account)
+	expect(events.state.referenceData.draft).toEqual({ What: account })
+	await events.discardEventDraft()
+	expect(events.state.referenceData.draft).not.toBeDefined()
+})
+
 it("creates a new event from a draft", async () => {
 	const create = jest.spyOn(EventModel, "create")
 	const events = new Events(eventsOpts)
@@ -249,18 +274,26 @@ it("updates an existing event based on changes in a draft", async () => {
 
 it("removes draft event from state on successful create", async () => {
 	const events = new Events(eventsOpts)
-	await events.setEventDraft({ Subject: "event draft" })
+	const account = failIfMissing(
+		af.accountQueryResult.records.find(a => a.Name === "Edge Communications")
+	)
+	await events.setEventDraft({ Subject: "event draft" }, account)
 	await events.saveDraft()
 	expect(events.state.errors).toEqual([])
 	expect(events.state.eventDraft).toBeFalsy()
+	expect(events.state.referenceData.draft).not.toBeDefined()
 })
 
 it("removes draft event from state on successful update", async () => {
 	const events = new Events(eventsOpts)
-	await events.setEventDraft({ Id: "1", Subject: "event draft" })
+	const account = failIfMissing(
+		af.accountQueryResult.records.find(a => a.Name === "Edge Communications")
+	)
+	await events.setEventDraft({ Id: "1", Subject: "event draft" }, account)
 	await events.saveDraft()
 	expect(events.state.errors).toEqual([])
 	expect(events.state.eventDraft).toBeFalsy()
+	expect(events.state.referenceData.draft).not.toBeDefined()
 })
 
 it("adds a new event to events list on creation", async () => {

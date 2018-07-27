@@ -53,7 +53,7 @@ export default function App(props: Props) {
 							accounts.getAccount(data.url)
 						if (account) {
 							const draft = newEvent({ account, allDay, date })
-							events.setEventDraft(draft)
+							events.setEventDraft(draft, account)
 						}
 					},
 

@@ -153,6 +153,9 @@ it("creates a new event draft when an account card is dropped on the calendar", 
 		StartDateTime: expect.any(Date),
 		EndDateTime: expect.any(Date)
 	})
+	events.getReference("WhatId") // trigger fetch
+	await delay()
+	expect(events.getReference("WhatId")).toEqual(account)
 })
 
 it("displays event form when a new event draft is present", async () => {
