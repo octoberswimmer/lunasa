@@ -1,42 +1,59 @@
 /* @flow strict */
 
+import $ from "jquery"
+import "jquery-ui/ui/widgets/draggable"
+import "jquery-ui/themes/base/draggable.css"
+import { defaultTimedEventDuration } from "../models/Event"
+
 import * as React from "react"
-import * as dnd from "react-dnd"
 
-type BaseProps = {
-	children({| isDragging: boolean |}): React.Node,
-	item: Object // used to identify the thing that is being dragged and dropped
+// `Identifier` data identifies the item being dragged to a drop target.
+export type Identifier = {
+	type: string,
+	url: string
 }
 
-type InjectedProps = {
-	connectDragSource<T: React.Node>(elem: T): T,
-	isDragging: boolean
+type Props = {
+	children: React.Node,
+	duration?: moment$MomentDuration, // Event duration to show when hovering over Fullcalendar
+	identifier?: Identifier, // data to attach to draggable that can be read by a droppable handler
+	options?: Object // for options see http://api.jqueryui.com/draggable/
 }
 
-export function Draggable(props: BaseProps & InjectedProps) {
-	const { children, connectDragSource, isDragging } = props
-	return connectDragSource(children({ isDragging }))
-}
+export default class Draggable extends React.Component<Props> {
+	ref = React.createRef()
 
-const source = {
-	beginDrag(props: BaseProps) {
-		return props.item
+	componentDidMount() {
+		this.initDraggable()
+	}
+
+	componentDidUpdate() {
+		this.initDraggable()
+	}
+
+	initDraggable() {
+		const elem = this.ref.current
+		if (elem) {
+			const $elem = $(elem)
+			$elem.draggable(this.props.options || {})
+			if (this.props.identifier) {
+				$elem.data({ identifier: this.props.identifier })
+			}
+			$elem.data({ duration: this.props.duration || defaultTimedEventDuration })
+		}
+	}
+
+	render() {
+		return (
+			<div className="draggable" ref={this.ref}>
+				{this.props.children}
+			</div>
+		)
 	}
 }
 
-function collect(connect, monitor): InjectedProps {
-	return {
-		// Wrap elements with `connectDragSource()` to let React DnD handle the
-		// drag events.
-		connectDragSource: connect.dragSource(),
-		isDragging: monitor.isDragging()
-	}
+export function getIdentifierFromDraggable(
+	elem: EventTarget | HTMLElement | JQuery
+): ?Identifier {
+	return $(elem).data("identifier")
 }
-
-const ConnectedDraggable: React.ComponentType<BaseProps> = dnd.DragSource(
-	"DragDropable",
-	source,
-	collect
-)(Draggable)
-
-export default ConnectedDraggable
