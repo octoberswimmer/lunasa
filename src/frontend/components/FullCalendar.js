@@ -42,9 +42,6 @@ export default class FullCalendar extends React.Component<Props> {
 		} else if (instance) {
 			instance.option(this.props.options || {})
 			this.displayEvents()
-			// Update view size to work around calendar resizing when switching
-			// account list views.
-			instance.updateViewSize(true)
 		}
 		this.fixUpStyles()
 	}
@@ -98,7 +95,11 @@ export default class FullCalendar extends React.Component<Props> {
 	}
 
 	render() {
-		return <div ref={this.root} />
+		return (
+			<div className="calendar">
+				<div ref={this.root} />
+			</div>
+		)
 	}
 }
 
