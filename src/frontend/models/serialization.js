@@ -53,7 +53,7 @@ function serializeSingleValue(input: mixed): JsonValue {
  *
  *     moment(someDate).utc().format(RFC_3339)
  */
-const RFC_3339 = "YYYY-MM-DDTHH:mm:ss"
+const RFC_3339 = "YYYY-MM-DD~HH:mm:ss"
 
 /*
  * Creates a string representation of a date value suitable for consumption by
@@ -64,8 +64,8 @@ export function visualforceDatetime(datetime: moment$Moment) {
 		.clone()
 		.utc()
 		.format(RFC_3339)
-	// When deployed to Visualforce moment produces a formatted string with the
-	// letter "A" where the letter "T" should be. The reason is unclear. This
-	// does not happen in local testing.
-	return string.replace("A", "T")
+	// When FullCalendar updates moment's locale, "T" (and "t") are treated as
+	// format tokens for indicating AM/PM with a single "A" or "P".  Therefore,
+	// we use a tilde when formatting the datetime, then replace it with a "T".
+	return string.replace("~", "T")
 }
