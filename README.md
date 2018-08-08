@@ -46,5 +46,4 @@ First build the frontend app:
 That will create a Visualforce static resource with bundled Javascript and CSS
 resources. Next push resources to Salesforce:
 
-    $ force push -t ApexPage -n Calendar
-    $ force push -t StaticResource -n Calendar
+    $ force import -d src
