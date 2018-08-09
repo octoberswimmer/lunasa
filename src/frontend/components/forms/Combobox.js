@@ -86,8 +86,12 @@ export default class Combobox extends React.Component<Props, State> {
 }
 
 function applicableOptions(options: PickListValue[], inputValue: ?string) {
+	// If a predefined value is selected, display all available completions.
+	// This makes it easy to switch to another option if the combobox is
+	// populated with a default value.
+	const predefinedOptionSelected = options.some(o => o.value === inputValue)
 	return filter({
-		inputValue: inputValue || "",
+		inputValue: !inputValue || predefinedOptionSelected ? "" : inputValue,
 		options: options.map(addId),
 		selection: [inputValue].filter(isTruthy)
 	})

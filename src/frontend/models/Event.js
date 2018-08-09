@@ -12,6 +12,7 @@ export type Event = {
 	Description: string,
 	Id: string,
 	IsAllDayEvent: boolean,
+	ShowAs?: string,
 	StartDateTime: Date | number,
 	Subject: string,
 	WhatId?: Id

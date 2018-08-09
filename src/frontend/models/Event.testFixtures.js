@@ -60,6 +60,11 @@ export const eventCreateFieldSet: FieldSet = [
 		name: "WhatId",
 		label: "What",
 		type: "reference"
+	},
+	{
+		name: "ShowAs",
+		label: "Show Time As",
+		type: "picklist"
 	}
 ]
 
@@ -306,7 +311,7 @@ export const eventDescription: SObjectDescription = {
 				{ active: true, defaultValue: false, label: "Email", value: "Email" },
 				{
 					active: true,
-					defaultValue: false,
+					defaultValue: true,
 					label: "Meeting",
 					value: "Meeting"
 				},

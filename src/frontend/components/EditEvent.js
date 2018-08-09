@@ -11,6 +11,7 @@ import * as React from "react"
 import { Subscribe } from "unstated"
 import Events from "../containers/Events"
 import { type FieldSet } from "../models/FieldSet"
+import { getDefaultValues } from "../models/SObjectDescription"
 import "./EditEvent.css"
 import { Label } from "./i18n/Label"
 import SObjectForm from "./SObjectForm"
@@ -23,11 +24,19 @@ export default function EditEvent(props: Props) {
 	return (
 		<Subscribe to={[Events]}>
 			{events => {
-				const { eventDraft } = events.state
+				const description = events.getEventDescription()
+				if (!description) {
+					return null
+				}
+				const { eventCreateFieldSet, eventDraft } = events.state
+				const initialValues = {
+					...getDefaultValues(description, eventCreateFieldSet),
+					...eventDraft
+				}
 				return (
 					<Formik
 						enableReinitialize={false}
-						initialValues={events.state.eventDraft}
+						initialValues={initialValues}
 						onSubmit={async (values, actions) => {
 							await events.setEventDraft(values)
 							await events.saveDraft()
@@ -87,10 +96,10 @@ export default function EditEvent(props: Props) {
 								}
 							>
 								<SObjectForm
-									description={events.getEventDescription()}
+									description={description}
 									fieldSet={toggleTimeInputs(
 										Boolean(values.IsAllDayEvent),
-										events.state.eventCreateFieldSet
+										eventCreateFieldSet
 									)}
 									getReference={fieldName =>
 										events.getReference(fieldName, eventDraft && eventDraft.Id)

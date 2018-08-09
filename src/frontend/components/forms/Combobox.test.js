@@ -6,7 +6,6 @@ import * as React from "react"
 import { delay } from "../../testHelpers"
 import Combobox from "./Combobox"
 
-// const fruits = ["apple", "banana", "cranberry"]
 const fruits = [
 	{ value: "apple", label: "Apple", active: true, defaultValue: false },
 	{ value: "banana", label: "Banana", active: true, defaultValue: false },
@@ -95,6 +94,20 @@ it("displays completions when input is empty", () => {
 	)
 	const input = wrapper.find("input.slds-combobox__input")
 	expect(inputElement(input).value).toBe("")
+	input.simulate("click")
+	const completions = wrapper.find("li")
+	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
+})
+
+it("displays all completions when input exactly matches a predefined option", () => {
+	// If a combobox is populated with a default value, make it easy to select
+	// a different value by displaying all completion options.
+	const wrapper = mount(
+		<Combobox label="Fruit" name="fruit" options={fruits} />,
+		{ initialValues: { fruit: "apple" } }
+	)
+	const input = wrapper.find("input.slds-combobox__input")
+	expect(inputElement(input).value).toBe("apple")
 	input.simulate("click")
 	const completions = wrapper.find("li")
 	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
