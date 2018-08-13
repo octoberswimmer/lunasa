@@ -3,6 +3,7 @@
 import Timepicker from "@salesforce/design-system-react/components/time-picker"
 import * as enzyme from "enzyme"
 import { Formik } from "formik"
+import moment from "moment-timezone"
 import * as React from "react"
 import { Provider } from "unstated"
 import Events from "../containers/Events"
@@ -26,7 +27,8 @@ const draft = {
 }
 
 const restClient = RestApi("0000")
-const eventsOpts = { eventCreateFieldSet, restClient }
+const timezone = moment.tz.guess()
+const eventsOpts = { eventCreateFieldSet, restClient, timezone }
 
 afterEach(() => {
 	jest.clearAllMocks()

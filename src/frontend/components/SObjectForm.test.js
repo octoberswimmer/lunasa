@@ -4,7 +4,7 @@ import Datepicker from "@salesforce/design-system-react/components/date-picker"
 import Timepicker from "@salesforce/design-system-react/components/time-picker"
 import * as enzyme from "enzyme"
 import { Formik } from "formik"
-import moment from "moment"
+import moment from "moment-timezone"
 import * as React from "react"
 import * as clf from "../models/CustomLabel.testFixtures"
 import { type Event } from "../models/Event"
@@ -26,6 +26,7 @@ const draft = {
 }
 
 const onSubmit = jest.fn()
+const timezone = moment.tz.guess()
 
 afterEach(() => {
 	onSubmit.mockClear()
@@ -39,6 +40,7 @@ it("presents inputs based on a given field set", () => {
 				{ name: "InputA", label: "Input A", type: "string" },
 				{ name: "InputB", label: "Input B", type: "string" }
 			]}
+			timezone={timezone}
 		/>
 	)
 	const inputA = wrapper.find("input[name='InputA']")
@@ -57,6 +59,7 @@ it("presents a checkbox input", () => {
 			fieldSet={[
 				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
 			]}
+			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find("input[name='IsAllDayEvent']")
@@ -70,6 +73,7 @@ it("presents a checked checkbox when the corresponding value is `true`", () => {
 			fieldSet={[
 				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
 			]}
+			timezone={timezone}
 		/>,
 		{ IsAllDayEvent: true }
 	)
@@ -82,6 +86,7 @@ it("presents a combobox input", () => {
 		<SObjectForm
 			description={description}
 			fieldSet={[{ name: "Subject", label: "Subject", type: "combobox" }]}
+			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find(Combobox)
@@ -121,6 +126,7 @@ it("presents a picklist input", () => {
 		<SObjectForm
 			description={description}
 			fieldSet={[{ name: "ShowAs", label: "Show Time As", type: "picklist" }]}
+			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find("select")
@@ -133,7 +139,11 @@ it("presents a picklist input", () => {
 
 it("gets a boolean value from a checkbox input", async () => {
 	const wrapper = mount(
-		<SObjectForm description={description} fieldSet={eventCreateFieldSet} />,
+		<SObjectForm
+			description={description}
+			fieldSet={eventCreateFieldSet}
+			timezone={timezone}
+		/>,
 		draft
 	)
 	const input = wrapper.find("input[name='IsAllDayEvent']")
@@ -151,6 +161,7 @@ it("presents a date input", () => {
 		<SObjectForm
 			description={description}
 			fieldSet={[{ name: "Date", label: "Date", type: "date" }]}
+			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find(DateTime)
@@ -164,6 +175,7 @@ it("presents a datetime input", () => {
 		<SObjectForm
 			description={description}
 			fieldSet={[{ name: "StartDateTime", label: "Start", type: "datetime" }]}
+			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find(DateTime)
@@ -174,7 +186,11 @@ it("presents a datetime input", () => {
 
 it("gets a Date value from a datetime input", async () => {
 	const wrapper = mount(
-		<SObjectForm description={description} fieldSet={eventCreateFieldSet} />,
+		<SObjectForm
+			description={description}
+			fieldSet={eventCreateFieldSet}
+			timezone={timezone}
+		/>,
 		draft
 	)
 	const dateTime = wrapper.find(DateTime).filter("[name='StartDateTime']")
@@ -200,6 +216,7 @@ it("presents a textarea input", () => {
 			fieldSet={[
 				{ name: "Description", label: "Description", type: "textarea" }
 			]}
+			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find("textarea")
@@ -208,7 +225,11 @@ it("presents a textarea input", () => {
 
 it("gets a string value from a textarea input", async () => {
 	const wrapper = mount(
-		<SObjectForm description={description} fieldSet={eventCreateFieldSet} />
+		<SObjectForm
+			description={description}
+			fieldSet={eventCreateFieldSet}
+			timezone={timezone}
+		/>
 	)
 	const input = wrapper.find("textarea")
 	inputElement(input).value = "some description"

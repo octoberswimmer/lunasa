@@ -1,7 +1,6 @@
 /* @flow strict */
 
-import moment from "moment"
-import resetDateCache from "reset-date-cache"
+import moment from "moment-timezone"
 import EventModel from "../api/Events"
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
@@ -12,11 +11,13 @@ import { delay, failIfMissing, withTimezone } from "../testHelpers"
 import Events from "./Events"
 
 const restClient = RestApi("0000")
+const timezone = moment.tz.guess()
 
 const eventsOpts = {
 	eventCreateFieldSet: ef.eventCreateFieldSet,
 	remoteObject: EventModel,
-	restClient
+	restClient,
+	timezone
 }
 
 afterEach(() => {
@@ -45,10 +46,8 @@ it("requests events by date range", () => {
 	})
 })
 
-it("sets time range to start and end of day in the local time zone", () => {
+it("sets time range to start and end of day in the user's time zone", () => {
 	const retrieve = jest.spyOn(EventModel, "retrieve")
-	const events = new Events(eventsOpts)
-	const origTz = process.env.TZ
 
 	// Data for various time zones with the following properties: an input time
 	// of 2pm, the start of the same day in the local time zone, and the end of
@@ -87,8 +86,7 @@ it("sets time range to start and end of day in the local time zone", () => {
 	]
 
 	for (const { tz, inputTime, expectedStart, expectedEnd } of fixtures) {
-		process.env.TZ = tz
-		resetDateCache()
+		const events = new Events({ ...eventsOpts, timezone: tz })
 		events.getEventsByDateRange(moment.utc(inputTime), moment.utc(inputTime))
 		expect(retrieve).toHaveBeenCalledWith({
 			where: {
@@ -99,9 +97,6 @@ it("sets time range to start and end of day in the local time zone", () => {
 			}
 		})
 	}
-
-	process.env.TZ = origTz
-	resetDateCache()
 })
 
 it("avoids making the same query twice in a row", () => {

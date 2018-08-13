@@ -26,13 +26,6 @@ export function inputElement(wrapper: ReactWrapper): HTMLInputElement {
 }
 
 /*
- * Parses ISO 8601 datetime format according to local time zone.
- */
-export function parseLocalDate(input: string): Date {
-	return moment(input, "YYYY-MM-DDTHH:mm:ss").toDate()
-}
-
-/*
  * `moment` values created in the callback will have the given locale
  */
 export async function withLocaleAndTz<T>(

@@ -1,8 +1,8 @@
 /* @flow strict */
 
 import { type EventObjectInput } from "fullcalendar"
-import moment from "moment"
-import { hasTime } from "../util/moment"
+import moment from "moment-timezone"
+import { type MomentInput, disambiguateTimezone, hasTime } from "../util/moment"
 import { type Account, getId } from "./Account"
 
 type Id = string
@@ -27,18 +27,33 @@ export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(
  * Convert a Salesforce Event record into a value that can be given to
  * Fullcalendar for display.
  */
-export function forFullcalendar(event: Event): EventObjectInput {
+export function forFullcalendar(
+	timezone: string,
+	event: Event
+): EventObjectInput {
 	return {
 		title: event.Subject,
-		start: event.StartDateTime,
+		start: dateForFullcalendar(timezone, event.StartDateTime),
 		end: event.IsAllDayEvent
-			? endDateForFullcalendar(event.EndDateTime)
-			: event.EndDateTime,
+			? endDateForFullcalendar(timezone, event.EndDateTime)
+			: dateForFullcalendar(timezone, event.EndDateTime),
 		allDay: Boolean(event.IsAllDayEvent),
 		editable: true,
 		type: "Event",
 		id: event.Id
 	}
+}
+
+/*
+ * Fullcalendar does not handle timezone conversions when displaying events.
+ * This function ensures that Moment values provided to Fullcalendar use
+ * a consistent time zone.
+ */
+export function dateForFullcalendar(
+	timezone: string,
+	date: MomentInput
+): moment$Moment {
+	return moment(date).tz(timezone)
 }
 
 /*
@@ -51,30 +66,35 @@ export function forFullcalendar(event: Event): EventObjectInput {
  *
  * See: https://github.com/fullcalendar/fullcalendar/issues/3854
  */
-function endDateForFullcalendar(date: Date | number): Date {
+function endDateForFullcalendar(
+	timezone: string,
+	date: MomentInput
+): moment$Moment {
 	return moment(date)
+		.tz(timezone)
 		.add(1, "day")
-		.toDate()
 }
 
 export function newEvent({
 	account,
 	allDay = false,
-	date
+	date,
+	timezone
 }: {
 	account: Account,
 	allDay?: boolean,
-	date: moment$Moment
+	date: moment$Moment,
+	timezone: string
 }): $Shape<Event> {
 	const start =
 		!hasTime(date) && !allDay
-			? date
-					.clone()
-					.local()
+			? disambiguateTimezone(timezone, date)
+					// $FlowFixMe type defs do not include timezone extentions
+					.tz(timezone)
 					.hours(10)
 					.minutes(0)
 					.startOf("minute")
-			: date.clone().local()
+			: disambiguateTimezone(timezone, date)
 	const end = allDay
 		? start.clone()
 		: start.clone().add(defaultTimedEventDuration)
@@ -89,11 +109,13 @@ export function newEvent({
 export function updateStartEnd({
 	event,
 	calEvent,
-	delta
+	delta,
+	timezone
 }: {
 	event: Event,
 	calEvent: EventObjectInput, // data from Fullcalendar `eventDrop` callback
-	delta: moment$MomentDuration
+	delta: moment$MomentDuration,
+	timezone: string
 }): Event {
 	// The way that Fullcalendar reports start and end times for
 	// all-day events is problematic. So in that case we transform
@@ -114,7 +136,9 @@ export function updateStartEnd({
 	const origStart = moment(event.StartDateTime)
 	const origEnd = moment(event.EndDateTime)
 	const duration = moment.duration(origEnd.diff(origStart))
-	const start = calEvent.start ? moment(calEvent.start) : origStart
+	const start = calEvent.start
+		? disambiguateTimezone(timezone, moment(calEvent.start))
+		: origStart
 
 	return {
 		...event,

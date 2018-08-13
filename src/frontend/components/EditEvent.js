@@ -104,6 +104,7 @@ export default function EditEvent(props: Props) {
 									getReference={fieldName =>
 										events.getReference(fieldName, eventDraft && eventDraft.Id)
 									}
+									timezone={events.state.timezone}
 								/>
 							</Modal>
 						)}

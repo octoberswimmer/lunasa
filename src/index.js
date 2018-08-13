@@ -10,6 +10,7 @@ import standardSprite from "@salesforce-ux/design-system/assets/icons/standard-s
 import utilitySprite from "@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg"
 import spinner from "@salesforce-ux/design-system/assets/images/spinners/slds_spinner.gif"
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css"
+import moment from "moment-timezone"
 import React from "react"
 import ReactDOM from "react-dom"
 import { Provider } from "unstated"
@@ -27,6 +28,7 @@ export function lunasa({
 	eventCreateFieldSet,
 	labels,
 	language,
+	timezone = moment.tz.guess(),
 	root,
 	assistiveRoot,
 	sessionToken,
@@ -38,6 +40,7 @@ export function lunasa({
 	eventCreateFieldSet: FieldSet,
 	labels: { [key: string]: string },
 	language?: string,
+	timezone?: string,
 	root: HTMLElement,
 	assistiveRoot: HTMLElement,
 	sessionToken: string,
@@ -58,7 +61,7 @@ export function lunasa({
 		restClient,
 		sortFields
 	})
-	const events = new Events({ eventCreateFieldSet, restClient })
+	const events = new Events({ eventCreateFieldSet, restClient, timezone })
 	ReactDOM.render(
 		<Provider inject={[accounts, events]}>
 			<IconSettings

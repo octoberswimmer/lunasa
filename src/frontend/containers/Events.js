@@ -15,7 +15,13 @@ import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
 import { type RestApi } from "../api/RestApi"
 import { type Criteria } from "../api/SObject"
-import { updateStartEnd, updateEnd } from "../models/Event"
+import { type Account } from "../models/Account"
+import {
+	forFullcalendar,
+	newEvent,
+	updateStartEnd,
+	updateEnd
+} from "../models/Event"
 import { type FieldSet } from "../models/FieldSet"
 import { visualforceDatetime } from "../models/serialization"
 import {
@@ -24,6 +30,7 @@ import {
 } from "../models/SObjectDescription"
 import { type Record } from "../models/QueryResult"
 import { stringifyCondition } from "../models/WhereCondition"
+import { setTimezone } from "../util/moment"
 import {
 	type AsyncActionState,
 	asyncAction,
@@ -39,7 +46,8 @@ export type State = AsyncActionState & {
 	eventCreateFieldSet: FieldSet,
 	eventDescription: ?SObjectDescription,
 	eventDraft: ?$Shape<Event>,
-	referenceData: { [key: Id]: Record } // map from Event IDs to What and Who properties
+	referenceData: { [key: Id]: Record }, // map from Event IDs to What and Who properties
+	timezone: string
 }
 
 export default class EventContainer extends Container<State> {
@@ -55,7 +63,8 @@ export default class EventContainer extends Container<State> {
 	constructor(opts: {
 		eventCreateFieldSet: FieldSet,
 		remoteObject?: RemoteObject<Event>,
-		restClient: Promise<RestApi>
+		restClient: Promise<RestApi>,
+		timezone: string
 	}) {
 		super()
 		this._remoteObject = opts.remoteObject || Events
@@ -66,7 +75,8 @@ export default class EventContainer extends Container<State> {
 			eventCreateFieldSet: opts.eventCreateFieldSet,
 			eventDescription: null,
 			eventDraft: null,
-			referenceData: {}
+			referenceData: {},
+			timezone: opts.timezone
 		}
 
 		// Memoizing methods that fetch data from APIs avoids loops where
@@ -133,6 +143,10 @@ export default class EventContainer extends Container<State> {
 		}
 	}
 
+	getEventsForFullcalendar(): EventObjectInput[] {
+		return this.state.events.map(e => forFullcalendar(this.state.timezone, e))
+	}
+
 	/*
 	 * `getReference` provides a record from a polymorphic reference. For
 	 * example:
@@ -177,15 +191,9 @@ export default class EventContainer extends Container<State> {
 		rangeStart: moment$Moment,
 		rangeEnd: moment$Moment
 	): Promise<void> {
-		// Clone input values because most moment methods mutate their input
-		const start = rangeStart
-			.clone()
-			.local()
-			.startOf("day")
-		const end = rangeEnd
-			.clone()
-			.local()
-			.endOf("day")
+		const { timezone } = this.state
+		const start = setTimezone(timezone, rangeStart).startOf("day")
+		const end = setTimezone(timezone, rangeEnd).endOf("day")
 		return this._fetchEvents({
 			where: {
 				and: {
@@ -229,6 +237,14 @@ export default class EventContainer extends Container<State> {
 				}))
 			}
 		})
+	}
+
+	newEvent(args: {
+		account: Account,
+		allDay?: boolean,
+		date: moment$Moment
+	}): $Shape<Event> {
+		return newEvent({ ...args, timezone: this.state.timezone })
 	}
 
 	/*
@@ -307,7 +323,7 @@ export default class EventContainer extends Container<State> {
 		delta: moment$MomentDuration
 	}): Promise<void> {
 		return this._updateEvent(calEvent.id, event =>
-			updateStartEnd({ event, calEvent, delta })
+			updateStartEnd({ event, calEvent, delta, timezone: this.state.timezone })
 		)
 	}
 
