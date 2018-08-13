@@ -31,6 +31,7 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const options = {
+					defaultView: "agendaWeek",
 					droppable: true,
 					// Toolbar controls to be displayed in calendar header
 					header: {
