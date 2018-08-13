@@ -31,6 +31,7 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const options = {
+					defaultView: "agendaWeek",
 					droppable: true,
 					// Toolbar controls to be displayed in calendar header
 					header: {
@@ -38,6 +39,7 @@ export default function App(props: Props) {
 						right: "agendaWeek,month today prev,next"
 					},
 					height: "auto",
+					minTime: "06:00:00", // first row in agenda view is 6am
 					timezone: "local",
 
 					// `drop` is called when an external draggable (e.g. an
