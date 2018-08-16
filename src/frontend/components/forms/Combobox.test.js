@@ -99,9 +99,10 @@ it("displays completions when input is empty", () => {
 	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
 })
 
-it("displays all completions when input exactly matches a predefined option", () => {
-	// If a combobox is populated with a default value, make it easy to select
-	// a different value by displaying all completion options.
+it("displays all completions if the input value has not been edited", () => {
+	// If the input value is untouched then display all available completions.
+	// This makes it easy to switch to another option if the combobox is
+	// populated with a default value.
 	const wrapper = mount(
 		<Combobox label="Fruit" name="fruit" options={fruits} />,
 		{ initialValues: { fruit: "apple" } }
@@ -111,6 +112,11 @@ it("displays all completions when input exactly matches a predefined option", ()
 	input.simulate("click")
 	const completions = wrapper.find("li")
 	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
+
+	// Change form state to so that input has been "touched"
+	inputElement(input).value = "appl"
+	input.simulate("change")
+	expect(wrapper.find("li").map(n => n.text())).toEqual(["Apple"])
 })
 
 it("updates form state when a completion is clicked", async () => {
@@ -142,7 +148,7 @@ it("hides completions dropdown when there are no completions to display", async 
 	inputElement(input).value = "not a fruit"
 	input.simulate("change")
 	const dropdown = wrapper.find("ul")
-	expect(dropdown.exists()).toBe(false)
+	expect(dropdown).not.toExist()
 })
 
 function mount(
