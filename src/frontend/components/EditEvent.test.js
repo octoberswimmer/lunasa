@@ -58,6 +58,7 @@ it("renders a form", async () => {
 it("saves an event", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
+	await events._fetchEventDescription()
 	const wrapper = mount(<EditEvent />, events)
 	await submit(wrapper)
 	expect(events.state.events).toContainEqual(
@@ -68,6 +69,7 @@ it("saves an event", async () => {
 it("submits the form when the user clicks 'Save'", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
+	await events._fetchEventDescription()
 	const wrapper = mount(<EditEvent />, events)
 	const button = wrapper.find("button").filterWhere(n => n.text() === "Save")
 	button.simulate("click")
@@ -80,6 +82,7 @@ it("submits the form when the user clicks 'Save'", async () => {
 it("discards event draft when the user clicks 'Cancel'", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
+	await events._fetchEventDescription()
 	const wrapper = mount(<EditEvent />, events)
 	const button = wrapper.find("button").filterWhere(n => n.text() === "Cancel")
 	button.simulate("click")
@@ -128,6 +131,7 @@ it("displays account name when editing", async () => {
 it("hides time inputs if 'IsAllDay' is selected", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ ...draft, IsAllDayEvent: true })
+	await events._fetchEventDescription()
 	const wrapper = mount(<EditEvent />, events)
 	expect(wrapper.find(Timepicker).exists()).toBe(false)
 
@@ -139,6 +143,24 @@ it("hides time inputs if 'IsAllDay' is selected", async () => {
 	formik.setFieldValue("IsAllDayEvent", true)
 	wrapper.update()
 	expect(wrapper.find(Timepicker).exists()).toBe(false)
+})
+
+it("prepopulates default value in combobox and picklist inputs", async () => {
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({})
+	await events._fetchEventDescription()
+	const wrapper = mount(<EditEvent />, events)
+	expect(
+		wrapper.find("input").filterWhere(n => n.prop("value") === "Meeting")
+	).toExist()
+	expect(wrapper.find("select[name='ShowAs']").props()).toHaveProperty(
+		"value",
+		"Busy"
+	)
+	await submit(wrapper)
+	expect(events.state.events).toContainEqual(
+		expect.objectContaining({ Subject: "Meeting", ShowAs: "Busy" })
+	)
 })
 
 // Unmount React tree after each test to avoid errors about missing `document`,

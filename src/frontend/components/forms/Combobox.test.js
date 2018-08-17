@@ -6,7 +6,6 @@ import * as React from "react"
 import { delay } from "../../testHelpers"
 import Combobox from "./Combobox"
 
-// const fruits = ["apple", "banana", "cranberry"]
 const fruits = [
 	{ value: "apple", label: "Apple", active: true, defaultValue: false },
 	{ value: "banana", label: "Banana", active: true, defaultValue: false },
@@ -100,6 +99,26 @@ it("displays completions when input is empty", () => {
 	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
 })
 
+it("displays all completions if the input value has not been edited", () => {
+	// If the input value is untouched then display all available completions.
+	// This makes it easy to switch to another option if the combobox is
+	// populated with a default value.
+	const wrapper = mount(
+		<Combobox label="Fruit" name="fruit" options={fruits} />,
+		{ initialValues: { fruit: "apple" } }
+	)
+	const input = wrapper.find("input.slds-combobox__input")
+	expect(inputElement(input).value).toBe("apple")
+	input.simulate("click")
+	const completions = wrapper.find("li")
+	expect(completions.map(n => n.text())).toEqual(fruits.map(f => f.label))
+
+	// Change form state to so that input has been "touched"
+	inputElement(input).value = "appl"
+	input.simulate("change")
+	expect(wrapper.find("li").map(n => n.text())).toEqual(["Apple"])
+})
+
 it("updates form state when a completion is clicked", async () => {
 	const wrapper = mount(
 		<Combobox label="Fruit" name="fruit" options={fruits} />
@@ -129,7 +148,7 @@ it("hides completions dropdown when there are no completions to display", async 
 	inputElement(input).value = "not a fruit"
 	input.simulate("change")
 	const dropdown = wrapper.find("ul")
-	expect(dropdown.exists()).toBe(false)
+	expect(dropdown).not.toExist()
 })
 
 function mount(

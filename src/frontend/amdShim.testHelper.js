@@ -30,7 +30,26 @@ function define(...args: any[]) {
 	})
 	return factory.apply(null, deps)
 }
-define.amd = {}
+
+/*
+ * A module checks for AMD support by testing for a globally-scoped function
+ * called `define` with a truthy `amd` property. We want to provide an AMD
+ * loader for jquery and jquery UI (which are not designed to work with
+ * CommonJS); but we do not want tslib to use the AMD loader, because it can
+ * export itself via CommonJS. So we define the `amd` property using a getter
+ * which returns a truthy value if-and-only-if the caller is a jquery module.
+ */
+Object.defineProperty(define, "amd", {
+	get() {
+		if (caller().match(/node_modules\/jquery/)) {
+			return {}
+		}
+	}
+	// Flow reports an error if there is no `value` property in a property
+	// descriptor. This specially-formatted comment is visible to Flow, but is
+	// not included at runtime.
+	/*::, value: {} */
+})
 
 function resolveModulePath(relativeTo: string, n: string): string {
 	if (!n.startsWith(".") && !n.startsWith("/")) {

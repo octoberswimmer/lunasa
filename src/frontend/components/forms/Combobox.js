@@ -20,11 +20,15 @@ type Props = {
 }
 
 type State = {
+	dirty: boolean,
 	isOpen: boolean
 }
 
 export default class Combobox extends React.Component<Props, State> {
 	state = {
+		// `true` if field value has changed
+		dirty: false,
+
 		// Control `isOpen` state of completions dropdown so that we can hide
 		// the dropdown when there are no completions to display.
 		isOpen: false
@@ -37,9 +41,13 @@ export default class Combobox extends React.Component<Props, State> {
 				form.setFieldTouched(name, true)
 			},
 			onChange: (event, { value }) => {
+				const dirty = value !== field.value
 				form.setFieldValue(name, value)
 				this.setState(state => ({
-					isOpen: state.isOpen && applicableOptions(options, value).length > 0
+					dirty,
+					isOpen:
+						state.isOpen &&
+						applicableOptions(options, value, dirty || state.dirty).length > 0
 				}))
 			},
 			// `onClose` is called on input blur, or on pressing
@@ -55,9 +63,10 @@ export default class Combobox extends React.Component<Props, State> {
 			onRequestOpen: () => {
 				// Open completions menu if there are completions to
 				// display.
-				this.setState({
-					isOpen: applicableOptions(options, field.value).length > 0
-				})
+				this.setState(state => ({
+					isOpen:
+						applicableOptions(options, field.value, state.dirty).length > 0
+				}))
 			},
 			onSelect: (event, { selection }: { selection: PickListValue[] }) => {
 				const option = selection[0]
@@ -71,7 +80,7 @@ export default class Combobox extends React.Component<Props, State> {
 				events={events}
 				isOpen={this.state.isOpen}
 				labels={{ label, noOptionsFound: "" }}
-				options={applicableOptions(options, field.value)}
+				options={applicableOptions(options, field.value, this.state.dirty)}
 				value={field.value || ""}
 				variant="inline-listbox"
 				{...rest}
@@ -85,9 +94,16 @@ export default class Combobox extends React.Component<Props, State> {
 	}
 }
 
-function applicableOptions(options: PickListValue[], inputValue: ?string) {
+function applicableOptions(
+	options: PickListValue[],
+	inputValue: ?string,
+	dirty: boolean
+) {
+	// If the input value has not been edited then display all available
+	// completions. This makes it easy to switch to another option if the
+	// combobox is populated with a default value.
 	return filter({
-		inputValue: inputValue || "",
+		inputValue: !inputValue || !dirty ? "" : inputValue,
 		options: options.map(addId),
 		selection: [inputValue].filter(isTruthy)
 	})

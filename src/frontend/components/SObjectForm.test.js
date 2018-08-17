@@ -94,7 +94,7 @@ it("presents a combobox input", () => {
 			{ active: true, defaultValue: false, label: "Email", value: "Email" },
 			{
 				active: true,
-				defaultValue: false,
+				defaultValue: true,
 				label: "Meeting",
 				value: "Meeting"
 			},
