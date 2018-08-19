@@ -115,7 +115,13 @@ export default function DateTime({
 					/>
 					{showTime !== false ? (
 						<Timepicker
-							label={<Label>Time</Label>}
+							label={
+								<Label
+									with={{ timezone: moment.tz.zone(timezone).abbr(moment()) }}
+								>
+									Time
+								</Label>
+							}
 							onDateChange={(time: Date, inputStr: string) => {
 								if (!isValidDate(time)) {
 									addFieldError(form, name, "Invalid time")

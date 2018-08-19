@@ -94,7 +94,7 @@
         <language>en_US</language>
         <protected>true</protected>
         <shortDescription>Label for time input.</shortDescription>
-        <value>Time</value>
+        <value>Time ({timezone})</value>
     </labels>
     <labels>
         <fullName>Toggle_Sort_Direction</fullName>
