@@ -1,7 +1,7 @@
 /* @flow strict */
 
 import * as enzyme from "enzyme"
-import moment from "moment"
+import moment from "moment-timezone"
 import * as React from "react"
 import { Provider } from "unstated"
 import RestApi from "../api/RestApi"
@@ -25,12 +25,14 @@ import { Label, LabelProvider } from "./i18n/Label"
 
 const restClient = RestApi("0000")
 
+const timezone = moment.tz.guess()
+
 const accountsOpts = {
 	accountFieldSet: af.accountFieldSet,
 	restClient
 }
 
-const eventsOpts = { eventCreateFieldSet, restClient }
+const eventsOpts = { eventCreateFieldSet, restClient, timezone }
 
 var initializeCalendar: JestMockFn<[], void>
 
@@ -70,7 +72,7 @@ it("displays events in calendar", async () => {
 	const calendar = wrapper.find(FullCalendar)
 	expect(calendar.props()).toHaveProperty(
 		"events",
-		eventFixtures.map(forFullcalendar)
+		eventFixtures.map(forFullcalendar.bind(null, timezone))
 	)
 })
 

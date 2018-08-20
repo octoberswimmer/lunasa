@@ -9,11 +9,7 @@ import unescape from "unescape"
 import { Subscribe } from "unstated"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
-import {
-	defaultTimedEventDuration,
-	forFullcalendar,
-	newEvent
-} from "../models/Event"
+import { defaultTimedEventDuration } from "../models/Event"
 import { hasTime } from "../util/moment"
 import "./App.css"
 import AccountList from "./AccountList"
@@ -39,7 +35,7 @@ export default function App(props: Props) {
 						right: "agendaWeek,month today prev,next"
 					},
 					height: "auto",
-					timezone: "local",
+					timezone: false, // date values from calendar will be ambiguously-zoned
 
 					// `drop` is called when an external draggable (e.g. an
 					// account card) is dropped on the calendar.
@@ -53,7 +49,11 @@ export default function App(props: Props) {
 							data.url &&
 							accounts.getAccount(data.url)
 						if (account) {
-							const draft = newEvent({ account, allDay, date })
+							const draft = events.newEvent({
+								account,
+								allDay,
+								date
+							})
 							events.setEventDraft(draft, account)
 						}
 					},
@@ -101,7 +101,7 @@ export default function App(props: Props) {
 							<FullCalendar
 								className="calendar"
 								defaultTimedEventDuration={defaultTimedEventDuration}
-								events={events.state.events.map(forFullcalendar)}
+								events={events.getEventsForFullcalendar()}
 								language={props.language}
 								options={options}
 							/>

@@ -1164,7 +1164,7 @@ declare module "fullcalendar" {
 	}
 
 	// 'fullcalendar/src/types/input-types'
-	declare type MomentInput = Moment | Date | Object | string | number
+	declare export type MomentInput = Moment | Date | Object | string | number
 	declare type DurationInput = Duration | Object | string | number
 	declare interface RangeInput {
 		start?: MomentInput;

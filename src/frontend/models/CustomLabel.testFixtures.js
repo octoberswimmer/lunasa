@@ -14,6 +14,6 @@ export const labels: Labels = {
 	Save_Event: "Save",
 	Selected_Accounts: "Selected Accounts",
 	Sort_by: "Sort by",
-	Time: "Time",
+	Time: "Time ({timezone})",
 	Toggle_Sort_Direction: "Toggle Sort Direction"
 }

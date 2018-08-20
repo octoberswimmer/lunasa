@@ -1,10 +1,20 @@
 /* @flow strict */
 
-import moment from "moment"
-import { type Event, forFullcalendar, newEvent } from "./Event"
+import moment from "moment-timezone"
+import { withTimezone } from "../testHelpers"
+import { sameMoment } from "../test/customExpect"
+import { setTimezone, stripZone } from "../util/moment"
+import {
+	type Event,
+	defaultTimedEventDuration,
+	forFullcalendar,
+	newEvent
+} from "./Event"
 import * as ef from "./Event.testFixtures"
 
-export const testEvent: Event = {
+const timezone = moment.tz.guess()
+
+const testEvent: Event = {
 	Id: "1",
 	EndDateTime: moment()
 		.endOf("hour")
@@ -30,23 +40,34 @@ const account = {
 
 it("creates a new event draft from an account and a date", () => {
 	const date = moment()
-	const event = newEvent({ account, date })
+	const event = newEvent({ account, date, timezone })
 	expect(event.WhatId).toBe("001f200001XrDswAAF")
 })
 
-it("sets default start and end time for event draft", () => {
-	const date = moment()
-	const event = newEvent({ account, date })
-	const start = moment(event.StartDateTime)
-	const end = moment(event.EndDateTime)
-	expect(start.isSame(date, "day")).toBe(true)
-	expect(end.isSame(date, "day")).toBe(true)
-	expect(start.isBefore(end))
+it("sets default start and end time for event draft", async () => {
+	const inputs = [
+		{ expected: "2018-07-05T10:00-07:00", tz: "America/Los_Angeles" },
+		{ expected: "2018-07-05T10:00+02:00", tz: "Europe/Berlin" },
+		{ expected: "2018-07-05T10:00Z", tz: "UTC" }
+	]
+	expect.assertions(inputs.length * 2)
+	for (const { expected, tz } of inputs) {
+		await withTimezone(tz, async () => {
+			const date = moment.tz("2018-07-05", tz)
+			// $FlowFixMe
+			date.hasTime = () => false
+			const event = newEvent({ account, date, timezone: tz })
+			expect(event.StartDateTime).toEqual(sameMoment(expected))
+			expect(event.EndDateTime).toEqual(
+				sameMoment(moment(expected).add(defaultTimedEventDuration))
+			)
+		})
+	}
 })
 
 it("sets `IsAllDayEvent` if given the `allDay` flag", () => {
 	const date = moment()
-	const event = newEvent({ account, allDay: true, date })
+	const event = newEvent({ account, allDay: true, date, timezone })
 	expect(event.IsAllDayEvent).toBe(true)
 })
 
@@ -54,35 +75,51 @@ it("sets default start and end time if given date has ambiguous time", () => {
 	const date = moment()
 	// $FlowFixMe
 	date.hasTime = () => false
-	const event = newEvent({ account, date })
-	expect(
-		moment(event.StartDateTime)
-			.local()
-			.hours()
-	).toBe(10)
-	expect(
-		moment(event.StartDateTime)
-			.local()
-			.minutes()
-	).toBe(0)
-	expect(
-		moment(event.EndDateTime)
-			.local()
-			.hours()
-	).toBe(11)
-	expect(
-		moment(event.EndDateTime)
-			.local()
-			.minutes()
-	).toBe(0)
+	const event = newEvent({ account, date, timezone })
+	expect(setTimezone(timezone, event.StartDateTime).hours()).toBe(10)
+	expect(setTimezone(timezone, event.StartDateTime).minutes()).toBe(0)
+	expect(setTimezone(timezone, event.EndDateTime).hours()).toBe(11)
+	expect(setTimezone(timezone, event.EndDateTime).minutes()).toBe(0)
+})
+
+it("fixes time zone information for event start time reported by fullcalendar", async () => {
+	const inputs = [
+		{
+			expected: "2018-07-05T09:30-07:00",
+			userTz: "America/Los_Angeles",
+			browserTz: "Europe/Berlin"
+		},
+		{
+			expected: "2018-07-05T09:30+02:00",
+			userTz: "Europe/Berlin",
+			browserTz: "America/Los_Angeles"
+		},
+		{
+			expected: "2018-07-05T09:30Z",
+			userTz: "UTC",
+			browserTz: "America/Los_Angeles"
+		}
+	]
+	expect.assertions(inputs.length * 2)
+	for (const { expected, userTz, browserTz } of inputs) {
+		await withTimezone(browserTz, async () => {
+			// Fullcalendar provides date values with an ambiguous timezone.
+			const date = stripZone(moment("2018-07-05T09:30"))
+			const event = newEvent({ account, date, timezone: userTz })
+			expect(event.StartDateTime).toEqual(sameMoment(expected))
+			expect(event.EndDateTime).toEqual(
+				sameMoment(moment(expected).add(defaultTimedEventDuration))
+			)
+		})
+	}
 })
 
 it("produces data for a FullCalendar event", () => {
-	const event = forFullcalendar(testEvent)
+	const event = forFullcalendar(timezone, testEvent)
 	expect(event).toMatchObject({
 		title: "Meeting",
-		start: testEvent.StartDateTime,
-		end: testEvent.EndDateTime,
+		start: sameMoment(testEvent.StartDateTime),
+		end: sameMoment(testEvent.EndDateTime),
 		allDay: false,
 		editable: true,
 		type: "Event",
@@ -91,7 +128,7 @@ it("produces data for a FullCalendar event", () => {
 })
 
 it("sets the 'allDay' flag in FullCalendar if appropriate", () => {
-	const event = forFullcalendar({ ...testEvent, IsAllDayEvent: true })
+	const event = forFullcalendar(timezone, { ...testEvent, IsAllDayEvent: true })
 	expect(event).toHaveProperty("allDay", true)
 })
 
@@ -106,10 +143,10 @@ it("sets the 'allDay' flag in FullCalendar if appropriate", () => {
  * See: https://github.com/fullcalendar/fullcalendar/issues/3854
  */
 it("adds one day to the `end` date for all-day events", () => {
-	const event = forFullcalendar({
+	const event = forFullcalendar(timezone, {
 		...testEvent,
 		EndDateTime: new Date("2018-07-12T00:00-07:00"),
 		IsAllDayEvent: true
 	})
-	expect(event.end).toEqual(new Date("2018-07-13T00:00-07:00"))
+	expect(event.end).toEqual(sameMoment("2018-07-13T00:00-07:00"))
 })

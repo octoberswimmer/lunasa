@@ -67,6 +67,7 @@
 			].filter(function(x) { return !!x; }),
 			labels: {!labelsAsJson},
 			language: "{!JSINHTMLENCODE(locale)}",
+			timezone: "{!JSINHTMLENCODE(timezone)}",
 			root: document.getElementById("root"),
 			assistiveRoot: document.getElementById("mount"),
 			sessionToken: "{!JSINHTMLENCODE($Api.Session_ID)}",

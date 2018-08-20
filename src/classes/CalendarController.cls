@@ -25,6 +25,10 @@ public class CalendarController {
 		return userInfo.getLocale();
 	}
 
+	public String getTimezone() {
+		return userInfo.getTimezone().toString();
+	}
+
 	public String getSortFieldsAsJson() {
 		List<Account_Scheduler_Sort_Field__mdt> sortFields = [
 			SELECT

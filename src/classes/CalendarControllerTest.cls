@@ -15,6 +15,13 @@ private class CalendarControllerTest {
 				'locale string matches the pattern xx_XX');
 	}
 
+	@isTest static void getTimezone_returns_a_timezone() {
+		CalendarController calendarController = new CalendarController(null);
+		String timezone = calendarController.getTimezone();
+		System.assert(Pattern.matches('[a-zA-Z_\\-]+/[a-zA-Z_\\-/]+', timezone),
+				timezone + ' is a time zone');
+	}
+
 	@isTest static void getSortFieldsAsJson_returns_serialized_data() {
 		CalendarController calendarController = new CalendarController(null);
 		String data = calendarController.getSortFieldsAsJson();

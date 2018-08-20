@@ -15,17 +15,19 @@ import DateTime from "./forms/DateTime"
 type Props = {
 	description: ?SObjectDescription, // description may be loading when form renders
 	fieldSet: FS.FieldSet,
-	getReference?: (fieldName: string) => ?Record
+	getReference?: (fieldName: string) => ?Record,
+	timezone: string
 }
 
 export default function SObjectForm({
 	description,
 	fieldSet,
-	getReference
+	getReference,
+	timezone
 }: Props) {
 	return (
 		<Form className="slds-form slds-form_stacked">
-			{inputsForFieldSet(fieldSet, description, getReference)}
+			{inputsForFieldSet(fieldSet, description, getReference, timezone)}
 		</Form>
 	)
 }
@@ -34,7 +36,8 @@ export default function SObjectForm({
 function inputsForFieldSet(
 	fieldSet: FS.FieldSet,
 	description: ?SObjectDescription,
-	getReference: ?(fieldName: string) => ?Record
+	getReference: ?(fieldName: string) => ?Record,
+	timezone: string
 ): React.Node {
 	const inputs = []
 	for (let i = 0; i < fieldSet.length; i += 2) {
@@ -49,7 +52,7 @@ function inputsForFieldSet(
 						className="slds-has-flexi-truncate slds-p-horizontal_medium"
 						key={field.name}
 					>
-						{inputFor(field, description, getReference)}
+						{inputFor(field, description, getReference, timezone)}
 					</div>
 				))}
 			</div>
@@ -72,7 +75,8 @@ function FormElement(props: { children: React.Node, label: string }) {
 function inputFor(
 	{ label, name, type }: FS.Field,
 	description: ?SObjectDescription,
-	getReference: ?(fieldName: string) => ?Record
+	getReference: ?(fieldName: string) => ?Record,
+	timezone: string
 ): React.Node {
 	switch (type) {
 		case "boolean":
@@ -101,6 +105,7 @@ function inputFor(
 					label={label}
 					name={name}
 					showTime={false}
+					timezone={timezone}
 				/>
 			)
 		case "datetime":
@@ -109,6 +114,7 @@ function inputFor(
 					containerClassName="slds-p-vertical_xx-small"
 					label={label}
 					name={name}
+					timezone={timezone}
 				/>
 			)
 		case "picklist":

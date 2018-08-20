@@ -13,8 +13,12 @@ import Calendar from "@salesforce/design-system-react/components/date-picker/pri
 import Timepicker from "@salesforce/design-system-react/components/time-picker"
 import classNames from "classnames"
 import { Field } from "formik"
-import moment from "moment"
+import moment from "moment-timezone"
 import * as React from "react"
+import {
+	mergeDateAndTime,
+	setTimezonePreserveClockTime
+} from "../../util/moment"
 import { Label } from "../i18n/Label"
 
 // Patch the Datepicker calendar so that it does not steal focus from the text
@@ -45,15 +49,16 @@ type Props = {
 	containerClassName?: string | string[],
 	label: string,
 	name: string,
-	showTime?: boolean
+	showTime?: boolean,
+	timezone: string
 }
 
-// TODO: input values should be editable by typing
 export default function DateTime({
 	containerClassName,
 	label,
 	name,
-	showTime
+	showTime,
+	timezone
 }: Props) {
 	return (
 		<Field
@@ -76,43 +81,64 @@ export default function DateTime({
 								addFieldError(form, name, "Invalid date")
 							} else {
 								removeFieldError(form, name, "Invalid date")
-								form.setFieldValue(
-									name,
-									mergeDateAndTime({
-										date,
-										time: field.value || date
-									})
-								)
+								// Datepicker assumes browser local timezone, so
+								// we need to modify the value for the user's
+								// timezone setting.
+								const dateWithTz = setTimezonePreserveClockTime(timezone, date)
+								const value = mergeDateAndTime({
+									date: dateWithTz,
+									// Assume value in field state is in
+									// user's chosen timezone.
+									time: moment.tz(field.value || dateWithTz, timezone)
+								}).toDate()
+								form.setFieldValue(name, value)
 							}
 						}}
 						formatter={(date: ?Date): string =>
 							date ? moment(date).format("L") : ""
 						}
 						parser={(inputStr: string): Date =>
+							// Parse inputs according to browser local timezone;
+							// we make the switch to the user's chosen timezone
+							// in the `onChange` handler.
 							moment(inputStr, "L", true).toDate()
 						}
 						triggerClassName="slds-col"
 						value={
-							moment.isDate(field.value)
-								? field.value
-								: moment(field.value).toDate()
+							// Datepicker assumes local timezone, so convert
+							// value for display.
+							setTimezonePreserveClockTime(
+								null,
+								moment.tz(field.value, timezone)
+							).toDate()
 						}
 					/>
 					{showTime !== false ? (
 						<Timepicker
-							label={<Label>Time</Label>}
+							label={
+								<Label
+									with={{ timezone: moment.tz.zone(timezone).abbr(moment()) }}
+								>
+									Time
+								</Label>
+							}
 							onDateChange={(time: Date, inputStr: string) => {
 								if (!isValidDate(time)) {
 									addFieldError(form, name, "Invalid time")
 								} else {
 									removeFieldError(form, name, "Invalid time")
-									form.setFieldValue(
-										name,
-										mergeDateAndTime({
-											date: field.value || time,
-											time
-										})
+									// Timepicker assumes browser local
+									// timezone, so we need to modify the value
+									// for the user's timezone setting.
+									const timeWithTz = setTimezonePreserveClockTime(
+										timezone,
+										time
 									)
+									const value = mergeDateAndTime({
+										date: moment.tz(field.value || timeWithTz, timezone),
+										time: timeWithTz
+									}).toDate()
+									form.setFieldValue(name, value)
 								}
 							}}
 							formatter={(date: ?Date): string =>
@@ -123,12 +149,19 @@ export default function DateTime({
 								// from changing erratically while the user is
 								// editing the time. "LT" specifies time-only format
 								// for the user's locale.
+								//
+								// Parse assuming browser local timezone. We
+								// convert to the user's chosen timezone in the
+								// `onDateChange` method.
 								moment(input, "LT", true).toDate()
 							}
 							value={
-								moment.isDate(field.value)
-									? field.value
-									: moment(field.value).toDate()
+								// Convert to browser local timezone so that
+								// Timepicker displays the time correctly.
+								setTimezonePreserveClockTime(
+									null,
+									moment.tz(field.value, timezone)
+								).toDate()
 							}
 						/>
 					) : null}
@@ -200,18 +233,6 @@ function setFieldErrors(form: Object, fieldName: string, errors: string[]) {
 		delete errors[fieldName]
 		form.setErrors(errors)
 	}
-}
-
-/*
- * `mergeDateAndTime` creates a new `Date` value that combines the date of one
- * input with the time-of-day of the other input.
- */
-function mergeDateAndTime({ date, time }: { date: Date, time: Date }): Date {
-	const result = new Date(time)
-	result.setFullYear(date.getFullYear())
-	result.setMonth(date.getMonth())
-	result.setDate(date.getDate())
-	return result
 }
 
 /*

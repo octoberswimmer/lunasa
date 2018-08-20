@@ -12,7 +12,7 @@ import "jest-enzyme"
 
 // jQuery UI uses AMD to load dependencies. That works fine in production
 // because Webpack provides an AMD loader. But in testing we need a shim.
-import "./frontend/amdShim.testHelper.js"
+import "./frontend/test/amdShim.testHelper.js"
 
 configure({ adapter: new Adapter() })
 
