@@ -47,7 +47,8 @@ export type State = AsyncActionState & {
 	eventDescription: ?SObjectDescription,
 	eventDraft: ?$Shape<Event>,
 	referenceData: { [key: Id]: Record }, // map from Event IDs to What and Who properties
-	timezone: string
+	timezone: string,
+	userId: Id
 }
 
 export default class EventContainer extends Container<State> {
@@ -64,7 +65,8 @@ export default class EventContainer extends Container<State> {
 		eventCreateFieldSet: FieldSet,
 		remoteObject?: RemoteObject<Event>,
 		restClient: Promise<RestApi>,
-		timezone: string
+		timezone: string,
+		userId: Id
 	}) {
 		super()
 		this._remoteObject = opts.remoteObject || Events
@@ -76,7 +78,8 @@ export default class EventContainer extends Container<State> {
 			eventDescription: null,
 			eventDraft: null,
 			referenceData: {},
-			timezone: opts.timezone
+			timezone: opts.timezone,
+			userId: opts.userId
 		}
 
 		// Memoizing methods that fetch data from APIs avoids loops where
@@ -196,10 +199,9 @@ export default class EventContainer extends Container<State> {
 		const end = setTimezone(timezone, rangeEnd).endOf("day")
 		return this._fetchEvents({
 			where: {
-				and: {
-					StartDateTime: { lt: visualforceDatetime(end) },
-					EndDateTime: { gt: visualforceDatetime(start) }
-				}
+				StartDateTime: { lt: visualforceDatetime(end) },
+				EndDateTime: { gt: visualforceDatetime(start) },
+				OwnerId: { eq: this.state.userId }
 			}
 		})
 	}

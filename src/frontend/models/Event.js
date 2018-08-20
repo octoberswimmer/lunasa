@@ -12,6 +12,7 @@ export type Event = {
 	Description: string,
 	Id: string,
 	IsAllDayEvent: boolean,
+	OwnerId?: Id,
 	ShowAs?: string,
 	StartDateTime: Date | number,
 	Subject: string,

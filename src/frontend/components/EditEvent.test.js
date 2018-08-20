@@ -28,7 +28,12 @@ const draft = {
 
 const restClient = RestApi("0000")
 const timezone = moment.tz.guess()
-const eventsOpts = { eventCreateFieldSet, restClient, timezone }
+const eventsOpts = {
+	eventCreateFieldSet,
+	restClient,
+	timezone,
+	userId: "testuserid"
+}
 
 afterEach(() => {
 	jest.clearAllMocks()
