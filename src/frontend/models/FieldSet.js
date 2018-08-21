@@ -19,8 +19,9 @@ export type FieldType =
 	| "url" // given as string
 
 export type Field = {
-	name: string,
 	label: string,
+	name: string,
+	required?: boolean,
 	type: FieldType
 }
 

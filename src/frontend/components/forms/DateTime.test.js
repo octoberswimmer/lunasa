@@ -510,6 +510,25 @@ it("updates time but not date when time input changes", async () => {
 	}
 })
 
+it("displays an asterisk in label if the field is required", () => {
+	const wrapper = mount(
+		<DateTime
+			label="Start"
+			name="start"
+			required={true}
+			timezone={moment.tz.guess()}
+		/>
+	)
+	expect(wrapper).toContainReact(
+		<legend className="slds-form-element__label">
+			<abbr className="slds-required" title="required">
+				*
+			</abbr>
+			Start
+		</legend>
+	)
+})
+
 it("displays an error on invalid date entry", () => {
 	const start = new Date("2018-06-29T10:00")
 	const wrapper = mount(
@@ -522,6 +541,7 @@ it("displays an error on invalid date entry", () => {
 	inputElement(input).value = "not a date"
 	input.simulate("change")
 	expect(wrapper.text()).toMatch("Invalid date")
+	expect(wrapper.find(".slds-form-element.slds-has-error")).toExist()
 })
 
 it("clears an invalid date error when a valid date is entered", () => {

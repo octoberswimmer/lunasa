@@ -33,6 +33,30 @@
         <value>Event</value>
     </labels>
     <labels>
+        <fullName>Field_Required</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error message when a required field has been left blank.</shortDescription>
+        <value>This field is required</value>
+    </labels>
+    <labels>
+        <fullName>Invalid_Date</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error message when invalid date value has been entered.</shortDescription>
+        <value>Invalid date</value>
+    </labels>
+    <labels>
+        <fullName>Invalid_Time</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error message when invalid time value has been entered.</shortDescription>
+        <value>Invalid time</value>
+    </labels>
+    <labels>
         <fullName>Loading</fullName>
         <categories>Account_Scheduler</categories>
         <language>en_US</language>

@@ -62,7 +62,7 @@ export function getLabel(
  */
 if (process.env.NODE_ENV !== "production") {
 	const origError = console.error
-	const labelPropTypePattern = /Invalid prop `(?:label|labels\.label|assistiveText)` of type `object` supplied/
+	const labelPropTypePattern = /Invalid prop `(?:label|labels\.label|assistiveText|errorText)` of type `object` supplied/
 	// $FlowFixMe
 	console.error = function error(message) {
 		if (typeof message === "string" && message.match(labelPropTypePattern)) {
