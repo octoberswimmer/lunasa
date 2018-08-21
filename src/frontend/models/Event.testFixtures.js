@@ -25,46 +25,55 @@ export const eventCreateFieldSet: FieldSet = [
 	{
 		name: "Subject",
 		label: "Subject",
+		required: true,
 		type: "combobox"
 	},
 	{
 		name: "StartDateTime",
 		label: "Start Date Time",
+		required: false,
 		type: "datetime"
 	},
 	{
 		name: "EndDateTime",
 		label: "End Date Time",
+		required: false,
 		type: "datetime"
 	},
 	{
 		name: "IsAllDayEvent",
 		label: "All-Day Event",
+		required: false,
 		type: "boolean"
 	},
 	{
 		name: "AccountId",
 		label: "Account ID",
+		required: false,
 		type: "reference"
 	},
 	{
 		name: "Description",
 		label: "Description",
+		required: false,
 		type: "textarea"
 	},
 	{
 		name: "EventSubtype",
 		label: "Event Subtype",
+		required: false,
 		type: "picklist"
 	},
 	{
 		name: "WhatId",
 		label: "What",
+		required: false,
 		type: "reference"
 	},
 	{
 		name: "ShowAs",
 		label: "Show Time As",
+		required: false,
 		type: "picklist"
 	}
 ]

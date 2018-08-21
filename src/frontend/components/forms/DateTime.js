@@ -19,6 +19,7 @@ import {
 	mergeDateAndTime,
 	setTimezonePreserveClockTime
 } from "../../util/moment"
+import { INVALID_DATE, INVALID_TIME, getErrorText } from "../i18n/errorMessages"
 import { Label } from "../i18n/Label"
 
 // Patch the Datepicker calendar so that it does not steal focus from the text
@@ -50,6 +51,7 @@ type Props = {
 	label: string,
 	name: string,
 	showTime?: boolean,
+	required?: boolean,
 	timezone: string
 }
 
@@ -58,6 +60,7 @@ export default function DateTime({
 	label,
 	name,
 	showTime,
+	required,
 	timezone
 }: Props) {
 	return (
@@ -68,6 +71,7 @@ export default function DateTime({
 					containerClassName={containerClassName}
 					errorMessage={form.errors[name]}
 					label={label}
+					required={required}
 				>
 					<Datepicker
 						labels={{ label: <Label>Date</Label> }}
@@ -78,9 +82,9 @@ export default function DateTime({
 							}: { date: Date, formattedDate: string, timezoneOffset: number }
 						) => {
 							if (!isValidDate(date)) {
-								addFieldError(form, name, "Invalid date")
+								addFieldError(form, name, INVALID_DATE)
 							} else {
-								removeFieldError(form, name, "Invalid date")
+								removeFieldError(form, name, INVALID_DATE)
 								// Datepicker assumes browser local timezone, so
 								// we need to modify the value for the user's
 								// timezone setting.
@@ -124,9 +128,9 @@ export default function DateTime({
 							}
 							onDateChange={(time: Date, inputStr: string) => {
 								if (!isValidDate(time)) {
-									addFieldError(form, name, "Invalid time")
+									addFieldError(form, name, INVALID_TIME)
 								} else {
-									removeFieldError(form, name, "Invalid time")
+									removeFieldError(form, name, INVALID_TIME)
 									// Timepicker assumes browser local
 									// timezone, so we need to modify the value
 									// for the user's timezone setting.
@@ -175,13 +179,20 @@ function FieldSet({
 	children,
 	containerClassName,
 	errorMessage,
-	label
+	label,
+	required
 }: {
 	children: React.Node,
 	containerClassName?: string | string[],
 	errorMessage?: ?string,
-	label: string
+	label: React.Node,
+	required?: boolean
 }) {
+	const requiredAsterisk = required ? (
+		<abbr className="slds-required" title="required">
+			*
+		</abbr>
+	) : null
 	return (
 		<div
 			className={classNames(
@@ -191,11 +202,16 @@ function FieldSet({
 			)}
 		>
 			<div className="slds-form-element__control">
-				<legend className="slds-form-element__label">{label}</legend>
+				<legend className="slds-form-element__label">
+					{requiredAsterisk}
+					{label}
+				</legend>
 				<div className="slds-grid slds-gutters_x-small">{children}</div>
 			</div>
 			{errorMessage ? (
-				<div className="slds-form-element__help">{errorMessage}</div>
+				<div className="slds-form-element__help">
+					{getErrorText(errorMessage)}
+				</div>
 			) : null}
 		</div>
 	)

@@ -1,5 +1,6 @@
 /* @flow strict */
 
+import classNames from "classnames"
 import { Field, Form } from "formik"
 import * as React from "react"
 import * as FS from "../models/FieldSet"
@@ -11,9 +12,13 @@ import {
 import Checkbox from "./forms/Checkbox"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
+import { getErrorText } from "./i18n/errorMessages"
+
+type Errors = { [key: string]: string }
 
 type Props = {
-	description: ?SObjectDescription, // description may be loading when form renders
+	description: SObjectDescription, // description may be loading when form renders
+	errors?: ?Errors,
 	fieldSet: FS.FieldSet,
 	getReference?: (fieldName: string) => ?Record,
 	timezone: string
@@ -21,13 +26,14 @@ type Props = {
 
 export default function SObjectForm({
 	description,
+	errors,
 	fieldSet,
 	getReference,
 	timezone
 }: Props) {
 	return (
 		<Form className="slds-form slds-form_stacked">
-			{inputsForFieldSet(fieldSet, description, getReference, timezone)}
+			{inputsForFieldSet(fieldSet, errors, description, getReference, timezone)}
 		</Form>
 	)
 }
@@ -35,7 +41,8 @@ export default function SObjectForm({
 // Get fields in pairs, and arrange inputs in a two-column grid
 function inputsForFieldSet(
 	fieldSet: FS.FieldSet,
-	description: ?SObjectDescription,
+	errors: ?Errors,
+	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
 	timezone: string
 ): React.Node {
@@ -52,7 +59,13 @@ function inputsForFieldSet(
 						className="slds-has-flexi-truncate slds-p-horizontal_medium"
 						key={field.name}
 					>
-						{inputFor(field, description, getReference, timezone)}
+						{inputFor(
+							field,
+							errors && errors[field.name],
+							description,
+							getReference,
+							timezone
+						)}
 					</div>
 				))}
 			</div>
@@ -61,20 +74,43 @@ function inputsForFieldSet(
 	return inputs
 }
 
-function FormElement(props: { children: React.Node, label: string }) {
+function FormElement(props: {
+	children: React.Node,
+	errorMessage?: ?string,
+	label: string,
+	required?: boolean
+}) {
+	const requiredAsterisk = props.required ? (
+		<abbr className="slds-required" title="required">
+			*
+		</abbr>
+	) : null
 	return (
-		<div className="slds-form-element slds-p-vertical_xx-small">
+		<div
+			className={classNames("slds-form-element", "slds-p-vertical_xx-small", {
+				"slds-has-error": Boolean(props.errorMessage)
+			})}
+		>
 			<label>
-				<span className="slds-form-element__label">{props.label}</span>
+				<span className="slds-form-element__label">
+					{requiredAsterisk}
+					{props.label}
+				</span>
 				<div className="slds-form-element__control">{props.children}</div>
+				{props.errorMessage ? (
+					<div className="slds-form-element__help">
+						{getErrorText(props.errorMessage)}
+					</div>
+				) : null}
 			</label>
 		</div>
 	)
 }
 
 function inputFor(
-	{ label, name, type }: FS.Field,
-	description: ?SObjectDescription,
+	{ label, name, required, type }: FS.Field,
+	errorMessage: ?string,
+	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
 	timezone: string
 ): React.Node {
@@ -83,19 +119,22 @@ function inputFor(
 			return (
 				<Checkbox
 					className="slds-p-vertical_xx-small"
+					errorText={getErrorText(errorMessage)}
 					label={label}
 					name={name}
+					required={required}
 				/>
 			)
 		case "combobox":
-			const options =
-				(description && getPicklistValues(description, name)) || []
+			const options = getPicklistValues(description, name) || []
 			return (
 				<Combobox
 					classNameContainer="slds-p-vertical_xx-small"
+					errorText={getErrorText(errorMessage)}
 					label={label}
 					name={name}
 					options={options}
+					required={required}
 				/>
 			)
 		case "date":
@@ -105,6 +144,7 @@ function inputFor(
 					label={label}
 					name={name}
 					showTime={false}
+					required={required}
 					timezone={timezone}
 				/>
 			)
@@ -114,13 +154,18 @@ function inputFor(
 					containerClassName="slds-p-vertical_xx-small"
 					label={label}
 					name={name}
+					required={required}
 					timezone={timezone}
 				/>
 			)
 		case "picklist":
-			const values = (description && getPicklistValues(description, name)) || []
+			const values = getPicklistValues(description, name) || []
 			return (
-				<FormElement label={label}>
+				<FormElement
+					errorMessage={errorMessage}
+					label={label}
+					required={required}
+				>
 					<Field className="slds-select" component="select" name={name}>
 						{values.map(({ label, value }) => (
 							<option key={value} value={value}>
@@ -143,13 +188,21 @@ function inputFor(
 			)
 		case "textarea":
 			return (
-				<FormElement label={label}>
+				<FormElement
+					errorMessage={errorMessage}
+					label={label}
+					required={required}
+				>
 					<Field className="slds-textarea" component="textarea" name={name} />
 				</FormElement>
 			)
 		default:
 			return (
-				<FormElement label={label}>
+				<FormElement
+					errorMessage={errorMessage}
+					label={label}
+					required={required}
+				>
 					<Field className="slds-input" type="text" name={name} />
 				</FormElement>
 			)
