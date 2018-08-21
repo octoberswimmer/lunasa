@@ -33,7 +33,8 @@ export function lunasa({
 	assistiveRoot,
 	sessionToken,
 	sortFields,
-	staticDirectory
+	staticDirectory,
+	userId
 }: {
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
@@ -45,7 +46,8 @@ export function lunasa({
 	assistiveRoot: HTMLElement,
 	sessionToken: string,
 	sortFields: SortField[],
-	staticDirectory: string
+	staticDirectory: string,
+	userId: string
 }) {
 	// Set base path for requests for lazily-loaded Javascript chunks.
 	declare var __webpack_public_path__: string
@@ -61,7 +63,12 @@ export function lunasa({
 		restClient,
 		sortFields
 	})
-	const events = new Events({ eventCreateFieldSet, restClient, timezone })
+	const events = new Events({
+		eventCreateFieldSet,
+		restClient,
+		timezone,
+		userId
+	})
 	ReactDOM.render(
 		<Provider inject={[accounts, events]}>
 			<IconSettings
@@ -108,7 +115,8 @@ if (process.env.NODE_ENV !== "production") {
 				assistiveRoot,
 				sessionToken: "0000",
 				sortFields: sortFieldFixtures.sortFields,
-				staticDirectory: ""
+				staticDirectory: "",
+				userId: "testuserid"
 			})
 		}
 	)

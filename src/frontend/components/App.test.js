@@ -32,7 +32,12 @@ const accountsOpts = {
 	restClient
 }
 
-const eventsOpts = { eventCreateFieldSet, restClient, timezone }
+const eventsOpts = {
+	eventCreateFieldSet,
+	restClient,
+	timezone,
+	userId: "testuserId"
+}
 
 var initializeCalendar: JestMockFn<[], void>
 

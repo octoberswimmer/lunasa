@@ -13,6 +13,7 @@ export const events: Event[] = [
 			.toDate(),
 		Description: "test event",
 		IsAllDayEvent: false,
+		OwnerId: "testuserid",
 		StartDateTime: moment()
 			.startOf("hour")
 			.toDate(),

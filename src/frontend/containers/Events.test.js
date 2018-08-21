@@ -17,7 +17,8 @@ const eventsOpts = {
 	eventCreateFieldSet: ef.eventCreateFieldSet,
 	remoteObject: EventModel,
 	restClient,
-	timezone
+	timezone,
+	userId: "testuserid"
 }
 
 afterEach(() => {
@@ -38,10 +39,9 @@ it("requests events by date range", () => {
 	expect(retrieve).toHaveBeenCalledTimes(1)
 	expect(retrieve).toHaveBeenCalledWith({
 		where: {
-			and: {
-				StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
-				EndDateTime: { gt: visualforceDatetime(today.startOf("day")) }
-			}
+			StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
+			EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
+			OwnerId: { eq: eventsOpts.userId }
 		}
 	})
 })
@@ -90,10 +90,9 @@ it("sets time range to start and end of day in the user's time zone", () => {
 		events.getEventsByDateRange(moment.utc(inputTime), moment.utc(inputTime))
 		expect(retrieve).toHaveBeenCalledWith({
 			where: {
-				and: {
-					StartDateTime: { lt: expectedEnd },
-					EndDateTime: { gt: expectedStart }
-				}
+				StartDateTime: { lt: expectedEnd },
+				EndDateTime: { gt: expectedStart },
+				OwnerId: { eq: eventsOpts.userId }
 			}
 		})
 	}
@@ -108,10 +107,9 @@ it("avoids making the same query twice in a row", () => {
 	expect(retrieve).toHaveBeenCalledTimes(1)
 	expect(retrieve).toHaveBeenCalledWith({
 		where: {
-			and: {
-				StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
-				EndDateTime: { gt: visualforceDatetime(today.startOf("day")) }
-			}
+			StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
+			EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
+			OwnerId: { eq: eventsOpts.userId }
 		}
 	})
 })

@@ -72,7 +72,8 @@
 			assistiveRoot: document.getElementById("mount"),
 			sessionToken: "{!JSINHTMLENCODE($Api.Session_ID)}",
 			sortFields: {!sortFieldsAsJson},
-			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}"
+			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}",
+			userId: "{!JSINHTMLENCODE($User.Id)}"
 		});
 	</script>
 </apex:page>
