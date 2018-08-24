@@ -13,7 +13,7 @@ import {
 	eventDescription
 } from "../models/Event.testFixtures"
 import RestApi from "../api/RestApi"
-import { delay, failIfMissing } from "../testHelpers"
+import { delay, failIfMissing, inputElement } from "../testHelpers"
 import EditEvent from "./EditEvent"
 import SObjectForm from "./SObjectForm"
 import { LabelProvider } from "./i18n/Label"
@@ -95,6 +95,18 @@ it("discards event draft when the user clicks 'Cancel'", async () => {
 	button.simulate("click")
 	await delay()
 	expect(events.state.eventDraft).toBeFalsy()
+})
+
+it("displays errors if required fields are left blank", async () => {
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ ...draft, Subject: "Meeting" })
+	await events._fetchEventDescription()
+	const wrapper = mount(<EditEvent />, events)
+	const input = wrapper.find(".slds-combobox input")
+	inputElement(input).value = ""
+	input.simulate("change")
+	await delay()
+	expect(wrapper.find(".slds-combobox")).toIncludeText("This field is required")
 })
 
 it("displays account name when editing", async () => {

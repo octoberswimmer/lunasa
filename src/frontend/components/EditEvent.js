@@ -13,6 +13,7 @@ import Events from "../containers/Events"
 import { type FieldSet } from "../models/FieldSet"
 import { getDefaultValues } from "../models/SObjectDescription"
 import "./EditEvent.css"
+import { FIELD_REQUIRED } from "./i18n/errorMessages"
 import { Label } from "./i18n/Label"
 import SObjectForm from "./SObjectForm"
 
@@ -43,6 +44,16 @@ export default function EditEvent(props: Props) {
 							actions.setSubmitting(false)
 							// TODO:
 							// actions.setErrors(submissionerrors)
+						}}
+						validate={(values, props) => {
+							const errors = {}
+							for (const { name, required } of eventCreateFieldSet) {
+								const value = values[name]
+								if (required && (value === "" || value == null)) {
+									errors[name] = FIELD_REQUIRED
+								}
+							}
+							return errors
 						}}
 						render={({ errors, handleSubmit, isSubmitting, values }) => (
 							<Modal
@@ -97,6 +108,7 @@ export default function EditEvent(props: Props) {
 							>
 								<SObjectForm
 									description={description}
+									errors={errors}
 									fieldSet={toggleTimeInputs(
 										Boolean(values.IsAllDayEvent),
 										eventCreateFieldSet

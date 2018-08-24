@@ -16,7 +16,8 @@ import { type PickListValue } from "../../models/SObjectDescription"
 type Props = {
 	label: string,
 	name: string,
-	options: PickListValue[]
+	options: PickListValue[],
+	required?: boolean
 }
 
 type State = {

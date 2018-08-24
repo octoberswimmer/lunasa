@@ -9,6 +9,9 @@ public class CalendarController {
 		labels.put('Date', System.Label.Date);
 		labels.put('Edit_Event', System.Label.Edit_Event);
 		labels.put('Event', System.Label.Event);
+		labels.put('Field_Required', System.Label.Field_Required);
+		labels.put('Invalid_Date', System.Label.Invalid_Date);
+		labels.put('Invalid_Time', System.Label.Invalid_Time);
 		labels.put('Loading', System.Label.Loading);
 		labels.put('Next_Page', System.Label.Next_Page);
 		labels.put('Page_Number_With_Page_Count', System.Label.Page_Number_With_Page_Count);
