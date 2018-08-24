@@ -16,6 +16,7 @@ import { delay, inputElement } from "../testHelpers"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
 import SObjectForm from "./SObjectForm"
+import { FIELD_REQUIRED } from "./i18n/errorMessages"
 import { LabelProvider } from "./i18n/Label"
 
 const draft = {
@@ -57,13 +58,22 @@ it("presents a checkbox input", () => {
 		<SObjectForm
 			description={description}
 			fieldSet={[
-				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
+				{
+					name: "IsAllDayEvent",
+					label: "Is All Day Event",
+					required: false,
+					type: "boolean"
+				}
 			]}
 			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find("input[name='IsAllDayEvent']")
 	expect(input.props().type).toBe("checkbox")
+	expect(input.props()).toMatchObject({
+		required: false,
+		type: "checkbox"
+	})
 })
 
 it("presents a checked checkbox when the corresponding value is `true`", () => {
@@ -85,7 +95,14 @@ it("presents a combobox input", () => {
 	const wrapper = mount(
 		<SObjectForm
 			description={description}
-			fieldSet={[{ name: "Subject", label: "Subject", type: "combobox" }]}
+			fieldSet={[
+				{
+					name: "Subject",
+					label: "Subject",
+					required: true,
+					type: "combobox"
+				}
+			]}
 			timezone={timezone}
 		/>
 	)
@@ -110,8 +127,29 @@ it("presents a combobox input", () => {
 				value: "Send Letter/Quote"
 			},
 			{ active: true, defaultValue: false, label: "Other", value: "Other" }
-		]
+		],
+		required: true
 	})
+})
+
+it("displays validation error message with combobox input", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			errors={{ Subject: FIELD_REQUIRED }}
+			fieldSet={[
+				{
+					name: "Subject",
+					label: "Subject",
+					required: true,
+					type: "combobox"
+				}
+			]}
+			timezone={timezone}
+		/>
+	)
+	const input = wrapper.find(Combobox)
+	expect(input).toIncludeText("This field is required")
 })
 
 it("presents a picklist input", () => {
@@ -160,27 +198,43 @@ it("presents a date input", () => {
 	const wrapper = mount(
 		<SObjectForm
 			description={description}
-			fieldSet={[{ name: "Date", label: "Date", type: "date" }]}
+			fieldSet={[
+				{ name: "Date", label: "Date", required: false, type: "date" }
+			]}
 			timezone={timezone}
 		/>
 	)
-	const input = wrapper.find(DateTime)
-	expect(input.props()).toHaveProperty("label", "Date")
-	expect(input.props()).toHaveProperty("name", "Date")
-	expect(input.props()).toHaveProperty("showTime", false)
+	expect(wrapper.find(DateTime).props()).toMatchObject({
+		label: "Date",
+		name: "Date",
+		showTime: false,
+		required: false,
+		timezone
+	})
 })
 
 it("presents a datetime input", () => {
 	const wrapper = mount(
 		<SObjectForm
 			description={description}
-			fieldSet={[{ name: "StartDateTime", label: "Start", type: "datetime" }]}
+			fieldSet={[
+				{
+					name: "StartDateTime",
+					label: "Start",
+					required: false,
+					type: "datetime"
+				}
+			]}
 			timezone={timezone}
 		/>
 	)
 	const input = wrapper.find(DateTime)
-	expect(input.props()).toHaveProperty("label", "Start")
-	expect(input.props()).toHaveProperty("name", "StartDateTime")
+	expect(wrapper.find(DateTime).props()).toMatchObject({
+		label: "Start",
+		name: "StartDateTime",
+		required: false,
+		timezone
+	})
 	expect(input.props()).not.toHaveProperty("showTime")
 })
 
@@ -241,6 +295,44 @@ it("gets a string value from a textarea input", async () => {
 		}),
 		expect.anything()
 	)
+})
+
+it("displays an asterisk in labels for required fields", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			errors={{ Description: FIELD_REQUIRED }}
+			fieldSet={[
+				{
+					name: "Description",
+					label: "Description",
+					required: true,
+					type: "textarea"
+				}
+			]}
+			timezone={timezone}
+		/>
+	)
+	expect(wrapper.find(".slds-form-element__label")).toContainReact(
+		<abbr className="slds-required" title="required">
+			*
+		</abbr>
+	)
+})
+
+it("displays validation errors with form inputs", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			errors={{ Description: FIELD_REQUIRED }}
+			fieldSet={[
+				{ name: "Description", label: "Description", type: "textarea" }
+			]}
+			timezone={timezone}
+		/>
+	)
+	expect(wrapper).toIncludeText("This field is required")
+	expect(wrapper.find(".slds-form-element")).toHaveClassName("slds-has-error")
 })
 
 function mount(
