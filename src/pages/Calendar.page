@@ -60,7 +60,7 @@
 					name: "{!JSINHTMLENCODE(f)}",
 					label: "{!JSINHTMLENCODE(f.Label)}",
 					type: "{!JSINHTMLENCODE(f.Type)}",
-					required: {!f.Required}
+					required: {!OR(f.Required, f.DBRequired)}
 				},
 			</apex:repeat>
 			null
