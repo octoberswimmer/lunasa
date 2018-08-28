@@ -178,11 +178,15 @@ function inputFor(
 		case "reference":
 			const record = getReference && getReference(name)
 			const href = record && hrefFromApiUrl(record.attributes.url)
+			const address = record &&
+				record.BillingAddress && <Address {...record.BillingAddress} />
 			return (
 				<div className="slds-form-element slds-p-vertical_xx-small">
 					<span className="slds-form-element__label">{label}</span>
 					<div className="slds-form-element__control">
 						{record ? <a href={href}>{record.Name}</a> : "-"}
+						<br />
+						{address || null}
 					</div>
 				</div>
 			)
@@ -207,6 +211,18 @@ function inputFor(
 				</FormElement>
 			)
 	}
+}
+
+function Address({ city, country, postalCode, state, street }: FS.Address) {
+	return (
+		<span>
+			{street}
+			<br />
+			{city}, {state} {postalCode}
+			<br />
+			{country}
+		</span>
+	)
 }
 
 const hrefPattern = /\/[A-Za-z_-]+\/[^/]+$/

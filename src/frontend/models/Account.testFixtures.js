@@ -1,6 +1,6 @@
 /* @flow strict */
 
-import { type FieldSet } from "./FieldSet"
+import { type Address, type FieldSet } from "./FieldSet"
 import { type QueryResult } from "./QueryResult"
 
 export const accountFieldSet: FieldSet = [
@@ -135,4 +135,15 @@ export const accountQueryResult: QueryResult = {
 			CreatedDate: "2018-06-01T20:35:50.000+0000"
 		}
 	]
+}
+
+export const address: Address = {
+	city: "Burlington",
+	country: "USA",
+	geocodeAccuracy: null,
+	latitude: null,
+	longitude: null,
+	postalCode: "27215",
+	state: "NC",
+	street: "525 S. Lexington Ave"
 }

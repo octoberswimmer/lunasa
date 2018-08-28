@@ -14,7 +14,11 @@ async function request<T>(sessionToken: string, url: string): Promise<T> {
 			Authorization: `Bearer ${sessionToken}`
 		})
 	})
-	return resp.json()
+	const data = await resp.json()
+	if (data && data.errorCode) {
+		throw new Error(data.message || data.errorCode)
+	}
+	return data
 }
 
 export default function ListViewsApi(sessionToken: string) {

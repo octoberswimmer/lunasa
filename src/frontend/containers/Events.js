@@ -28,7 +28,7 @@ import {
 	type SObjectDescription,
 	getRelationshipName
 } from "../models/SObjectDescription"
-import { type Record } from "../models/QueryResult"
+import { type Record, getId, getType } from "../models/QueryResult"
 import { stringifyCondition } from "../models/WhereCondition"
 import { setTimezone } from "../util/moment"
 import {
@@ -227,18 +227,41 @@ export default class EventContainer extends Container<State> {
 				operator: "equals",
 				values: [`'${eventId}'`]
 			})
-			// Limit fetched relationship  data to `Name` fields from `What` and
-			// `Who` for now.
+			// Limit fetched relationship data to `Name` and `BillingAddress`
+			// fields from `What` and `Who` for now.
 			const query = `SELECT What.Name, Who.Name FROM Event WHERE ${where}`
 			const client = await this._restClient
 			const result = await client.query(query)
 			const matchingRecord = result.records[0]
 			if (matchingRecord) {
+				const [WhatAddress, WhoAddress] = await Promise.all([
+					this._fetchBillingAddress(matchingRecord.What),
+					this._fetchBillingAddress(matchingRecord.Who)
+				])
+				matchingRecord.What = WhatAddress
+				matchingRecord.Who = WhoAddress
 				await this.setState(state => ({
 					referenceData: { ...state.referenceData, [eventId]: matchingRecord }
 				}))
 			}
 		})
+	}
+
+	async _fetchBillingAddress<T: ?Record>(record: T): Promise<T> {
+		if (!record || getType(record) !== "Account") {
+			return record
+		}
+		const where = stringifyCondition({
+			field: "Id",
+			operator: "equals",
+			values: [`'${getId(record)}'`]
+		})
+		const client = await this._restClient
+		const result = await client.query(
+			`SELECT BillingAddress FROM Account WHERE ${where}`
+		)
+		const resultRecord = result.records[0]
+		return { ...resultRecord, ...record }
 	}
 
 	newEvent(args: {
@@ -253,9 +276,11 @@ export default class EventContainer extends Container<State> {
 	 * Create or update a draft event
 	 */
 	async setEventDraft(details: $Shape<Event>, account?: Record): Promise<void> {
+		const accountWithAddress =
+			account && (await this._fetchBillingAddress(account))
 		await this.setState(state => {
-			const referenceData = account
-				? { ...state.referenceData, draft: { What: account } }
+			const referenceData = accountWithAddress
+				? { ...state.referenceData, draft: { What: accountWithAddress } }
 				: state.referenceData
 			return {
 				eventDraft: details,

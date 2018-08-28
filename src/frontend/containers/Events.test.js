@@ -134,30 +134,36 @@ it("does not transmit event description request more than once", async () => {
 })
 
 it("gets data from a referenced record", async () => {
-	expect.assertions(3)
 	const referencedRecords = {
 		What: {
 			Name: "Account Name",
 			attributes: {
 				type: "Account",
-				url: "https://host/accounts/someAccountId"
+				url: "/sobjects/Account/someAccountId"
 			}
 		},
 		attributes: {
 			type: "Event",
-			url: "https://host/accounts/someEventId"
+			url: "/sobjects/Account/someEventId"
 		}
 	}
 	const client = await restClient
 	jest.spyOn(client, "query").mockImplementation(
 		async (query: string): Promise<QueryResult> => {
-			expect(query).toMatch(
-				/SELECT.*What\.Name.*FROM Event.*WHERE Id = 'someEventId'/
-			)
-			return {
-				done: true,
-				totalSize: 1,
-				records: [referencedRecords]
+			if (
+				query.match(/SELECT.*What\.Name.*FROM Event.*WHERE Id = 'someEventId'/)
+			) {
+				return {
+					done: true,
+					totalSize: 1,
+					records: [referencedRecords]
+				}
+			} else {
+				return {
+					done: true,
+					totalSize: 0,
+					records: []
+				}
 			}
 		}
 	)

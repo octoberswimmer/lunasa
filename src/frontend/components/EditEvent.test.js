@@ -7,11 +7,13 @@ import moment from "moment-timezone"
 import * as React from "react"
 import { Provider } from "unstated"
 import Events from "../containers/Events"
+import * as af from "../models/Account.testFixtures"
 import * as clf from "../models/CustomLabel.testFixtures"
 import {
 	eventCreateFieldSet,
 	eventDescription
 } from "../models/Event.testFixtures"
+import { type QueryResult } from "../models/QueryResult"
 import RestApi from "../api/RestApi"
 import { delay, failIfMissing, inputElement } from "../testHelpers"
 import EditEvent from "./EditEvent"
@@ -109,12 +111,63 @@ it("displays errors if required fields are left blank", async () => {
 	expect(wrapper.find(".slds-combobox")).toIncludeText("This field is required")
 })
 
-it("displays account name when editing", async () => {
+it("displays account name and billing address when creating a new event", async () => {
+	const account = failIfMissing(
+		af.accountQueryResult.records.find(a => a.Name === "Edge Communications")
+	)
+	const client = await restClient
+	jest.spyOn(client, "query").mockImplementation(
+		async (query): Promise<QueryResult> => {
+			if (
+				query.match(
+					/SELECT .*\bBillingAddress\b.* FROM Account WHERE Id = '001f200001XrDsvAAF'/
+				)
+			) {
+				return {
+					totalSize: 1,
+					done: true,
+					records: [
+						{
+							BillingAddress: af.address,
+							attributes: {
+								type: "Account",
+								url: "/services/data/v40.0/sobjects/Account/001f200001XrDsvAAF"
+							}
+						}
+					]
+				}
+			} else {
+				return {
+					done: true,
+					totalSize: 0,
+					records: []
+				}
+			}
+		}
+	)
+	const events = new Events(eventsOpts)
+	await events.setEventDraft(
+		events.newEvent({ account, date: moment(draft.StartDateTime) }),
+		account
+	)
+	const wrapper = mount(<EditEvent />, events)
+	await delay(100)
+	wrapper.update()
+	expect(events.state.errors).toEqual([])
+	expect(wrapper).toContainReact(
+		<a href="/lightning/r/Account/001f200001XrDsvAAF/view">
+			Edge Communications
+		</a>
+	)
+	expect(wrapper.text()).toMatch(/525 S. Lexington Ave.*Burlington/)
+})
+
+it("displays account name and billing address when editing", async () => {
 	const referencedRecords = {
 		What: {
 			Name: "Edge Communications",
 			attributes: {
-				type: "Account",
+				type: "Name",
 				url: "/services/data/v40.0/sobjects/Account/001f200001XrDsvAAF"
 			}
 		},
@@ -124,16 +177,45 @@ it("displays account name when editing", async () => {
 		}
 	}
 	const client = await restClient
-	jest.spyOn(client, "query").mockImplementation(async query => {
-		expect(query).toBe(
-			"SELECT What.Name, Who.Name FROM Event WHERE Id = 'someEventId'"
-		)
-		return {
-			totalSize: 1,
-			done: true,
-			records: [referencedRecords]
+	jest.spyOn(client, "query").mockImplementation(
+		async (query): Promise<QueryResult> => {
+			if (
+				query.match(
+					/SELECT .*\bWhat.Name\b.* FROM Event WHERE Id = 'someEventId'/
+				)
+			) {
+				return {
+					totalSize: 1,
+					done: true,
+					records: [referencedRecords]
+				}
+			} else if (
+				query.match(
+					/SELECT .*\bBillingAddress\b.* FROM Account WHERE Id = '001f200001XrDsvAAF'/
+				)
+			) {
+				return {
+					totalSize: 1,
+					done: true,
+					records: [
+						{
+							BillingAddress: af.address,
+							attributes: {
+								type: "Account",
+								url: "/services/data/v40.0/sobjects/Account/001f200001XrDsvAAF"
+							}
+						}
+					]
+				}
+			} else {
+				return {
+					done: true,
+					totalSize: 0,
+					records: []
+				}
+			}
 		}
-	})
+	)
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ ...draft, Id: "someEventId" })
 	const wrapper = mount(<EditEvent />, events)
@@ -145,6 +227,7 @@ it("displays account name when editing", async () => {
 			Edge Communications
 		</a>
 	)
+	expect(wrapper.text()).toMatch(/525 S. Lexington Ave.*Burlington/)
 })
 
 it("hides time inputs if 'IsAllDay' is selected", async () => {
