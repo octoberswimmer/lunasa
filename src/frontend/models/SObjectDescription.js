@@ -1,6 +1,6 @@
 /* @flow strict */
 
-import { type FieldSet, type FieldType } from "./FieldSet"
+import { type FieldType } from "./FieldSet"
 
 type URL = string
 
@@ -8,6 +8,7 @@ export type PickListValue = {|
 	active: boolean,
 	defaultValue: boolean,
 	label: string,
+	validFor?: ?mixed,
 	value: string
 |}
 
@@ -81,21 +82,6 @@ export type SObjectDescription = {|
 	urlEdit: URL,
 	urlNew: URL
 |}
-
-export function getDefaultValues(
-	description: SObjectDescription,
-	fieldSet: FieldSet
-): Object {
-	const defaultValues = {}
-	for (const field of fieldSet) {
-		const values = getPicklistValues(description, field.name)
-		const def = values && values.find(value => value.defaultValue)
-		if (def) {
-			defaultValues[field.name] = def.value
-		}
-	}
-	return defaultValues
-}
 
 export function getField(
 	description: SObjectDescription,

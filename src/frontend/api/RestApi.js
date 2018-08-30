@@ -1,10 +1,12 @@
 /* @flow strict */
 
+import { type Layout } from "../models/Layout"
 import {
 	type ListView,
 	type ListViewDescription,
 	type ListViews
 } from "../models/ListView"
+import { type RecordTypeInfo } from "../models/RecordType"
 import { type QueryResult } from "../models/QueryResult"
 import productionConstructor from "./RestApi.production"
 
@@ -12,6 +14,7 @@ import productionConstructor from "./RestApi.production"
  * `sobjectType` can be "Account"
  */
 export interface RestApi {
+	fetchLayout(recordType: RecordTypeInfo): Promise<Layout>;
 	fetchListViews(sobjectType: string): Promise<ListViews>;
 	fetchListViewDescription(listView: ListView): Promise<ListViewDescription>;
 	query(soqlQuery: string): Promise<QueryResult>;

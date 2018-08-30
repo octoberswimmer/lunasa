@@ -11,7 +11,8 @@ import * as af from "../models/Account.testFixtures"
 import * as clf from "../models/CustomLabel.testFixtures"
 import {
 	eventCreateFieldSet,
-	eventDescription
+	eventDescription,
+	eventRecordTypeInfos
 } from "../models/Event.testFixtures"
 import { type QueryResult } from "../models/QueryResult"
 import RestApi from "../api/RestApi"
@@ -32,6 +33,7 @@ const restClient = RestApi("0000")
 const timezone = moment.tz.guess()
 const eventsOpts = {
 	eventCreateFieldSet,
+	eventRecordTypeInfos,
 	restClient,
 	timezone,
 	userId: "testuserid"
@@ -51,7 +53,7 @@ it("requests event object description on mount", async () => {
 it("renders a form", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	const form = wrapper.find(SObjectForm)
 	expect(form.props()).toMatchObject({
@@ -67,7 +69,7 @@ it("renders a form", async () => {
 it("saves an event", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	await submit(wrapper)
 	expect(events.state.events).toContainEqual(
@@ -78,7 +80,7 @@ it("saves an event", async () => {
 it("submits the form when the user clicks 'Save'", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	const button = wrapper.find("button").filterWhere(n => n.text() === "Save")
 	button.simulate("click")
@@ -91,7 +93,7 @@ it("submits the form when the user clicks 'Save'", async () => {
 it("discards event draft when the user clicks 'Cancel'", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft(draft)
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	const button = wrapper.find("button").filterWhere(n => n.text() === "Cancel")
 	button.simulate("click")
@@ -102,7 +104,7 @@ it("discards event draft when the user clicks 'Cancel'", async () => {
 it("displays errors if required fields are left blank", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ ...draft, Subject: "Meeting" })
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	const input = wrapper.find(".slds-combobox input")
 	inputElement(input).value = ""
@@ -233,7 +235,7 @@ it("displays account name and billing address when editing", async () => {
 it("hides time inputs if 'IsAllDay' is selected", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ ...draft, IsAllDayEvent: true })
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	expect(wrapper.find(Timepicker).exists()).toBe(false)
 
@@ -250,7 +252,7 @@ it("hides time inputs if 'IsAllDay' is selected", async () => {
 it("prepopulates default value in combobox and picklist inputs", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({})
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<EditEvent />, events)
 	expect(
 		wrapper.find("input").filterWhere(n => n.prop("value") === "Meeting")
@@ -290,4 +292,11 @@ async function submit(wrapper: enzyme.ReactWrapper) {
 	const form = wrapper.find("form")
 	form.props().onSubmit()
 	await delay()
+}
+
+async function prepopulate(events: Events): Promise<void> {
+	await Promise.all([
+		events._fetchEventDescription(),
+		events._fetchEventLayout()
+	])
 }

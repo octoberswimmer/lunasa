@@ -23,12 +23,14 @@ import {
 	updateEnd
 } from "../models/Event"
 import { type FieldSet } from "../models/FieldSet"
+import { type Layout } from "../models/Layout"
 import { visualforceDatetime } from "../models/serialization"
 import {
 	type SObjectDescription,
 	getRelationshipName
 } from "../models/SObjectDescription"
 import { type Record, getId, getType } from "../models/QueryResult"
+import { type RecordTypeInfo } from "../models/RecordType"
 import { stringifyCondition } from "../models/WhereCondition"
 import { setTimezone } from "../util/moment"
 import {
@@ -46,6 +48,8 @@ export type State = AsyncActionState & {
 	eventCreateFieldSet: FieldSet,
 	eventDescription: ?SObjectDescription,
 	eventDraft: ?$Shape<Event>,
+	eventLayout: ?Layout,
+	eventRecordTypeInfos: RecordTypeInfo[],
 	referenceData: { [key: Id]: Record }, // map from Event IDs to What and Who properties
 	timezone: string,
 	userId: Id
@@ -58,16 +62,18 @@ export default class EventContainer extends Container<State> {
 	// Memoized API interfaces
 	_fetchEvents: (query: Criteria<Event>) => Promise<void>
 	_fetchEventDescription: () => Promise<void>
+	_fetchEventLayout: () => Promise<void>
 	_fetchReferenceData: (eventId: Id) => Promise<void>
 	_requestEvents: (query: Criteria<Event>) => Promise<Event[]>
 
-	constructor(opts: {
+	constructor(opts: {|
 		eventCreateFieldSet: FieldSet,
+		eventRecordTypeInfos: RecordTypeInfo[],
 		remoteObject?: RemoteObject<Event>,
 		restClient: Promise<RestApi>,
 		timezone: string,
 		userId: Id
-	}) {
+	|}) {
 		super()
 		this._remoteObject = opts.remoteObject || Events
 		this._restClient = opts.restClient
@@ -77,6 +83,8 @@ export default class EventContainer extends Container<State> {
 			eventCreateFieldSet: opts.eventCreateFieldSet,
 			eventDescription: null,
 			eventDraft: null,
+			eventLayout: null,
+			eventRecordTypeInfos: opts.eventRecordTypeInfos,
 			referenceData: {},
 			timezone: opts.timezone,
 			userId: opts.userId
@@ -92,6 +100,7 @@ export default class EventContainer extends Container<State> {
 		this._fetchEventDescription = memoize(
 			this._fetchEventDescription.bind(this)
 		)
+		this._fetchEventLayout = memoize(this._fetchEventLayout.bind(this))
 		this._fetchReferenceData = memoize(this._fetchReferenceData.bind(this))
 
 		// Skip making the request on consecutive calls with the same query to
@@ -146,6 +155,20 @@ export default class EventContainer extends Container<State> {
 		}
 	}
 
+	/*
+	 * `getEventLayout` returns the layout for associated with the user's
+	 * default event record type, or triggers a fetch for the layout if it has
+	 * not been loaded yet.
+	 */
+	getEventLayout(): ?Layout {
+		const layout = this.state.eventLayout
+		if (layout) {
+			return layout
+		} else {
+			this._fetchEventLayout()
+		}
+	}
+
 	getEventsForFullcalendar(): EventObjectInput[] {
 		return this.state.events.map(e => forFullcalendar(this.state.timezone, e))
 	}
@@ -166,12 +189,9 @@ export default class EventContainer extends Container<State> {
 	 */
 	getReference(referenceField: string, eventId: ?Id): ?Record {
 		const data = this.state.referenceData[eventId || "draft"]
-		const description = this.state.eventDescription
+		const description = this.getEventDescription()
 		if (!data && eventId) {
 			this._fetchReferenceData(eventId)
-		}
-		if (!description) {
-			this._fetchEventDescription()
 		}
 		if (data && description) {
 			const key = getRelationshipName(description, referenceField)
@@ -217,6 +237,20 @@ export default class EventContainer extends Container<State> {
 		await asyncAction(this, async () => {
 			const eventDescription = await this._remoteObject.describe()
 			await this.setState({ eventDescription })
+		})
+	}
+
+	async _fetchEventLayout(): Promise<void> {
+		await asyncAction(this, async () => {
+			const client = await this._restClient
+			const recordType = this.state.eventRecordTypeInfos.find(
+				rt => rt.defaultRecordTypeMapping
+			)
+			if (!recordType) {
+				throw new Error("Could not determine your event record type.")
+			}
+			const eventLayout = await client.fetchLayout(recordType)
+			await this.setState({ eventLayout })
 		})
 	}
 

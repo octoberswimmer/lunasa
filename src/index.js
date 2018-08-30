@@ -20,12 +20,14 @@ import { LabelProvider } from "./frontend/components/i18n/Label"
 import Accounts from "./frontend/containers/Accounts"
 import Events from "./frontend/containers/Events"
 import { type FieldSet } from "./frontend/models/FieldSet"
+import { type RecordTypeInfo } from "./frontend/models/RecordType"
 import { type SortField } from "./frontend/models/SortField"
 
 export function lunasa({
 	accountFieldSet,
 	accountIds,
 	eventCreateFieldSet,
+	eventRecordTypeInfos,
 	labels,
 	language,
 	timezone = moment.tz.guess(),
@@ -39,6 +41,7 @@ export function lunasa({
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
 	eventCreateFieldSet: FieldSet,
+	eventRecordTypeInfos: RecordTypeInfo[],
 	labels: { [key: string]: string },
 	language?: string,
 	timezone?: string,
@@ -65,6 +68,7 @@ export function lunasa({
 	})
 	const events = new Events({
 		eventCreateFieldSet,
+		eventRecordTypeInfos,
 		restClient,
 		timezone,
 		userId
@@ -109,6 +113,7 @@ if (process.env.NODE_ENV !== "production") {
 			lunasa({
 				accountFieldSet: accountFixtures.accountFieldSet,
 				eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
+				eventRecordTypeInfos: eventFixtures.eventRecordTypeInfos,
 				labels: labelFixtures.labels,
 				language: navigator.language,
 				root,

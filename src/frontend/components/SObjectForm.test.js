@@ -10,7 +10,9 @@ import * as clf from "../models/CustomLabel.testFixtures"
 import { type Event } from "../models/Event"
 import {
 	eventCreateFieldSet,
-	eventDescription as description
+	eventDescription as description,
+	eventLayout as layout,
+	offsiteEventLayout
 } from "../models/Event.testFixtures"
 import { delay, inputElement } from "../testHelpers"
 import Combobox from "./forms/Combobox"
@@ -41,6 +43,7 @@ it("presents inputs based on a given field set", () => {
 				{ name: "InputA", label: "Input A", type: "string" },
 				{ name: "InputB", label: "Input B", type: "string" }
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -65,6 +68,7 @@ it("presents a checkbox input", () => {
 					type: "boolean"
 				}
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -83,6 +87,7 @@ it("presents a checked checkbox when the corresponding value is `true`", () => {
 			fieldSet={[
 				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>,
 		{ IsAllDayEvent: true }
@@ -103,6 +108,7 @@ it("presents a combobox input", () => {
 					type: "combobox"
 				}
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -132,6 +138,41 @@ it("presents a combobox input", () => {
 	})
 })
 
+it("gets combobox values from the given layout", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[
+				{
+					name: "Subject",
+					label: "Subject",
+					required: true,
+					type: "combobox"
+				}
+			]}
+			layout={offsiteEventLayout}
+			timezone={timezone}
+		/>
+	)
+	const input = wrapper.find(Combobox)
+	expect(input.props()).toMatchObject({
+		name: "Subject",
+		label: "Subject",
+		// option values from event fixtures
+		options: [
+			{ active: true, defaultValue: true, label: "Call", value: "Call" },
+			{ active: true, defaultValue: false, label: "Email", value: "Email" },
+			{
+				active: true,
+				defaultValue: false,
+				label: "Send Letter/Quote",
+				value: "Send Letter/Quote"
+			}
+		],
+		required: true
+	})
+})
+
 it("displays validation error message with combobox input", () => {
 	const wrapper = mount(
 		<SObjectForm
@@ -145,6 +186,7 @@ it("displays validation error message with combobox input", () => {
 					type: "combobox"
 				}
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -164,6 +206,7 @@ it("presents a picklist input", () => {
 		<SObjectForm
 			description={description}
 			fieldSet={[{ name: "ShowAs", label: "Show Time As", type: "picklist" }]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -180,6 +223,7 @@ it("gets a boolean value from a checkbox input", async () => {
 		<SObjectForm
 			description={description}
 			fieldSet={eventCreateFieldSet}
+			layout={layout}
 			timezone={timezone}
 		/>,
 		draft
@@ -201,6 +245,7 @@ it("presents a date input", () => {
 			fieldSet={[
 				{ name: "Date", label: "Date", required: false, type: "date" }
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -225,6 +270,7 @@ it("presents a datetime input", () => {
 					type: "datetime"
 				}
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -243,6 +289,7 @@ it("gets a Date value from a datetime input", async () => {
 		<SObjectForm
 			description={description}
 			fieldSet={eventCreateFieldSet}
+			layout={layout}
 			timezone={timezone}
 		/>,
 		draft
@@ -270,6 +317,7 @@ it("presents a textarea input", () => {
 			fieldSet={[
 				{ name: "Description", label: "Description", type: "textarea" }
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -282,6 +330,7 @@ it("gets a string value from a textarea input", async () => {
 		<SObjectForm
 			description={description}
 			fieldSet={eventCreateFieldSet}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -310,6 +359,7 @@ it("displays an asterisk in labels for required fields", () => {
 					type: "textarea"
 				}
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
@@ -328,6 +378,7 @@ it("displays validation errors with form inputs", () => {
 			fieldSet={[
 				{ name: "Description", label: "Description", type: "textarea" }
 			]}
+			layout={layout}
 			timezone={timezone}
 		/>
 	)
