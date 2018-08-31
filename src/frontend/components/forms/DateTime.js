@@ -121,7 +121,9 @@ export default function DateTime({
 						<Timepicker
 							label={
 								<Label
-									with={{ timezone: moment.tz.zone(timezone).abbr(moment()) }}
+									with={{
+										timezone: moment.tz.zone(timezone).abbr(field.value)
+									}}
 								>
 									Time
 								</Label>

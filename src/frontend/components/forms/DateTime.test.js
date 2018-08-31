@@ -529,6 +529,31 @@ it("displays an asterisk in label if the field is required", () => {
 	)
 })
 
+it("displays a time zone abbreviation in time picker label", () => {
+	const inputs = [
+		{
+			value: "2018-10-30T10:00-07:00",
+			expected: "PDT",
+			tz: "America/Los_Angeles"
+		},
+		{
+			value: "2018-11-05T10:00-07:00",
+			expected: "PST",
+			tz: "America/Los_Angeles"
+		}
+	]
+	for (const { value, expected, tz } of inputs) {
+		const start = moment(value)
+		const wrapper = mount(
+			<DateTime label="Start" name="start" timezone={tz} />,
+			{
+				initialValues: { start }
+			}
+		)
+		expect(wrapper).toIncludeText(`Time (${expected})`)
+	}
+})
+
 it("displays an error on invalid date entry", () => {
 	const start = new Date("2018-06-29T10:00")
 	const wrapper = mount(
