@@ -15,6 +15,7 @@ const timezone = moment.tz.guess()
 
 const eventsOpts = {
 	eventCreateFieldSet: ef.eventCreateFieldSet,
+	eventRecordTypeInfos: ef.eventRecordTypeInfos,
 	remoteObject: EventModel,
 	restClient,
 	timezone,
@@ -125,12 +126,37 @@ it("requests event sObject description", async () => {
 it("does not transmit event description request more than once", async () => {
 	const describe = jest.spyOn(EventModel, "describe")
 	const events = new Events(eventsOpts)
-	await Promise.all([
-		events.getEventDescription(),
-		events.getEventDescription(),
-		events.getEventDescription()
-	])
+	events.getEventDescription()
+	events.getEventDescription()
+	await delay()
+	events.getEventDescription()
+	events.getEventDescription()
 	expect(describe).toHaveBeenCalledTimes(1)
+})
+
+it("requests layout metadata for the user's default event record type", async () => {
+	// Use `Offsite_Events` as the default record type
+	const eventRecordTypeInfos = ef.eventRecordTypeInfos.map(rt => ({
+		...rt,
+		defaultRecordTypeMapping: rt.developerName === "Offsite_Events"
+	}))
+	const events = new Events({ ...eventsOpts, eventRecordTypeInfos })
+	events.getEventLayout() // trigger fetch
+	await delay()
+	const layout = events.getEventLayout()
+	expect(layout).toEqual(ef.offsiteEventLayout)
+})
+
+it("does not transmit request for layout more than once", async () => {
+	const client = await restClient
+	jest.spyOn(client, "fetchLayout")
+	const events = new Events(eventsOpts)
+	events.getEventLayout()
+	events.getEventLayout()
+	await delay()
+	events.getEventLayout()
+	events.getEventLayout()
+	expect(client.fetchLayout).toHaveBeenCalledTimes(1)
 })
 
 it("gets data from a referenced record", async () => {

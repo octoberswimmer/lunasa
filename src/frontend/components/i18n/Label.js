@@ -6,7 +6,10 @@ import { type Labels } from "../../models/CustomLabel"
 
 const { Consumer, Provider } = React.createContext({})
 
-export const LabelProvider: React.ComponentType<{ value: Labels }> = Provider
+export const LabelProvider: React.ComponentType<{
+	value: Labels,
+	children?: React$Node
+}> = Provider
 
 export function Label(props: {
 	children: string,

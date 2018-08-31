@@ -1,6 +1,13 @@
 @isTest
 private class CalendarControllerTest {
 
+	@isTest static void getEventRecordTypeInfos_returns_metadata() {
+		CalendarController calendarController = new CalendarController(null);
+		String rts = calendarController.getEventRecordTypeInfos();
+		System.assert(Pattern.matches('.*"defaultRecordTypeMapping":\\s*true.*', rts),
+				'serialized values include a default record type');
+	}
+
 	@isTest static void getLabelsAsJson_returns_serialized_map() {
 		CalendarController calendarController = new CalendarController(null);
 		String labels = calendarController.getLabelsAsJson();

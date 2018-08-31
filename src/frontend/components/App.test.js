@@ -8,6 +8,7 @@ import RestApi from "../api/RestApi"
 import Accounts from "../containers/Accounts"
 import Events from "../containers/Events"
 import * as af from "../models/Account.testFixtures"
+import * as ef from "../models/Event.testFixtures"
 import * as clf from "../models/CustomLabel.testFixtures"
 import { forFullcalendar } from "../models/Event"
 import {
@@ -34,6 +35,7 @@ const accountsOpts = {
 
 const eventsOpts = {
 	eventCreateFieldSet,
+	eventRecordTypeInfos: ef.eventRecordTypeInfos,
 	restClient,
 	timezone,
 	userId: "testuserId"
@@ -169,7 +171,7 @@ it("displays event form when a new event draft is present", async () => {
 	const accounts = new Accounts(accountsOpts)
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ Subject: "Meeting" })
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<App />, { accounts, events })
 	const form = wrapper.find(EditEvent)
 	expect(form.exists()).toBe(true)
@@ -180,7 +182,7 @@ it("displays event form when a draft of changes to an existing event is present"
 	const accounts = new Accounts(accountsOpts)
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ Id: "1", Subject: "Meeting" })
-	await events._fetchEventDescription()
+	await prepopulate(events)
 	const wrapper = mount(<App />, { accounts, events })
 	const form = wrapper.find(EditEvent)
 	expect(form.exists()).toBe(true)
@@ -265,4 +267,11 @@ function mount(
 		</Provider>
 	)
 	return _wrapper
+}
+
+async function prepopulate(events: Events): Promise<void> {
+	await Promise.all([
+		events._fetchEventDescription(),
+		events._fetchEventLayout()
+	])
 }

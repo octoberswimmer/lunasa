@@ -11,7 +11,7 @@ import * as React from "react"
 import { Subscribe } from "unstated"
 import Events from "../containers/Events"
 import { type FieldSet } from "../models/FieldSet"
-import { getDefaultValues } from "../models/SObjectDescription"
+import { getDefaultValues } from "../models/Layout"
 import "./EditEvent.css"
 import { FIELD_REQUIRED } from "./i18n/errorMessages"
 import { Label } from "./i18n/Label"
@@ -26,12 +26,13 @@ export default function EditEvent(props: Props) {
 		<Subscribe to={[Events]}>
 			{events => {
 				const description = events.getEventDescription()
-				if (!description) {
+				const layout = events.getEventLayout()
+				if (!description || !layout) {
 					return null
 				}
 				const { eventCreateFieldSet, eventDraft } = events.state
 				const initialValues = {
-					...getDefaultValues(description, eventCreateFieldSet),
+					...getDefaultValues(description, layout, eventCreateFieldSet),
 					...eventDraft
 				}
 				return (
@@ -116,6 +117,7 @@ export default function EditEvent(props: Props) {
 									getReference={fieldName =>
 										events.getReference(fieldName, eventDraft && eventDraft.Id)
 									}
+									layout={layout}
 									timezone={events.state.timezone}
 								/>
 							</Modal>

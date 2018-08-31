@@ -1,10 +1,12 @@
 /* @flow strict */
 
+import { type Layout } from "../models/Layout"
 import {
 	type ListView,
 	type ListViewDescription,
 	type ListViews
 } from "../models/ListView"
+import { type RecordTypeInfo } from "../models/RecordType"
 import { type QueryResult } from "../models/QueryResult"
 
 async function request<T>(sessionToken: string, url: string): Promise<T> {
@@ -29,6 +31,10 @@ export default function ListViewsApi(sessionToken: string) {
 		)
 	}
 
+	function fetchLayout(recordType: RecordTypeInfo): Promise<Layout> {
+		return request(sessionToken, recordType.urls.layout)
+	}
+
 	function fetchListViewDescription(
 		listView: ListView
 	): Promise<ListViewDescription> {
@@ -40,5 +46,5 @@ export default function ListViewsApi(sessionToken: string) {
 		return request(sessionToken, `/services/data/v40.0/query?q=${q}`)
 	}
 
-	return { fetchListViews, fetchListViewDescription, query }
+	return { fetchLayout, fetchListViews, fetchListViewDescription, query }
 }

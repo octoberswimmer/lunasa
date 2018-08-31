@@ -3,6 +3,11 @@ public class CalendarController {
 	public CalendarController(ApexPages.StandardSetController stdController) {
 	}
 
+	public String getEventRecordTypeInfos() {
+		List<RecordTypeInfo> infos = Event.SObjectType.getDescribe().getRecordTypeInfos();
+		return JSON.serialize(infos);
+	}
+
 	public String getLabelsAsJson() {
 		Map<String, String> labels = new Map<String, String>();
 		labels.put('Cancel_Editing', System.Label.Cancel_Editing);

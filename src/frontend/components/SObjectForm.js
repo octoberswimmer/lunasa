@@ -4,11 +4,9 @@ import classNames from "classnames"
 import { Field, Form } from "formik"
 import * as React from "react"
 import * as FS from "../models/FieldSet"
+import { type Layout, getPicklistValues } from "../models/Layout"
 import { type Record } from "../models/QueryResult"
-import {
-	type SObjectDescription,
-	getPicklistValues
-} from "../models/SObjectDescription"
+import { type SObjectDescription } from "../models/SObjectDescription"
 import Checkbox from "./forms/Checkbox"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
@@ -21,6 +19,7 @@ type Props = {
 	errors?: ?Errors,
 	fieldSet: FS.FieldSet,
 	getReference?: (fieldName: string) => ?Record,
+	layout: Layout,
 	timezone: string
 }
 
@@ -29,11 +28,19 @@ export default function SObjectForm({
 	errors,
 	fieldSet,
 	getReference,
+	layout,
 	timezone
 }: Props) {
 	return (
 		<Form className="slds-form slds-form_stacked">
-			{inputsForFieldSet(fieldSet, errors, description, getReference, timezone)}
+			{inputsForFieldSet(
+				fieldSet,
+				errors,
+				description,
+				getReference,
+				layout,
+				timezone
+			)}
 		</Form>
 	)
 }
@@ -44,6 +51,7 @@ function inputsForFieldSet(
 	errors: ?Errors,
 	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
+	layout: Layout,
 	timezone: string
 ): React.Node {
 	const inputs = []
@@ -64,6 +72,7 @@ function inputsForFieldSet(
 							errors && errors[field.name],
 							description,
 							getReference,
+							layout,
 							timezone
 						)}
 					</div>
@@ -112,6 +121,7 @@ function inputFor(
 	errorMessage: ?string,
 	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
+	layout: Layout,
 	timezone: string
 ): React.Node {
 	switch (type) {
@@ -126,7 +136,7 @@ function inputFor(
 				/>
 			)
 		case "combobox":
-			const options = getPicklistValues(description, name) || []
+			const options = getPicklistValues(description, layout, name) || []
 			return (
 				<Combobox
 					classNameContainer="slds-p-vertical_xx-small"
@@ -159,7 +169,7 @@ function inputFor(
 				/>
 			)
 		case "picklist":
-			const values = getPicklistValues(description, name) || []
+			const values = getPicklistValues(description, layout, name) || []
 			return (
 				<FormElement
 					errorMessage={errorMessage}
