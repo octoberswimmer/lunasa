@@ -157,11 +157,3 @@ it("merges the date of one Moment value with the time-of-day of another", () => 
 		expect(result).toEqual(sameMoment(expected))
 	}
 })
-
-it("reports an error when attempting to merge date and time from different timezones", () => {
-	const date = moment.tz("2018-08-19T00:00", "America/Los_Angeles")
-	const time = moment.tz("2018-01-01T10:30", "Europe/Berlin")
-	expect(() => {
-		mergeDateAndTime({ date, time })
-	}).toThrowError("Date and time to be merged must have the same time zone.")
-})

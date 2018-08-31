@@ -57,9 +57,6 @@ export function mergeDateAndTime({
 }): moment$Moment {
 	const result = moment(time)
 	const d = moment(date)
-	if (result.utcOffset() !== d.utcOffset()) {
-		throw new Error("Date and time to be merged must have the same time zone.")
-	}
 	result.year(d.year())
 	result.month(d.month())
 	result.date(d.date())
