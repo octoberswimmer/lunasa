@@ -38,13 +38,15 @@ it("requests events by date range", () => {
 	const today = moment()
 	events.getEventsByDateRange(today, today)
 	expect(retrieve).toHaveBeenCalledTimes(1)
-	expect(retrieve).toHaveBeenCalledWith({
-		where: {
-			StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
-			EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
-			OwnerId: { eq: eventsOpts.userId }
-		}
-	})
+	expect(retrieve).toHaveBeenCalledWith(
+		expect.objectContaining({
+			where: {
+				StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
+				EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
+				OwnerId: { eq: eventsOpts.userId }
+			}
+		})
+	)
 })
 
 it("sets time range to start and end of day in the user's time zone", () => {
@@ -89,13 +91,15 @@ it("sets time range to start and end of day in the user's time zone", () => {
 	for (const { tz, inputTime, expectedStart, expectedEnd } of fixtures) {
 		const events = new Events({ ...eventsOpts, timezone: tz })
 		events.getEventsByDateRange(moment.utc(inputTime), moment.utc(inputTime))
-		expect(retrieve).toHaveBeenCalledWith({
-			where: {
-				StartDateTime: { lt: expectedEnd },
-				EndDateTime: { gt: expectedStart },
-				OwnerId: { eq: eventsOpts.userId }
-			}
-		})
+		expect(retrieve).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: {
+					StartDateTime: { lt: expectedEnd },
+					EndDateTime: { gt: expectedStart },
+					OwnerId: { eq: eventsOpts.userId }
+				}
+			})
+		)
 	}
 })
 
@@ -106,13 +110,25 @@ it("avoids making the same query twice in a row", () => {
 	events.getEventsByDateRange(today, today)
 	events.getEventsByDateRange(today, today)
 	expect(retrieve).toHaveBeenCalledTimes(1)
-	expect(retrieve).toHaveBeenCalledWith({
-		where: {
-			StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
-			EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
-			OwnerId: { eq: eventsOpts.userId }
-		}
-	})
+	expect(retrieve).toHaveBeenCalledWith(
+		expect.objectContaining({
+			where: {
+				StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
+				EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
+				OwnerId: { eq: eventsOpts.userId }
+			}
+		})
+	)
+})
+
+it("fetches first 100 events", () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	events.getEventsByDateRange(today, today)
+	events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(1)
+	expect(retrieve).toHaveBeenCalledWith(expect.objectContaining({ limit: 100 }))
 })
 
 it("requests event sObject description", async () => {

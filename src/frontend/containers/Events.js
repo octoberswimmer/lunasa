@@ -218,6 +218,7 @@ export default class EventContainer extends Container<State> {
 		const start = setTimezone(timezone, rangeStart).startOf("day")
 		const end = setTimezone(timezone, rangeEnd).endOf("day")
 		return this._fetchEvents({
+			limit: 100,
 			where: {
 				StartDateTime: { lt: visualforceDatetime(end) },
 				EndDateTime: { gt: visualforceDatetime(start) },
