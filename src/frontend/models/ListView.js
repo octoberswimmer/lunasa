@@ -66,8 +66,8 @@ export type ListViewDescription = {
  */
 export function whereClause(desc: ListViewDescription): string {
 	const cond = stringifyCondition(desc.whereCondition)
-	const where = cond ? `WHERE ${cond}` : ""
 	const scope =
 		desc.scope && desc.scope !== "everything" ? `USING SCOPE ${desc.scope}` : ""
-	return [where, scope].join(" ")
+	const where = cond ? `WHERE ${cond}` : ""
+	return [scope, where].join(" ").trim()
 }

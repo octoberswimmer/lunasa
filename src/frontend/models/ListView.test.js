@@ -9,7 +9,7 @@ it("produces a where clause for a SOQL query", () => {
 	)
 	expect(desc).toBeDefined()
 	if (desc) {
-		expect(whereClause(desc)).toBe("WHERE CreatedDate = THIS_WEEK ")
+		expect(whereClause(desc)).toBe("WHERE CreatedDate = THIS_WEEK")
 	}
 })
 
@@ -23,6 +23,6 @@ it("includes scope clause for a SOQL query if scope is not 'everything'", () => 
 		scope: "mine"
 	}
 	expect(whereClause(desc)).toBe(
-		"WHERE CreatedDate = THIS_WEEK USING SCOPE mine"
+		"USING SCOPE mine WHERE CreatedDate = THIS_WEEK"
 	)
 })
