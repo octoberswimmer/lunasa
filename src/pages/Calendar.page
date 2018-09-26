@@ -41,13 +41,14 @@
 			<apex:repeat value="{!$ObjectType.Account.FieldSets.CalendarCard}" var="f">
 				{
 					name: "{!JSINHTMLENCODE(f)}",
+					accessible: {!$ObjectType.Account.Fields[f].Accessible},
 					label: "{!JSINHTMLENCODE(f.Label)}",
 					type: "{!JSINHTMLENCODE(f.Type)}",
 					required: {!OR(f.Required, f.DBRequired)}
 				},
 			</apex:repeat>
 			null
-			].filter(function(x) { return !!x; }),
+			].filter(function(x) { return !!x && x.accessible; }),
 			accountIds: [
 			<apex:repeat value="{!selected}" var="account">
 				"{!JSINHTMLENCODE(account.Id)}",
