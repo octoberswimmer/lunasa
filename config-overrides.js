@@ -41,6 +41,23 @@ module.exports = {
 				})
 			}
 		})
+
+		// Add expose-loader to expose jQuery so
+		// jquery-ui-touch-punch can find the jQuery global
+		config.module.rules.push({
+			test: require.resolve("jquery"),
+			use: [
+				{
+					loader: "expose-loader",
+					options: "$"
+				},
+				{
+					loader: "expose-loader",
+					options: "jQuery"
+				}
+			]
+		})
+
 		return config
 	},
 	jest(config /*: Object */) {
