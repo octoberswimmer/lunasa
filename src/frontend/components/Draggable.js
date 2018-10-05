@@ -2,10 +2,10 @@
 
 import $ from "jquery"
 import "jquery-ui/ui/widgets/draggable"
-import "jquery-ui/themes/base/draggable.css"
-import { defaultTimedEventDuration } from "../models/Event"
-
+// IMPORTANT: TouchPunch must be imported **after** jQuery UI Draggable
+import "jquery-ui-touch-punch"
 import * as React from "react"
+import { defaultTimedEventDuration } from "../models/Event"
 
 // `Identifier` data identifies the item being dragged to a drop target.
 export type Identifier = {

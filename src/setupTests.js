@@ -9,6 +9,9 @@ import ElementFocus from "@salesforce/design-system-react/utilities/dom-element-
 import { configure } from "enzyme"
 import Adapter from "enzyme-adapter-react-16"
 import "jest-enzyme"
+import jQuery from "jquery"
+
+global.window.jQuery = jQuery
 
 // jQuery UI uses AMD to load dependencies. That works fine in production
 // because Webpack provides an AMD loader. But in testing we need a shim.
