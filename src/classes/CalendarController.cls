@@ -1,4 +1,4 @@
-public class CalendarController {
+public with sharing class CalendarController {
 
 	public CalendarController(ApexPages.StandardSetController stdController) {
 	}
@@ -30,11 +30,11 @@ public class CalendarController {
 	}
 
 	public String getLocale() {
-		return userInfo.getLocale();
+		return UserInfo.getLocale();
 	}
 
 	public String getTimezone() {
-		return userInfo.getTimezone().toString();
+		return UserInfo.getTimezone().toString();
 	}
 
 	public String getSortFieldsAsJson() {
