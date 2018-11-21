@@ -9,11 +9,12 @@
  * @flow strict
  */
 
-import sortBy from "lodash.sortby"
+import sortListBy from "lodash.sortby"
 import { Container } from "unstated"
 import { type RestApi } from "../api/RestApi"
 import { type Account } from "../models/Account"
 import { type FieldSet, fieldList } from "../models/FieldSet"
+import * as F from "../models/Filter"
 import {
 	type Id,
 	type ListView,
@@ -23,7 +24,7 @@ import {
 } from "../models/ListView"
 import { type QueryResult } from "../models/QueryResult"
 import * as SortField from "../models/SortField"
-import { stringifyCondition } from "../models/WhereCondition"
+import { conjunction, stringifyCondition } from "../models/WhereCondition"
 import {
 	type AsyncActionState,
 	asyncAction,
@@ -40,8 +41,11 @@ export type State = AsyncActionState & {
 	accountFieldSet: FieldSet,
 	accountIds: ?(Id[]), // list of IDs provided via query parameter
 	accountQueryResult: QueryResult | null,
+	filters: F.Filter[],
 	listViewDescriptions: { [key: Id]: ListViewDescription },
 	listViews: ListViews | null,
+	listView: ?ListViewLike,
+	locale: string,
 	count: number | null,
 	offset: number,
 	pageSize: number,
@@ -51,7 +55,10 @@ export type State = AsyncActionState & {
 }
 
 type Request = {|
+	accountFieldSet: FieldSet,
+	filters: F.Filter[],
 	listView: ListViewLike,
+	locale: string,
 	limit: number,
 	offset: number,
 	sortBy: string,
@@ -65,6 +72,7 @@ export default class AccountContainer extends Container<State> {
 	constructor(opts: {|
 		accountFieldSet: FieldSet,
 		accountIds?: ?(Id[]),
+		locale?: ?string, // e.g. "en_US"
 		pageSize?: number,
 		restClient: Promise<RestApi>,
 		sortFields?: SortField.SortField[]
@@ -72,7 +80,7 @@ export default class AccountContainer extends Container<State> {
 		super()
 		this._restClient = opts.restClient
 		this.fetchListViews()
-		const sortFields = sortBy(opts.sortFields || [], [
+		const sortFields = sortListBy(opts.sortFields || [], [
 			s => SortField.getPrecedence(s)
 		])
 		const defaultSortField = sortFields[0]
@@ -81,8 +89,11 @@ export default class AccountContainer extends Container<State> {
 			accountFieldSet: opts.accountFieldSet,
 			accountIds: opts.accountIds,
 			accountQueryResult: null,
+			filters: [],
 			listViewDescriptions: {},
 			listViews: null,
+			listView: null,
+			locale: opts.locale || navigator.language,
 			count: null,
 			offset: 0,
 			pageSize: opts.pageSize || 5,
@@ -137,6 +148,14 @@ export default class AccountContainer extends Container<State> {
 		return this.state.errors
 	}
 
+	async applyFilter(filter: F.Filter): Promise<void> {
+		await this.setState(state => ({
+			filters: F.applyFilter(state.filters, filter),
+			offset: 0
+		}))
+		await this._fetchAccounts()
+	}
+
 	async dismissError(error: Error): Promise<void> {
 		await this.setState(state => ({
 			errors: state.errors.filter(e => e.message !== error.message)
@@ -159,101 +178,116 @@ export default class AccountContainer extends Container<State> {
 	}
 
 	async selectListView(listView: ListViewLike): Promise<void> {
-		const request = {
-			listView,
-			offset: 0
-		}
-		await Promise.all([
-			this._fetchAccounts(request),
-			this._fetchRecordCount(listView)
-		])
+		await this.setState({ listView, offset: 0 })
+		await this._fetchAccounts()
 	}
 
-	async selectSortDirection(dir: SortField.SortDirection): Promise<void> {
-		const fetchPromise = this._fetchAccounts({
-			sortDirection: dir
-		})
-		const updateStatePromise = this.setState({
-			sortDirection: dir
-		})
-		await Promise.all([fetchPromise, updateStatePromise])
+	async selectSortDirection(
+		sortDirection: SortField.SortDirection
+	): Promise<void> {
+		await this.setState({ sortDirection })
+		await this._fetchAccounts()
 	}
 
 	async selectSortField(sortField: SortField.SortField): Promise<void> {
-		const fetchPromise = this._fetchAccounts({
-			sortBy: SortField.getField(sortField),
-			sortDirection: SortField.getDefaultSortOrder(sortField)
-		})
-		const updateStatePromise = this.setState({
+		await this.setState({
 			selectedSortField: sortField,
 			sortDirection: SortField.getDefaultSortOrder(sortField)
 		})
-		await Promise.all([fetchPromise, updateStatePromise])
+		await this._fetchAccounts()
 	}
 
 	async fetchPage(pageNumber: number): Promise<void> {
-		const pageSize = this.state.pageSize
-		const offset = (pageNumber - 1) * pageSize // page numbers start at 1
-		const request = { limit: pageSize, offset }
-		return this._fetchAccounts(request)
+		await this.setState(state => {
+			const pageSize = state.pageSize
+			const offset = (pageNumber - 1) * pageSize // page numbers start at 1
+			return { offset }
+		})
+		await this._fetchAccounts()
 	}
 
-	async _fetchAccounts(requestOptions: $Shape<Request>): Promise<void> {
-		const request = {
-			...this._getDefaultRequestOptions(),
-			...this._lastRequest,
-			...requestOptions
-		}
-		if (!request.listView) {
+	async _fetchAccounts(): Promise<void> {
+		const request = this._buildRequest()
+		if (!request) {
 			return
 		}
+
+		// Get updated record count when changing list view or filters.
+		const recordSetChanged =
+			!this._lastRequest ||
+			(request.listView !== this._lastRequest.listView ||
+				request.filters !== this._lastRequest.filters)
+
 		this._lastRequest = request
+
 		await asyncAction(this, async () => {
-			const accountQueryResult = await this._queryAccounts(request)
+			const totalSizePromise = recordSetChanged
+				? this._fetchRecordCount(request)
+				: Promise.resolve(this.state.count)
+			const [accountQueryResult, totalSize] = await Promise.all([
+				this._queryAccounts(request),
+				totalSizePromise
+			])
 			// Make sure that the result from a long-running query does not
 			// replace data from a more-recent, faster query.
 			if (this._lastRequest === request) {
-				await this.setState({ accountQueryResult, offset: request.offset })
+				await this.setState({
+					accountQueryResult,
+					offset: request.offset,
+					count: totalSize
+				})
 			}
 		})
 	}
 
-	_getDefaultRequestOptions(): $Shape<Request> {
-		const sortField = this.state.selectedSortField
+	_buildRequest(): ?Request {
+		const {
+			accountFieldSet,
+			filters,
+			listView,
+			locale,
+			offset,
+			pageSize,
+			selectedSortField,
+			sortDirection
+		} = this.state
+		if (!listView) {
+			return
+		}
 		return {
-			limit: this.state.pageSize,
-			offset: 0,
-			sortBy: sortField ? SortField.getField(sortField) : "Account.Name",
-			sortDirection: this.state.sortDirection
+			accountFieldSet,
+			filters,
+			listView,
+			locale,
+			limit: pageSize,
+			offset,
+			sortBy: selectedSortField
+				? SortField.getField(selectedSortField)
+				: "Account.Name",
+			sortDirection
 		}
 	}
 
-	async _queryAccounts({
-		listView,
-		limit,
-		offset,
-		sortBy,
-		sortDirection
-	}: Request): Promise<QueryResult> {
+	async _queryAccounts(request: Request): Promise<QueryResult> {
+		const { accountFieldSet, limit, offset, sortDirection, sortBy } = request
 		const client = await this._restClient
-		const fields = fieldList(this.state.accountFieldSet)
-		const where = this._getWhereClause(listView)
+		const fields = fieldList(accountFieldSet)
+		const where = this._getWhereClause(request)
 		const orderDir = sortDirection === SortField.DESCENDING ? "DESC" : "ASC"
 		const query = `SELECT ${fields} FROM Account ${where} ORDER BY ${sortBy} ${orderDir} NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
 		return client.query(query)
 	}
 
-	async _fetchRecordCount(listView: ListViewLike): Promise<void> {
-		await asyncAction(this, async () => {
-			const client = await this._restClient
-			const where = this._getWhereClause(listView)
-			const query = `SELECT COUNT() FROM Account ${where}`
-			const result = await client.query(query)
-			await this.setState({ count: result.totalSize })
-		})
+	async _fetchRecordCount(req: Request): Promise<number> {
+		const client = await this._restClient
+		const where = this._getWhereClause(req)
+		const query = `SELECT COUNT() FROM Account ${where}`
+		const result = await client.query(query)
+		return result.totalSize
 	}
 
-	_getWhereClause(listView: ListViewLike): string {
+	_getWhereClause({ filters, listView, locale }: Request): string {
+		const filterCondition = F.whereCondition(filters, { locale })
 		if (listView.id === GIVEN_IDS) {
 			const ids = this.state.accountIds
 			if (!ids || ids.length < 1) {
@@ -263,14 +297,19 @@ export default class AccountContainer extends Container<State> {
 			}
 			return (
 				"WHERE " +
-				stringifyCondition({
-					field: "Id",
-					operator: "IN",
-					values: ids.map(id => `'${id}'`)
-				})
+				stringifyCondition(
+					conjunction("and", [
+						{
+							field: "Id",
+							operator: "IN",
+							values: ids.map(id => `'${id}'`)
+						},
+						filterCondition
+					])
+				)
 			)
 		} else {
-			return whereClause(this._getDescription(listView))
+			return whereClause(this._getDescription(listView), [filterCondition])
 		}
 	}
 

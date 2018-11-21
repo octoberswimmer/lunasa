@@ -7,6 +7,21 @@ it("produces an empty string if no conditions are given", () => {
 	expect(stringifyCondition(whereCondition)).toBe("")
 })
 
+it("skips nested conjunction conditions with empty sub-condition lists", () => {
+	const nested = [
+		{ conditions: [], conjunction: "and" },
+		{ field: "Name", operator: "notEquals", values: ["'bob'"] }
+	]
+	const whereCondition = { conditions: nested, conjunction: "and" }
+	expect(stringifyCondition(whereCondition)).toBe("Name != 'bob'")
+})
+
+it("formats single condition of a conjunction without parenthesis", () => {
+	const nested = [{ field: "Name", operator: "notEquals", values: ["'bob'"] }]
+	const whereCondition = { conditions: nested, conjunction: "and" }
+	expect(stringifyCondition(whereCondition)).toBe("Name != 'bob'")
+})
+
 it("compares a value to a field", () => {
 	const whereCondition = {
 		field: "Name",
