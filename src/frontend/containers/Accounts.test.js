@@ -2,6 +2,7 @@
 
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
+import * as F from "../models/Filter"
 import * as lvf from "../models/ListView.testFixtures"
 import * as SortField from "../models/SortField"
 import * as sff from "../models/SortField.testFixtures"
@@ -311,6 +312,42 @@ it("sorts results when fetching pages", async () => {
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
 			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE Id IN \('001f200001XrDt1AAF', '001f200001XrDt2AAF', '001f200001XrDt0AAF'\)\s+ORDER BY Account.CreatedDate DESC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 5\s*$/
+		)
+	)
+	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
+it("filters by first letter of account name", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts({
+		...opts,
+		accountIds: ["001f200001XrDt1AAF"]
+	})
+	const filter = F.firstLetter("a")
+	await accounts.selectListView({ id: GIVEN_IDS })
+	await accounts.applyFilter(filter)
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE \(Id IN \('001f200001XrDt1AAF'\)\) AND \(Name LIKE 'a%'\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+		)
+	)
+	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
+})
+
+it("filters to accounts with names that start with an 'Other' letter", async () => {
+	const { querySpy } = await spies
+	const accounts = new Accounts({
+		...opts,
+		accountIds: ["001f200001XrDt1AAF"]
+	})
+	await accounts.selectListView({ id: GIVEN_IDS })
+	await accounts.applyFilter(F.firstLetter("a"))
+	await accounts.applyFilter(F.firstLetterOther())
+	expect(accounts.state.errors).toEqual([])
+	expect(querySpy).toHaveBeenCalledWith(
+		expect.stringMatching(
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE \(Id IN \('001f200001XrDt1AAF'\)\) AND \(NOT \(\(Name LIKE 'a%'\) OR.*\)\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)

@@ -10,6 +10,7 @@ public with sharing class CalendarController {
 
 	public String getLabelsAsJson() {
 		Map<String, String> labels = new Map<String, String>();
+		labels.put('All', System.Label.All);
 		labels.put('Cancel_Editing', System.Label.Cancel_Editing);
 		labels.put('Date', System.Label.Date);
 		labels.put('Edit_Event', System.Label.Edit_Event);
@@ -19,6 +20,7 @@ public with sharing class CalendarController {
 		labels.put('Invalid_Time', System.Label.Invalid_Time);
 		labels.put('Loading', System.Label.Loading);
 		labels.put('Next_Page', System.Label.Next_Page);
+		labels.put('Other', System.Label.Other);
 		labels.put('Page_Number_With_Page_Count', System.Label.Page_Number_With_Page_Count);
 		labels.put('Previous_Page', System.Label.Previous_Page);
 		labels.put('Save_Event', System.Label.Save_Event);

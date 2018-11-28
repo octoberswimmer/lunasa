@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
+        <fullName>All</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Filter that shows accounts beginning with any letter.</shortDescription>
+        <value>All</value>
+    </labels>
+    <labels>
         <fullName>Cancel_Editing</fullName>
         <categories>Account_Scheduler</categories>
         <language>en_US</language>
@@ -71,6 +79,14 @@
         <protected>true</protected>
         <shortDescription>Navigate to the next page of results.</shortDescription>
         <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>Other</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Filter to show accounts beginning with a non-Latin letter.</shortDescription>
+        <value>Other</value>
     </labels>
     <labels>
         <fullName>Page_Number_With_Page_Count</fullName>

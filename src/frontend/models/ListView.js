@@ -1,6 +1,10 @@
 /* @flow strict */
 
-import { type WhereCondition, stringifyCondition } from "./WhereCondition"
+import {
+	type WhereCondition,
+	conjunction,
+	stringifyCondition
+} from "./WhereCondition"
 
 export type Id = string
 export type URL = string
@@ -64,8 +68,13 @@ export type ListViewDescription = {
  * Read `whereCondition` and `scope` from a list view description and produce
  * a string for use in a SOQL query.
  */
-export function whereClause(desc: ListViewDescription): string {
-	const cond = stringifyCondition(desc.whereCondition)
+export function whereClause(
+	desc: ListViewDescription,
+	extraConditions: WhereCondition[] = []
+): string {
+	const cond = stringifyCondition(
+		conjunction("AND", extraConditions.concat(desc.whereCondition))
+	)
 	const scope =
 		desc.scope && desc.scope !== "everything" ? `USING SCOPE ${desc.scope}` : ""
 	const where = cond ? `WHERE ${cond}` : ""

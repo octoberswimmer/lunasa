@@ -1,7 +1,7 @@
 /* @flow strict */
 
 export type WhereCondition =
-	| {| conjunction: "and" | "or", conditions: WhereCondition[] |}
+	| {| conjunction: "AND" | "OR", conditions: WhereCondition[] |}
 	| {| field: string, operator: string, values: string[] |}
 	| {| condition: WhereCondition |} // negation
 
@@ -19,12 +19,16 @@ const listOperators = ["in"]
 
 export function stringifyCondition(cond: WhereCondition): string {
 	if (cond.conditions) {
-		if (cond.conditions.length < 1) {
+		const nested = cond.conditions
+			.map(c => stringifyCondition(c))
+			.filter(c => !!c)
+		if (nested.length < 1) {
 			return ""
 		}
-		return cond.conditions
-			.map(c => `(${stringifyCondition(c)})`)
-			.join(` ${cond.conjunction} `)
+		if (nested.length === 1) {
+			return nested[0]
+		}
+		return nested.map(c => `(${c})`).join(` ${cond.conjunction} `)
 	} else if (cond.condition) {
 		return `NOT (${stringifyCondition(cond.condition)})`
 	} else {
@@ -41,4 +45,15 @@ function stringifyValues(operator: string, values: string[]): string {
 	} else {
 		return values[0]
 	}
+}
+
+export function conjunction(
+	op: "AND" | "OR",
+	conditions: WhereCondition[]
+): WhereCondition {
+	return { conjunction: op, conditions }
+}
+
+export function not(condition: WhereCondition): WhereCondition {
+	return { condition }
 }

@@ -570,7 +570,7 @@ export const accountListViewDescriptions: ListViewDescription[] = [
 			"SELECT Name, Site, BillingState, Phone, Owner.Alias, Id, CreatedDate, LastModifiedDate, SystemModstamp, Owner.Id, OwnerId FROM Account ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST",
 		scope: "everything",
 		sobjectType: "Account",
-		whereCondition: { conditions: [], conjunction: "and" }
+		whereCondition: { conditions: [], conjunction: "AND" }
 	},
 	{
 		columns: [
@@ -736,7 +736,7 @@ export const accountListViewDescriptions: ListViewDescription[] = [
 			"SELECT Name, Site, BillingState, Phone, toLabel(Type), Owner.Alias, Id, CreatedDate, LastModifiedDate, SystemModstamp, Owner.Id, OwnerId FROM Account USING SCOPE mru ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST",
 		scope: "mru",
 		sobjectType: "Account",
-		whereCondition: { conditions: [], conjunction: "and" }
+		whereCondition: { conditions: [], conjunction: "AND" }
 	},
 	{
 		columns: [
@@ -902,7 +902,7 @@ export const accountListViewDescriptions: ListViewDescription[] = [
 			"SELECT Name, Site, BillingState, Phone, toLabel(Type), Owner.Alias, Id, CreatedDate, LastModifiedDate, SystemModstamp, Owner.Id, OwnerId FROM Account ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST",
 		scope: "everything",
 		sobjectType: "Account",
-		whereCondition: { conditions: [], conjunction: "and" }
+		whereCondition: { conditions: [], conjunction: "AND" }
 	},
 	{
 		columns: [
@@ -1068,6 +1068,6 @@ export const accountListViewDescriptions: ListViewDescription[] = [
 			"SELECT Name, Site, BillingState, Phone, toLabel(Type), Owner.Alias, Id, CreatedDate, LastModifiedDate, SystemModstamp, Owner.Id, OwnerId FROM Account USING SCOPE mine ORDER BY Name ASC NULLS FIRST, Id ASC NULLS FIRST",
 		scope: "mine",
 		sobjectType: "Account",
-		whereCondition: { conditions: [], conjunction: "and" }
+		whereCondition: { conditions: [], conjunction: "AND" }
 	}
 ]

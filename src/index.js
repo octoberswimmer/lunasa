@@ -63,6 +63,7 @@ export function lunasa({
 	const accounts = new Accounts({
 		accountFieldSet,
 		accountIds,
+		locale: language,
 		restClient,
 		sortFields
 	})

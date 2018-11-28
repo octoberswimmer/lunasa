@@ -4,18 +4,22 @@ import Button from "@salesforce/design-system-react/components/button"
 import classNames from "classnames"
 import * as React from "react"
 import { Subscribe } from "unstated"
-import Accounts, { type ListViewLike, GIVEN_IDS } from "../containers/Accounts"
-import { type Account } from "../models/Account"
-import { type FieldSet } from "../models/FieldSet"
+import Accounts, {
+	type ListViewLike,
+	GIVEN_IDS
+} from "../../containers/Accounts"
+import { type Account } from "../../models/Account"
+import { type FieldSet } from "../../models/FieldSet"
 import {
 	type SortDirection,
 	type SortField,
 	ASCENDING,
 	DESCENDING
-} from "../models/SortField"
-import AccountCard from "./AccountCard"
+} from "../../models/SortField"
+import AccountCard from "../AccountCard"
+import { Label } from "../i18n/Label"
 import "./AccountList.css"
-import { Label } from "./i18n/Label"
+import FilterByFirstLetter from "./FilterByFirstLetter"
 
 type Props = {
 	className?: string | string[],
@@ -43,6 +47,13 @@ export default function AccountList(props: Props) {
 							/>
 						) : null}
 					</div>
+					<FilterByFirstLetter
+						filters={accounts.state.filters}
+						locale={accounts.state.locale}
+						onApplyFilter={filter => {
+							accounts.applyFilter(filter)
+						}}
+					/>
 					<SelectSortField
 						onSelectSortDirection={dir => {
 							accounts.selectSortDirection(dir)
