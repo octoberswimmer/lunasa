@@ -1,7 +1,7 @@
 /* @flow strict */
 
 export type WhereCondition =
-	| {| conjunction: "and" | "or", conditions: WhereCondition[] |}
+	| {| conjunction: "AND" | "OR", conditions: WhereCondition[] |}
 	| {| field: string, operator: string, values: string[] |}
 	| {| condition: WhereCondition |} // negation
 
@@ -48,7 +48,7 @@ function stringifyValues(operator: string, values: string[]): string {
 }
 
 export function conjunction(
-	op: "and" | "or",
+	op: "AND" | "OR",
 	conditions: WhereCondition[]
 ): WhereCondition {
 	return { conjunction: op, conditions }

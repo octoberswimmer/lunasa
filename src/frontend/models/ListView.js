@@ -73,7 +73,7 @@ export function whereClause(
 	extraConditions: WhereCondition[] = []
 ): string {
 	const cond = stringifyCondition(
-		conjunction("and", extraConditions.concat(desc.whereCondition))
+		conjunction("AND", extraConditions.concat(desc.whereCondition))
 	)
 	const scope =
 		desc.scope && desc.scope !== "everything" ? `USING SCOPE ${desc.scope}` : ""

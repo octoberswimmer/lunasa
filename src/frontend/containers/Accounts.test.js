@@ -329,7 +329,7 @@ it("filters by first letter of account name", async () => {
 	expect(accounts.state.errors).toEqual([])
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
-			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE \(Id IN \('001f200001XrDt1AAF'\)\) and \(Name like 'a%'\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE \(Id IN \('001f200001XrDt1AAF'\)\) AND \(Name LIKE 'a%'\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)
@@ -347,7 +347,7 @@ it("filters to accounts with names that start with an 'Other' letter", async () 
 	expect(accounts.state.errors).toEqual([])
 	expect(querySpy).toHaveBeenCalledWith(
 		expect.stringMatching(
-			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE \(Id IN \('001f200001XrDt1AAF'\)\) and \(NOT \(\(Name like 'a%'\) or.*\)\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
+			/SELECT Name, Site, CreatedDate, Phone FROM Account\s+WHERE \(Id IN \('001f200001XrDt1AAF'\)\) AND \(NOT \(\(Name LIKE 'a%'\) OR.*\)\)\s+ORDER BY Account.Name ASC NULLS FIRST, Id ASC NULLS FIRST\s+LIMIT 5\s+OFFSET 0\s*$/
 		)
 	)
 	expect(accounts.state.accountQueryResult).toEqual(af.accountQueryResult)

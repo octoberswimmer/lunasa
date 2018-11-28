@@ -71,7 +71,7 @@ export function whereCondition(
 			}
 		})
 	)
-	return conjunction("and", conditions)
+	return conjunction("AND", conditions)
 }
 
 function whereConditionFirstLetter(
@@ -94,8 +94,8 @@ function whereConditionFirstLetter(
 function startsWithOneOf(field: string, letters: string[]): WhereCondition {
 	const conditions = letters.map(letter => ({
 		field,
-		operator: "like",
+		operator: "LIKE",
 		values: [`'${letter}%'`]
 	}))
-	return conjunction("or", conditions)
+	return conjunction("OR", conditions)
 }

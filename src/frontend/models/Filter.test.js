@@ -42,14 +42,14 @@ it("produces a SOQL `where` clause when filtering by first letter", () => {
 	const filters = [F.firstLetter("b")]
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
-	).toBe("Name like 'b%'")
+	).toBe("Name LIKE 'b%'")
 })
 
 it("produces a SOQL `where` clause when filtering by 'Other' first letter", () => {
 	const filters = [F.firstLetterOther()]
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
-	).toMatch(/NOT \(\(Name like 'a%'\).*\)/)
+	).toMatch(/NOT \(\(Name LIKE 'a%'\).*\)/)
 })
 
 it("produces a SOQL `where` clause when filtering by 'Any' first letter", () => {
@@ -63,18 +63,18 @@ it("treats accented letters as equivalent to base Latin letters in German", () =
 	const filters = [F.firstLetter("o")]
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "de-DE" }))
-	).toBe("(Name like 'o%') or (Name like 'ö%')")
+	).toBe("(Name LIKE 'o%') OR (Name LIKE 'ö%')")
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
-	).toBe("Name like 'o%'")
+	).toBe("Name LIKE 'o%'")
 })
 
 it("excludes accented latin characters when filtering by 'Other' letter in German", () => {
 	const filters = [F.firstLetterOther()]
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "de-DE" }))
-	).toMatch(/NOT \(.*\(Name like 'ö%'\).*\)/)
+	).toMatch(/NOT \(.*\(Name LIKE 'ö%'\).*\)/)
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
-	).not.toMatch(/NOT \(.*\(Name like 'ö%'\).*\)/)
+	).not.toMatch(/NOT \(.*\(Name LIKE 'ö%'\).*\)/)
 })

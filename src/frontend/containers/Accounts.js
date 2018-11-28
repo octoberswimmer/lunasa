@@ -298,7 +298,7 @@ export default class AccountContainer extends Container<State> {
 			return (
 				"WHERE " +
 				stringifyCondition(
-					conjunction("and", [
+					conjunction("AND", [
 						{
 							field: "Id",
 							operator: "IN",

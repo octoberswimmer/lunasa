@@ -3,32 +3,32 @@
 import { stringifyCondition } from "./WhereCondition"
 
 it("produces an empty string if no conditions are given", () => {
-	const whereCondition = { conditions: [], conjunction: "and" }
+	const whereCondition = { conditions: [], conjunction: "AND" }
 	expect(stringifyCondition(whereCondition)).toBe("")
 })
 
 it("skips nested conjunction conditions with empty sub-condition lists", () => {
 	const nested = [
-		{ conditions: [], conjunction: "and" },
+		{ conditions: [], conjunction: "AND" },
 		{ field: "Name", operator: "notEquals", values: ["'bob'"] }
 	]
-	const whereCondition = { conditions: nested, conjunction: "and" }
+	const whereCondition = { conditions: nested, conjunction: "AND" }
 	expect(stringifyCondition(whereCondition)).toBe("Name != 'bob'")
 })
 
 it("formats single condition of a conjunction without parenthesis", () => {
 	const nested = [{ field: "Name", operator: "notEquals", values: ["'bob'"] }]
-	const whereCondition = { conditions: nested, conjunction: "and" }
+	const whereCondition = { conditions: nested, conjunction: "AND" }
 	expect(stringifyCondition(whereCondition)).toBe("Name != 'bob'")
 })
 
 it("compares a value to a field", () => {
 	const whereCondition = {
 		field: "Name",
-		operator: "like",
+		operator: "LIKE",
 		values: ["'%foo%'"]
 	}
-	expect(stringifyCondition(whereCondition)).toBe("Name like '%foo%'")
+	expect(stringifyCondition(whereCondition)).toBe("Name LIKE '%foo%'")
 })
 
 it("translates operator names to symbols", () => {
@@ -57,19 +57,19 @@ it("combines multiple conditions with a conjunction", () => {
 	const whereCondition = {
 		conditions: [
 			{ field: "Amount", operator: "notEquals", values: ["'1'"] },
-			{ condition: { field: "Name", operator: "like", values: ["'%bar%'"] } },
+			{ condition: { field: "Name", operator: "LIKE", values: ["'%bar%'"] } },
 			{
 				conditions: [
-					{ field: "Name", operator: "like", values: ["'%foo%'"] },
-					{ field: "Name", operator: "like", values: ["'%baz%'"] }
+					{ field: "Name", operator: "LIKE", values: ["'%foo%'"] },
+					{ field: "Name", operator: "LIKE", values: ["'%baz%'"] }
 				],
-				conjunction: "or"
+				conjunction: "OR"
 			}
 		],
-		conjunction: "and"
+		conjunction: "AND"
 	}
 	expect(stringifyCondition(whereCondition)).toBe(
-		"(Amount != '1') and (NOT (Name like '%bar%')) and ((Name like '%foo%') or (Name like '%baz%'))"
+		"(Amount != '1') AND (NOT (Name LIKE '%bar%')) AND ((Name LIKE '%foo%') OR (Name LIKE '%baz%'))"
 	)
 })
 
