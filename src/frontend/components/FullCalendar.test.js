@@ -74,7 +74,7 @@ function getCalendar(wrapper: enzyme.ReactWrapper): Calendar {
 // and to avoid slowdown from accumulated React trees.
 let _wrapper: enzyme.ReactWrapper
 afterEach(() => {
-	if (_wrapper) {
+	if (_wrapper && _wrapper.length === 1) {
 		_wrapper.unmount()
 	}
 })
