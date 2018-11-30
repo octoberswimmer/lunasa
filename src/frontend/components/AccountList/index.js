@@ -17,12 +17,14 @@ import {
 	DESCENDING
 } from "../../models/SortField"
 import AccountCard from "../AccountCard"
-import { Label } from "../i18n/Label"
+import { Label, WithLabels } from "../i18n/Label"
 import "./AccountList.css"
 import FilterByFirstLetter from "./FilterByFirstLetter"
+import Search from "./Search"
 
 type Props = {
 	className?: string | string[],
+	debounceInterval?: number,
 	fieldSet: FieldSet,
 	spinner?: string // path to spinner image
 }
@@ -40,16 +42,19 @@ export default function AccountList(props: Props) {
 							}}
 						/>
 						{accounts.isLoading() ? (
-							<img
-								alt={<Label>Loading</Label>}
-								className="loading-spinner"
-								src={props.spinner}
-							/>
+							<LoadingSpinner spinner={props.spinner} />
 						) : null}
 					</div>
 					<FilterByFirstLetter
 						filters={accounts.state.filters}
 						locale={accounts.state.locale}
+						onApplyFilter={filter => {
+							accounts.applyFilter(filter)
+						}}
+					/>
+					<Search
+						debounceInterval={props.debounceInterval}
+						filters={accounts.state.filters}
 						onApplyFilter={filter => {
 							accounts.applyFilter(filter)
 						}}
@@ -110,22 +115,30 @@ class SelectAccountListView extends React.Component<SelectProps> {
 	}
 
 	render() {
-		const { listViews } = this.props
-		const listViewOptions = listViews
-			? listViews.map(view => (
-					<option value={view.id} key={view.id}>
-						{labelFor(view)}
-					</option>
-			  ))
-			: []
 		return (
-			<select
-				className="slds-select select-list-view"
-				onInput={this.onInput}
-				ref={this.select}
-			>
-				{listViewOptions}
-			</select>
+			<WithLabels>
+				{label => {
+					const { listViews } = this.props
+					const listViewOptions = listViews
+						? listViews.map(view => (
+								<option value={view.id} key={view.id}>
+									{view.id === GIVEN_IDS
+										? label("Selected_Accounts")
+										: view.label}
+								</option>
+						  ))
+						: []
+					return (
+						<select
+							className="slds-select select-list-view"
+							onInput={this.onInput}
+							ref={this.select}
+						>
+							{listViewOptions}
+						</select>
+					)
+				}}
+			</WithLabels>
 		)
 	}
 
@@ -140,14 +153,6 @@ class SelectAccountListView extends React.Component<SelectProps> {
 		if (listView) {
 			onSelectListView(listView)
 		}
-	}
-}
-
-function labelFor(listView: ListViewLike): React.Node {
-	if (listView.id === GIVEN_IDS) {
-		return <Label>Selected_Accounts</Label>
-	} else {
-		return listView.label
 	}
 }
 
@@ -268,5 +273,15 @@ function Pagination(props: {
 				className="nextPage"
 			/>
 		</footer>
+	)
+}
+
+function LoadingSpinner({ spinner }: { spinner: ?string }) {
+	return (
+		<WithLabels>
+			{label => (
+				<img alt={label("Loading")} className="loading-spinner" src={spinner} />
+			)}
+		</WithLabels>
 	)
 }

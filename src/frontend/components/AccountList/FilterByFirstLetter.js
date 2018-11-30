@@ -19,7 +19,7 @@ export default function FilterByFirstLetter({
 	locale,
 	onApplyFilter
 }: Props) {
-	const selectedLetter = F.filterByLetter(filters)
+	const selectedLetter = F.isFilteredByLetter(filters)
 	const chars = getAlphabetCollapsed(locale).map(char => (
 		<Button
 			className={classNames("filterLetter", {
@@ -37,7 +37,7 @@ export default function FilterByFirstLetter({
 	const other = (
 		<Button
 			className={classNames("filterLetter", {
-				selected: F.filterByLetterOther(filters)
+				selected: F.isFilteredByLetterOther(filters)
 			})}
 			onClick={() => {
 				onApplyFilter(F.firstLetterOther())
@@ -51,7 +51,7 @@ export default function FilterByFirstLetter({
 	const any = (
 		<Button
 			className={classNames("filterLetter", {
-				selected: F.filterByLetterAny(filters)
+				selected: F.isFilteredByLetterAny(filters)
 			})}
 			onClick={() => {
 				onApplyFilter(F.firstLetterAny())

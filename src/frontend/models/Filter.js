@@ -6,7 +6,11 @@ import { getAlphabet, getEquivalentCharacters } from "../locale"
 import { excludeNull } from "../util/array"
 import { type WhereCondition, conjunction, not } from "./WhereCondition"
 
+// Filter types
 const FIRST_LETTER = "firstLetter"
+const SUBSTRING = "substring"
+
+// First letter option types
 const LATIN_LETTER = "latinLetter"
 const OTHER_LETTER = "otherLetter"
 const ANY_LETTER = "anyLetter"
@@ -16,7 +20,9 @@ export type FirstLetterOption =
 	| {| type: typeof OTHER_LETTER |}
 	| {| type: typeof ANY_LETTER |}
 
-export type Filter = {| type: typeof FIRST_LETTER, option: FirstLetterOption |}
+export type Filter =
+	| {| type: typeof FIRST_LETTER, option: FirstLetterOption |}
+	| {| type: typeof SUBSTRING, substring: ?string |}
 
 export function firstLetter(letter: string): Filter {
 	return { type: FIRST_LETTER, option: { type: LATIN_LETTER, letter } }
@@ -30,6 +36,10 @@ export function firstLetterAny(): Filter {
 	return { type: FIRST_LETTER, option: { type: ANY_LETTER } }
 }
 
+export function substring(s: string): Filter {
+	return { type: SUBSTRING, substring: s }
+}
+
 // Merges a filter with a list of existing filters such that there is at most
 // one filter of `type` in the result.
 export function applyFilter(filters: Filter[], newFilter: Filter): Filter[] {
@@ -39,24 +49,36 @@ export function applyFilter(filters: Filter[], newFilter: Filter): Filter[] {
 // Extract a first-letter filter configuration from a list of applied filters.
 export function getFirstLetterOption(filters: Filter[]): FirstLetterOption {
 	const result = filters.find(f => f.type === FIRST_LETTER)
-	return result ? result.option : firstLetterAny().option
+	if (result && result.type === FIRST_LETTER) {
+		return result.option
+	} else {
+		return { type: ANY_LETTER }
+	}
 }
 
-export function filterByLetter(filters: Filter[]): ?string {
+export function isFilteredByLetter(filters: Filter[]): ?string {
 	const option = getFirstLetterOption(filters)
 	if (option.type === LATIN_LETTER) {
 		return option.letter
 	}
 }
 
-export function filterByLetterOther(filters: Filter[]): boolean {
+export function isFilteredByLetterOther(filters: Filter[]): boolean {
 	const option = getFirstLetterOption(filters)
 	return option.type === OTHER_LETTER
 }
 
-export function filterByLetterAny(filters: Filter[]): boolean {
+export function isFilteredByLetterAny(filters: Filter[]): boolean {
 	const option = getFirstLetterOption(filters)
 	return option.type === ANY_LETTER
+}
+
+export function isFilteredBySubstring(filters: Filter[]): ?string {
+	for (const filter of filters) {
+		if (filter.type === SUBSTRING) {
+			return filter.substring
+		}
+	}
 }
 
 export function whereCondition(
@@ -68,6 +90,8 @@ export function whereCondition(
 			switch (filter.type) {
 				case FIRST_LETTER:
 					return whereConditionFirstLetter(filter.option, opts)
+				case SUBSTRING:
+					return whereConditionSubstring(filter.substring)
 			}
 		})
 	)
@@ -98,4 +122,10 @@ function startsWithOneOf(field: string, letters: string[]): WhereCondition {
 		values: [`'${letter}%'`]
 	}))
 	return conjunction("OR", conditions)
+}
+
+function whereConditionSubstring(substr: ?string): ?WhereCondition {
+	if (substr) {
+		return { field: "Name", operator: "LIKE", values: [`'%${substr}%'`] }
+	}
 }

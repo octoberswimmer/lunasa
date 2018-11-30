@@ -16,6 +16,7 @@ export const labels: Labels = {
 	Previous_Page: "Prev",
 
 	Save_Event: "Save",
+	Search: "Search",
 	Selected_Accounts: "Selected Accounts",
 	Sort_by: "Sort by",
 	Time: "Time ({timezone})",
