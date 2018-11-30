@@ -113,6 +113,14 @@
         <value>Save</value>
     </labels>
     <labels>
+        <fullName>Search</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Label for a search input to get accounts by a portion of the account name.</shortDescription>
+        <value>Search</value>
+    </labels>
+    <labels>
         <fullName>Selected_Accounts</fullName>
         <categories>Account_Scheduler</categories>
         <language>en_US</language>

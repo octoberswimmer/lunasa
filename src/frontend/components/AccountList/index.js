@@ -20,9 +20,11 @@ import AccountCard from "../AccountCard"
 import { Label, WithLabels } from "../i18n/Label"
 import "./AccountList.css"
 import FilterByFirstLetter from "./FilterByFirstLetter"
+import Search from "./Search"
 
 type Props = {
 	className?: string | string[],
+	debounceInterval?: number,
 	fieldSet: FieldSet,
 	spinner?: string // path to spinner image
 }
@@ -46,6 +48,13 @@ export default function AccountList(props: Props) {
 					<FilterByFirstLetter
 						filters={accounts.state.filters}
 						locale={accounts.state.locale}
+						onApplyFilter={filter => {
+							accounts.applyFilter(filter)
+						}}
+					/>
+					<Search
+						debounceInterval={props.debounceInterval}
+						filters={accounts.state.filters}
 						onApplyFilter={filter => {
 							accounts.applyFilter(filter)
 						}}

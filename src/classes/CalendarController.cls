@@ -24,6 +24,7 @@ public with sharing class CalendarController {
 		labels.put('Page_Number_With_Page_Count', System.Label.Page_Number_With_Page_Count);
 		labels.put('Previous_Page', System.Label.Previous_Page);
 		labels.put('Save_Event', System.Label.Save_Event);
+		labels.put('Search', System.Label.Search);
 		labels.put('Selected_Accounts', System.Label.Selected_Accounts);
 		labels.put('Sort_by', System.Label.Sort_by);
 		labels.put('Time', System.Label.Time);

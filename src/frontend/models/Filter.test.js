@@ -5,37 +5,42 @@ import { stringifyCondition } from "./WhereCondition"
 
 it("creates a filter that filters by first letter", () => {
 	const filters = [F.firstLetter("b")]
-	expect(F.filterByLetter(filters)).toBe("b")
-	expect(F.filterByLetterOther(filters)).toBe(false)
-	expect(F.filterByLetterAny(filters)).toBe(false)
+	expect(F.isFilteredByLetter(filters)).toBe("b")
+	expect(F.isFilteredByLetterOther(filters)).toBe(false)
+	expect(F.isFilteredByLetterAny(filters)).toBe(false)
 })
 
 it("creates a filter that filters by non-Latin initial letter", () => {
 	const filters = [F.firstLetterOther()]
-	expect(F.filterByLetter(filters)).not.toBeDefined()
-	expect(F.filterByLetterOther(filters)).toBe(true)
-	expect(F.filterByLetterAny(filters)).toBe(false)
+	expect(F.isFilteredByLetter(filters)).not.toBeDefined()
+	expect(F.isFilteredByLetterOther(filters)).toBe(true)
+	expect(F.isFilteredByLetterAny(filters)).toBe(false)
 })
 
 it("creates a filter that does not filter by first letter", () => {
 	const filters = [F.firstLetterAny()]
-	expect(F.filterByLetter(filters)).not.toBeDefined()
-	expect(F.filterByLetterOther(filters)).toBe(false)
-	expect(F.filterByLetterAny(filters)).toBe(true)
+	expect(F.isFilteredByLetter(filters)).not.toBeDefined()
+	expect(F.isFilteredByLetterOther(filters)).toBe(false)
+	expect(F.isFilteredByLetterAny(filters)).toBe(true)
 })
 
 it("defaults to filtering by 'any' first letter", () => {
 	const filters = []
-	expect(F.filterByLetter(filters)).not.toBeDefined()
-	expect(F.filterByLetterOther(filters)).toBe(false)
-	expect(F.filterByLetterAny(filters)).toBe(true)
+	expect(F.isFilteredByLetter(filters)).not.toBeDefined()
+	expect(F.isFilteredByLetterOther(filters)).toBe(false)
+	expect(F.isFilteredByLetterAny(filters)).toBe(true)
+})
+
+it("creates a filter that filters by substring", () => {
+	const filters = [F.substring("Juicer")]
+	expect(F.isFilteredBySubstring(filters)).toBe("Juicer")
 })
 
 it("applies one filter of a given type at a time", () => {
 	const prevFilters = [F.firstLetterAny()]
 	const filters = F.applyFilter(prevFilters, F.firstLetter("b"))
 	expect(filters.length).toBe(1)
-	expect(F.filterByLetter(filters)).toBe("b")
+	expect(F.isFilteredByLetter(filters)).toBe("b")
 })
 
 it("produces a SOQL `where` clause when filtering by first letter", () => {
@@ -77,4 +82,25 @@ it("excludes accented latin characters when filtering by 'Other' letter in Germa
 	expect(
 		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
 	).not.toMatch(/NOT \(.*\(Name LIKE 'ö%'\).*\)/)
+})
+
+it("produces a SOQL `where` clause when filtering by substring", () => {
+	const filters = [F.substring("Juicer")]
+	expect(
+		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
+	).toBe("Name LIKE '%Juicer%'")
+})
+
+it("does not apply substring filter if substring value is empty", () => {
+	const filters = [F.substring("")]
+	expect(
+		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
+	).toBe("")
+})
+
+it("produces a SOQL `where` clause when multiple filters are applied", () => {
+	const filters = [F.firstLetter("o"), F.substring("Juicer")]
+	expect(
+		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
+	).toBe("(Name LIKE 'o%') AND (Name LIKE '%Juicer%')")
 })

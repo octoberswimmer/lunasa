@@ -8,10 +8,11 @@ import RestApi from "../../api/RestApi"
 import Accounts, { GIVEN_IDS } from "../../containers/Accounts"
 import * as af from "../../models/Account.testFixtures"
 import * as clf from "../../models/CustomLabel.testFixtures"
+import * as F from "../../models/Filter"
 import * as lf from "../../models/ListView.testFixtures"
 import * as SortField from "../../models/SortField"
 import * as sff from "../../models/SortField.testFixtures"
-import { delay, failIfMissing } from "../../testHelpers"
+import { delay, failIfMissing, inputElement } from "../../testHelpers"
 import AccountCard from "../AccountCard"
 import AccountList from "../AccountList"
 import { LabelProvider } from "../i18n/Label"
@@ -111,6 +112,28 @@ it("updates state container when a list view is selected", async () => {
 	select.simulate("input")
 	expect(selectListView).toHaveBeenCalledTimes(2) // once on initialization
 	expect(selectListView).toHaveBeenCalledWith(listView)
+})
+
+it("updates state container when a search query is entered", async () => {
+	const debounceInterval = 5
+	const accounts = new Accounts(accountsOpts)
+	const applyFilter = jest.spyOn(accounts, "applyFilter")
+	const wrapper = mount(
+		<AccountList
+			debounceInterval={debounceInterval}
+			fieldSet={af.accountFieldSet}
+		/>,
+		{
+			accounts
+		}
+	)
+	const searchInput = wrapper.find("input[name='search']")
+	inputElement(searchInput).value = "Juice"
+	searchInput.simulate("change")
+	await delay(debounceInterval * 2)
+	expect(applyFilter).toHaveBeenCalledWith(
+		expect.objectContaining(F.substring("Juice"))
+	)
 })
 
 it("presents sort options", () => {

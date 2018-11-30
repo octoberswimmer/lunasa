@@ -27,7 +27,7 @@ it("filters by a letter when it is clicked", () => {
 	const button = wrapper.find(Button).filterWhere(n => n.text() === "B")
 	button.simulate("click")
 	expect(onApplyFilter).toBeCalled()
-	expect(F.filterByLetter([onApplyFilter.mock.calls[0][0]])).toBe("b")
+	expect(F.isFilteredByLetter([onApplyFilter.mock.calls[0][0]])).toBe("b")
 })
 
 it("filters by 'Other'", () => {
@@ -42,7 +42,7 @@ it("filters by 'Other'", () => {
 	const button = wrapper.find(Button).filterWhere(n => n.text() === "Other")
 	button.simulate("click")
 	expect(onApplyFilter).toBeCalled()
-	expect(F.filterByLetterOther([onApplyFilter.mock.calls[0][0]])).toBe(true)
+	expect(F.isFilteredByLetterOther([onApplyFilter.mock.calls[0][0]])).toBe(true)
 })
 
 it("filters by 'All'", () => {
@@ -57,7 +57,7 @@ it("filters by 'All'", () => {
 	const button = wrapper.find(Button).filterWhere(n => n.text() === "All")
 	button.simulate("click")
 	expect(onApplyFilter).toBeCalled()
-	expect(F.filterByLetterAny([onApplyFilter.mock.calls[0][0]])).toBe(true)
+	expect(F.isFilteredByLetterAny([onApplyFilter.mock.calls[0][0]])).toBe(true)
 })
 
 it("highlights a letter when the corresponding filter is active", () => {

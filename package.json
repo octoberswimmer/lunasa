@@ -21,6 +21,7 @@
     "@salesforce-ux/design-system": "^2.6.2",
     "@salesforce/design-system-react": "^0.8.18",
     "classnames": "^2.2.5",
+    "debounce": "^1.2.0",
     "fast-deep-equal": "^2.0.1",
     "formik": "^1.0.2",
     "fullcalendar": "^3.9.0",
