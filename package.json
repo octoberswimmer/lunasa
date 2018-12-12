@@ -5,7 +5,7 @@
   "homepage": ".",
   "scripts": {
     "start": "react-app-rewired start",
-    "prebuild": "flow check && CI=true yarn test",
+    "prebuild": "flow check && cross-env CI=true yarn test",
     "build": "react-app-rewired build && yarn run static",
     "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject",
@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "caller": "^1.0.1",
+    "cross-env": "5.2.0",
     "enzyme": "^3.7.0",
     "enzyme-adapter-react-16": "^1.7.0",
     "expose-loader": "^0.7.5",
