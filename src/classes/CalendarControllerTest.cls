@@ -62,4 +62,32 @@ private class CalendarControllerTest {
 				'precedence of sort field');
 	}
 
+	@isTest static void getSortFieldDefinitionsAsJson_returns_serialized_data() {
+		CalendarController calendarController = new CalendarController(null);
+		String data = calendarController.getSortFieldDefinitionsAsJson();
+		JSONParser parser = JSON.createParser(data);
+		List<FieldDefinition> fieldDefinitions = new List<FieldDefinition>();
+		while (parser.nextToken() != null) {
+			if (parser.getCurrentToken() == JSONToken.START_OBJECT) {
+				FieldDefinition fieldDefinition =
+					(FieldDefinition) parser.readValueAsStrict(
+							FieldDefinition.class);
+				fieldDefinitions.add(fieldDefinition);
+			}
+		}
+		System.assert(fieldDefinitions.size() > 0, 'there is at least one field definition');
+		FieldDefinition fieldDefinition;
+		for (FieldDefinition fd : fieldDefinitions) {
+			if (fd.DurableId == 'Account.Name') {
+				fieldDefinition = fd;
+			}
+		}
+		System.assertEquals('Account', fieldDefinition.EntityDefinitionId,
+			'EntityDefinitionId');
+		System.assertEquals('Account.Name', fieldDefinition.DurableId,
+			'DurableId');
+		System.assertEquals('Name', fieldDefinition.QualifiedApiName,
+			'QualifiedApiName');
+	}
+
 }

@@ -8,6 +8,7 @@ import RestApi from "../../api/RestApi"
 import Accounts, { GIVEN_IDS } from "../../containers/Accounts"
 import * as af from "../../models/Account.testFixtures"
 import * as clf from "../../models/CustomLabel.testFixtures"
+import * as fdf from "../../models/FieldDefinition.testFixtures"
 import * as F from "../../models/Filter"
 import * as lf from "../../models/ListView.testFixtures"
 import * as SortField from "../../models/SortField"
@@ -24,10 +25,16 @@ const accountsOpts = {
 }
 
 const sortByName = failIfMissing(
-	sff.sortFields.find(s => SortField.getField(s) === "Account.Name")
+	sff.sortFields.find(
+		s => SortField.getFieldForSoql(s, fdf.fieldDefinitions) === "Account.Name"
+	)
 )
 const sortByCreatedDate = failIfMissing(
-	sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+	sff.sortFields.find(
+		s =>
+			SortField.getFieldForSoql(s, fdf.fieldDefinitions) ===
+			"Account.CreatedDate"
+	)
 )
 
 it("displays list views in a select", async () => {

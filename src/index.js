@@ -19,6 +19,7 @@ import App from "./frontend/components/App"
 import { LabelProvider } from "./frontend/components/i18n/Label"
 import Accounts from "./frontend/containers/Accounts"
 import Events from "./frontend/containers/Events"
+import { type FieldDefinition } from "./frontend/models/FieldDefinition"
 import { type FieldSet } from "./frontend/models/FieldSet"
 import { type RecordTypeInfo } from "./frontend/models/RecordType"
 import { type SortField } from "./frontend/models/SortField"
@@ -35,6 +36,7 @@ export function lunasa({
 	assistiveRoot,
 	sessionToken,
 	sortFields,
+	fieldDefinitions,
 	staticDirectory,
 	userId
 }: {
@@ -49,6 +51,7 @@ export function lunasa({
 	assistiveRoot: HTMLElement,
 	sessionToken: string,
 	sortFields: SortField[],
+	fieldDefinitions: FieldDefinition[],
 	staticDirectory: string,
 	userId: string
 }) {
@@ -65,7 +68,8 @@ export function lunasa({
 		accountIds,
 		locale: language,
 		restClient,
-		sortFields
+		sortFields,
+		fieldDefinitions
 	})
 	const events = new Events({
 		eventCreateFieldSet,
@@ -108,9 +112,16 @@ if (process.env.NODE_ENV !== "production") {
 		import("./frontend/models/Account.testFixtures"),
 		import("./frontend/models/CustomLabel.testFixtures"),
 		import("./frontend/models/Event.testFixtures"),
+		import("./frontend/models/FieldDefinition.testFixtures"),
 		import("./frontend/models/SortField.testFixtures")
 	]).then(
-		([accountFixtures, labelFixtures, eventFixtures, sortFieldFixtures]) => {
+		([
+			accountFixtures,
+			labelFixtures,
+			eventFixtures,
+			fieldDefinitionFixtures,
+			sortFieldFixtures
+		]) => {
 			lunasa({
 				accountFieldSet: accountFixtures.accountFieldSet,
 				eventCreateFieldSet: eventFixtures.eventCreateFieldSet,
@@ -121,6 +132,7 @@ if (process.env.NODE_ENV !== "production") {
 				assistiveRoot,
 				sessionToken: "0000",
 				sortFields: sortFieldFixtures.sortFields,
+				fieldDefinitions: fieldDefinitionFixtures.fieldDefinitions,
 				staticDirectory: "",
 				userId: "testuserid"
 			})

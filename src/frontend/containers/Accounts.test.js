@@ -2,6 +2,7 @@
 
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
+import * as fdf from "../models/FieldDefinition.testFixtures"
 import * as F from "../models/Filter"
 import * as lvf from "../models/ListView.testFixtures"
 import * as SortField from "../models/SortField"
@@ -27,7 +28,8 @@ const accountFieldSet = [
 const opts = {
 	accountFieldSet,
 	restClient,
-	sortFields: sff.sortFields
+	sortFields: sff.sortFields,
+	fieldDefinitions: fdf.fieldDefinitions
 }
 
 afterEach(() => {
@@ -70,12 +72,22 @@ it("sorts sort fields by precedence", () => {
 		sortFields
 	})
 	expect(accounts.state.sortFields).toHaveLength(2)
-	expect(SortField.getField(accounts.state.sortFields[0])).toBe("Account.Name")
-	expect(SortField.getField(accounts.state.sortFields[1])).toBe(
-		"Account.CreatedDate"
-	)
+	expect(
+		SortField.getFieldForSoql(
+			accounts.state.sortFields[0],
+			fdf.fieldDefinitions
+		)
+	).toBe("Account.Name")
+	expect(
+		SortField.getFieldForSoql(
+			accounts.state.sortFields[1],
+			fdf.fieldDefinitions
+		)
+	).toBe("Account.CreatedDate")
 	const selected = accounts.state.selectedSortField
-	expect(selected && SortField.getField(selected)).toBe("Account.Name")
+	expect(
+		selected && SortField.getFieldForSoql(selected, fdf.fieldDefinitions)
+	).toBe("Account.Name")
 })
 
 it("requests Account list views", async () => {
@@ -118,7 +130,11 @@ it("sorts results when a list view is selected", async () => {
 	const { querySpy } = await spies
 	const accounts = new Accounts(opts)
 	const sortField = failIfMissing(
-		sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+		sff.sortFields.find(
+			s =>
+				SortField.getFieldForSoql(s, fdf.fieldDefinitions) ===
+				"Account.CreatedDate"
+		)
 	)
 	await accounts.selectSortField(sortField)
 
@@ -196,7 +212,11 @@ it("changes result sorting when requested", async () => {
 	await accounts.selectListView({ id: GIVEN_IDS })
 	await accounts.selectSortField(
 		failIfMissing(
-			sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+			sff.sortFields.find(
+				s =>
+					SortField.getFieldForSoql(s, fdf.fieldDefinitions) ===
+					"Account.CreatedDate"
+			)
 		)
 	)
 	expect(accounts.state.errors).toEqual([])
@@ -303,7 +323,11 @@ it("sorts results when fetching pages", async () => {
 		]
 	})
 	const sortField = failIfMissing(
-		sff.sortFields.find(s => SortField.getField(s) === "Account.CreatedDate")
+		sff.sortFields.find(
+			s =>
+				SortField.getFieldForSoql(s, fdf.fieldDefinitions) ===
+				"Account.CreatedDate"
+		)
 	)
 	await accounts.selectSortField(sortField)
 	await accounts.selectListView({ id: GIVEN_IDS })
