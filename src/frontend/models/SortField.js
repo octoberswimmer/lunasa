@@ -4,6 +4,8 @@
  * @flow strict
  */
 
+import { type FieldDefinition } from "./FieldDefinition"
+
 type URL = string
 
 export type SortDirection = "Ascending" | "Descending"
@@ -46,7 +48,7 @@ export const getDefaultSortOrder = getProperty.bind(
 	null,
 	"Default_Sort_Order__c"
 )
-export const getField = getProperty.bind(null, "Field__c")
+const getField = getProperty.bind(null, "Field__c")
 export const getObject = getProperty.bind(null, "Object__c")
 export const getPrecedence = getProperty.bind(null, "Precedence__c")
 
@@ -62,4 +64,16 @@ function getProperty<K: $Keys<SortFieldNoPrefix>>(
 		)
 	}
 	return (s: any)[key]
+}
+
+// Get the field name to use in the `order by` clause of a SOQL query. This
+// might require mapping a durable ID to a qualified API name.
+export function getFieldForSoql(s: SortField, fs: FieldDefinition[]): string {
+	const field = getField(s)
+	const matchingFd = fs.find(fd => fd.DurableId === field)
+	if (matchingFd) {
+		return matchingFd.QualifiedApiName
+	} else {
+		return field
+	}
 }

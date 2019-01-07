@@ -11,7 +11,7 @@ export const sortFields: SortField[] = [
 				"/services/data/v43.0/sobjects/oscal__Account_Scheduler_Sort_Field__mdt/m00f2000000kRjSAAU"
 		},
 		oscal__Default_Sort_Order__c: "Ascending",
-		oscal__Field__c: "Account.Name",
+		oscal__Field__c: "Account.00N1r00000JYYMV",
 		Label: "Account Name",
 		oscal__Object__c: "Account",
 		oscal__Precedence__c: 1.0,

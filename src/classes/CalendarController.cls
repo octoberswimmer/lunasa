@@ -55,4 +55,16 @@ public with sharing class CalendarController {
 		return JSON.serialize(sortFields);
 	}
 
+	public String getSortFieldDefinitionsAsJson() {
+		List<FieldDefinition> fieldDefinitions = [
+			SELECT DurableId, QualifiedApiName
+			FROM FieldDefinition
+			WHERE
+				EntityDefinition.QualifiedApiName = 'Account' AND
+				DurableId IN (
+					SELECT Field__c FROM Account_Scheduler_Sort_Field__mdt
+				)
+		];
+		return JSON.serialize(fieldDefinitions);
+	}
 }

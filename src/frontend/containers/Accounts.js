@@ -13,6 +13,7 @@ import sortListBy from "lodash.sortby"
 import { Container } from "unstated"
 import { type RestApi } from "../api/RestApi"
 import { type Account } from "../models/Account"
+import { type FieldDefinition } from "../models/FieldDefinition"
 import { type FieldSet, fieldList } from "../models/FieldSet"
 import * as F from "../models/Filter"
 import {
@@ -51,7 +52,8 @@ export type State = AsyncActionState & {
 	pageSize: number,
 	selectedSortField: ?SortField.SortField,
 	sortFields: SortField.SortField[],
-	sortDirection: SortField.SortDirection
+	sortDirection: SortField.SortDirection,
+	fieldDefinitions: FieldDefinition[]
 }
 
 type Request = {|
@@ -75,7 +77,8 @@ export default class AccountContainer extends Container<State> {
 		locale?: ?string, // e.g. "en_US"
 		pageSize?: number,
 		restClient: Promise<RestApi>,
-		sortFields?: SortField.SortField[]
+		sortFields?: SortField.SortField[],
+		fieldDefinitions?: FieldDefinition[]
 	|}) {
 		super()
 		this._restClient = opts.restClient
@@ -101,7 +104,8 @@ export default class AccountContainer extends Container<State> {
 			sortFields,
 			sortDirection: defaultSortField
 				? SortField.getDefaultSortOrder(defaultSortField)
-				: SortField.ASCENDING
+				: SortField.ASCENDING,
+			fieldDefinitions: opts.fieldDefinitions || []
 		}
 	}
 
@@ -249,7 +253,8 @@ export default class AccountContainer extends Container<State> {
 			offset,
 			pageSize,
 			selectedSortField,
-			sortDirection
+			sortDirection,
+			fieldDefinitions
 		} = this.state
 		if (!listView) {
 			return
@@ -262,7 +267,7 @@ export default class AccountContainer extends Container<State> {
 			limit: pageSize,
 			offset,
 			sortBy: selectedSortField
-				? SortField.getField(selectedSortField)
+				? SortField.getFieldForSoql(selectedSortField, fieldDefinitions)
 				: "Account.Name",
 			sortDirection
 		}
