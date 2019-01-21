@@ -10,6 +10,7 @@
     "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject",
     "precommit": "git-format-staged -f 'prettier --stdin' '*.js' '!flow-typed/*'",
+    "prepare": "patch-package",
     "static": "node scripts/static.js Calendar"
   },
   "prettier": {
@@ -46,10 +47,12 @@
     "enzyme": "^3.7.0",
     "enzyme-adapter-react-16": "^1.7.0",
     "expose-loader": "^0.7.5",
-    "flow-bin": "0.84.0",
+    "flow-bin": "^0.91.0",
     "git-format-staged": "^2.0.0",
     "husky": "^0.14.3",
     "jest-enzyme": "^6.0.2",
+    "patch-package": "^5.1.2",
+    "postinstall-prepare": "^1.0.1",
     "prettier": "^1.13.4",
     "react-app-rewired": "^1.5.2",
     "reset-date-cache": "^1.0.4",

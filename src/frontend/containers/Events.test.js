@@ -24,12 +24,6 @@ const eventsOpts = {
 
 afterEach(() => {
 	jest.clearAllMocks()
-	// Remove spies from `EventModel`
-	for (const method of Object.values(EventModel)) {
-		if (method && typeof method.mockRestore === "function") {
-			method.mockRestore()
-		}
-	}
 })
 
 it("requests events by date range", () => {

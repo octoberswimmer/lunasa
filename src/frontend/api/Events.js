@@ -61,4 +61,7 @@ function dateToLocalTz<T: Date | number | void>(input: T): T {
 		: date
 }
 
-export default new RemoteObject(EventModel, { transformAfterRetrieve })
+const Events: RemoteObject<Event> = new RemoteObject(EventModel, {
+	transformAfterRetrieve
+})
+export default Events
