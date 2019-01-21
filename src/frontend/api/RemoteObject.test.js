@@ -56,6 +56,13 @@ it("pre-serializes date values on create", async () => {
 	)
 })
 
+it("deletes records", async () => {
+	const remote = new RemoteObject(objectMock)
+	const deletedIds = await remote.del(["1"])
+	expect(deletedIds).toEqual(["1"])
+	expect(objectMock.fixtures["1"]).not.toBeDefined()
+})
+
 it("fetches an object description", async () => {
 	const remote = new RemoteObject(objectMock)
 	const description = await remote.describe()

@@ -64,6 +64,7 @@ type Ordering<Fields: Object = Object> = {
 export interface SObject<Fields: Object> {
 	constructor(): any;
 	create(values: $Shape<Fields>, cb: Callback<Id[]>): void;
+	del(ids: Id[], cb: Callback<Id[]>): void;
 	describe(cb: Callback<SObjectDescription>): void;
 	retrieve(
 		criteria: Criteria<Fields>,

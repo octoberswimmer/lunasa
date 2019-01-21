@@ -9,6 +9,22 @@
         <value>All</value>
     </labels>
     <labels>
+        <fullName>Are_You_Sure</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Title of dialog that asks for confirmation for destructive action.</shortDescription>
+        <value>Are you sure?</value>
+    </labels>
+    <labels>
+        <fullName>Cancel_Delete</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Text for button that cancels event deletion when asked for confirmation.</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
         <fullName>Cancel_Editing</fullName>
         <categories>Account_Scheduler</categories>
         <language>en_US</language>
@@ -17,12 +33,28 @@
         <value>Cancel</value>
     </labels>
     <labels>
+        <fullName>Confirm_Delete</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Text for button that confirms that event should be deleted.</shortDescription>
+        <value>Delete</value>
+    </labels>
+    <labels>
         <fullName>Date</fullName>
         <categories>Account_Scheduler</categories>
         <language>en_US</language>
         <protected>true</protected>
         <shortDescription>Label for date input.</shortDescription>
         <value>Date</value>
+    </labels>
+    <labels>
+        <fullName>Delete_Event</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Text for button that deletes an event.</shortDescription>
+        <value>Delete</value>
     </labels>
     <labels>
         <fullName>Edit_Event</fullName>
@@ -39,6 +71,14 @@
         <protected>true</protected>
         <shortDescription>Refers to a calendar event.</shortDescription>
         <value>Event</value>
+    </labels>
+    <labels>
+        <fullName>Event_Will_Be_Deleted</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Explanation that event will be permanently deleted if the user proceeds.</shortDescription>
+        <value>The event will be permanently deleted. Are you sure you wish to proceed?</value>
     </labels>
     <labels>
         <fullName>Field_Required</fullName>

@@ -33,12 +33,33 @@ function uniqueId() {
 }
 
 export default class SObjectMock<Fields: Object> implements SObject<Fields> {
-	fixtures: { [key: Id]: Fields } = {}
+	fixtures: { [key: Id]: Fields }
+
+	constructor({ fixtures = {} }: { fixtures?: { [key: Id]: Fields } } = {}) {
+		this.fixtures = { ...fixtures } // Make a defensive copy.
+		if (typeof beforeEach !== "undefined") {
+			// Reset fake server state before each test.
+			beforeEach(() => {
+				this.fixtures = { ...fixtures }
+			})
+		}
+	}
+
 	create(values: $Shape<Fields>, cb: Callback<Id[]>) {
 		const id = uniqueId()
 		values.Id = id
 		this.fixtures[id] = values
 		cb(null, [id], event)
+	}
+	del(ids: Id[], cb: Callback<Id[]>) {
+		const deletedIds = []
+		for (const id of ids) {
+			if (this.fixtures.hasOwnProperty(id)) {
+				delete this.fixtures[id]
+				deletedIds.push(id)
+			}
+		}
+		cb(null, deletedIds, event)
 	}
 	describe(cb: Callback<SObjectDescription>) {
 		return cb(null, ef.eventDescription, event)

@@ -36,6 +36,12 @@ export default class RemoteObject<Fields: Object> {
 		return id
 	}
 
+	// `del` is short for `delete`
+	async del(ids: Id[]): Promise<Id[]> {
+		const sObject = await this.sObject
+		return lift(cb => sObject.del(ids, cb))
+	}
+
 	async describe(): Promise<SObjectDescription> {
 		const sObject = await this.sObject
 		return lift(cb => sObject.describe(cb))
