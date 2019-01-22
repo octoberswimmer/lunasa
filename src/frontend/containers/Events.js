@@ -32,6 +32,7 @@ import {
 import { type Record, getId, getType } from "../models/QueryResult"
 import { type RecordTypeInfo } from "../models/RecordType"
 import { stringifyCondition } from "../models/WhereCondition"
+import { excludeNull } from "../util/array"
 import { setTimezone } from "../util/moment"
 import {
 	type AsyncActionState,
@@ -44,6 +45,7 @@ import { memoize, preserveRequestOrder, skipDuplicateInputs } from "./memoize"
 type Id = string
 
 export type State = AsyncActionState & {
+	awaitingConfirmDelete: boolean, // `true` if awaiting confirmation to delete
 	events: Event[],
 	eventCreateFieldSet: FieldSet,
 	eventDescription: ?SObjectDescription,
@@ -79,6 +81,7 @@ export default class EventContainer extends Container<State> {
 		this._restClient = opts.restClient
 		this.state = {
 			...asyncActionInitState,
+			awaitingConfirmDelete: false,
 			events: [],
 			eventCreateFieldSet: opts.eventCreateFieldSet,
 			eventDescription: null,
@@ -336,6 +339,28 @@ export default class EventContainer extends Container<State> {
 	}
 
 	/*
+	 * Delete the event that is currently being edited.
+	 */
+	async deleteEvent(): Promise<void> {
+		await asyncAction(this, async () => {
+			const draft = this.state.eventDraft
+			await this.setState({ awaitingConfirmDelete: false })
+			if (!draft || !draft.Id) {
+				throw new Error("There is no event to delete.")
+			}
+			await this._delete(draft.Id)
+		})
+	}
+
+	beginDeleteEvent() {
+		this.setState({ awaitingConfirmDelete: true })
+	}
+
+	cancelDeleteEvent() {
+		this.setState({ awaitingConfirmDelete: false })
+	}
+
+	/*
 	 * Create a new event, or update an existing event
 	 */
 	async saveDraft(): Promise<void> {
@@ -364,13 +389,35 @@ export default class EventContainer extends Container<State> {
 		return draft
 	}
 
-	async _mergeChangedEvent(event: Event): Promise<void> {
+	async _delete(eventId: Id): Promise<void> {
+		const deletedIds = await this._remoteObject.del([eventId])
+		if (deletedIds[0] !== eventId) {
+			throw new Error("An error occurred deleting the event")
+		}
+		await this._mergeChangedEvent(...deletedIds)
+	}
+
+	/*
+	 * When events are saved or updated values in `changed` will be Event
+	 * objects. In this case this function removes the stale version of each
+	 * event from local state and replaces it with the updated version in
+	 * `changed`. When events are deleted values in `changed` will be bare IDs.
+	 * In that case events are removed from local state, and are not replaced.
+	 *
+	 * This function also clears the draft from local state, which has the
+	 * effect of closing the edit modal.
+	 */
+	async _mergeChangedEvent(...changed: Array<Event | Id>): Promise<void> {
+		const removedIds = changed.map(e => (typeof e === "string" ? e : e.Id))
+		const addedEvents = excludeNull(
+			changed.map(e => (typeof e === "object" ? e : null))
+		)
 		await this.setState(state => {
-			const events = state.events.filter(e => e.Id !== event.Id)
+			const events = state.events.filter(e => !removedIds.includes(e.Id))
 			const referenceData = { ...state.referenceData }
 			delete referenceData.draft
 			return {
-				events: events.concat([event]),
+				events: events.concat(addedEvents),
 				eventDraft: null,
 				referenceData
 			}

@@ -24,16 +24,12 @@ type Props = {
 export default function EditEvent(props: Props) {
 	return (
 		<Subscribe to={[Events]}>
-			{events => (
-				<WithLabels>
-					{label => <EventForm {...props} events={events} label={label} />}
-				</WithLabels>
-			)}
+			{events => <EventForm {...props} events={events} />}
 		</Subscribe>
 	)
 }
 
-function EventForm({ events, label, spinner }: *) {
+function EventForm({ events, spinner }: *) {
 	const description = events.getEventDescription()
 	const layout = events.getEventLayout()
 	if (!description || !layout) {
@@ -65,13 +61,61 @@ function EventForm({ events, label, spinner }: *) {
 				}
 				return errors
 			}}
-			render={({ errors, handleSubmit, isSubmitting, values }) => (
+			render={formikProps => (
+				<React.Fragment>
+					<EventModal {...formikProps} events={events} spinner={spinner} />
+					<ConfirmDeleteDialog events={events} />
+				</React.Fragment>
+			)}
+		/>
+	)
+}
+
+function EventModal({
+	errors,
+	events,
+	handleSubmit,
+	isSubmitting,
+	values,
+	spinner
+}: {
+	errors: { [field: string]: string },
+	events: Events,
+	handleSubmit: (e: SyntheticEvent<any>) => void,
+	isSubmitting: boolean,
+	values: Object,
+	spinner: ?string
+}) {
+	const description = events.getEventDescription()
+	const layout = events.getEventLayout()
+	const { eventCreateFieldSet, eventDraft } = events.state
+	if (!description || !layout) {
+		return null
+	}
+	return (
+		<WithLabels>
+			{label => (
 				<Modal
 					contentClassName={[
 						"event-form-modal-content",
 						"slds-p-around--medium"
 					]}
+					directional={true} // puts "Delete" on the left
 					footer={[
+						events.isEditingEvent() ? (
+							<Button
+								key="delete-button"
+								label={label("Delete_Event")}
+								onClick={() => {
+									// Sets state to open confirmation dialog.
+									events.beginDeleteEvent()
+								}}
+								variant="base"
+							/>
+						) : (
+							// empty span so "Cancel" does not move to left
+							<span key="delete-button-placeholder" />
+						),
 						events.isLoading() ? (
 							<img
 								alt={label("Loading")}
@@ -131,7 +175,43 @@ function EventForm({ events, label, spinner }: *) {
 					/>
 				</Modal>
 			)}
-		/>
+		</WithLabels>
+	)
+}
+
+function ConfirmDeleteDialog({ events }: { events: Events }) {
+	const cancelDelete = () => events.cancelDeleteEvent()
+	return (
+		<WithLabels>
+			{label => (
+				<Modal
+					dismissable={false}
+					footer={[
+						<Button
+							key="cancel-button"
+							label={label("Cancel_Delete")}
+							onClick={cancelDelete}
+						/>,
+						<Button
+							key="save-button"
+							label={label("Confirm_Delete")}
+							variant="destructive"
+							onClick={() => {
+								events.deleteEvent()
+							}}
+						/>
+					]}
+					isOpen={events.state.awaitingConfirmDelete}
+					onRequestClose={cancelDelete}
+					prompt="warning"
+					title={<Label>Are_You_Sure</Label>}
+				>
+					<div className="confirm-delete-content slds-m-around_medium">
+						<Label>Event_Will_Be_Deleted</Label>
+					</div>
+				</Modal>
+			)}
+		</WithLabels>
 	)
 }
 

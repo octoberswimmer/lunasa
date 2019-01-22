@@ -4,12 +4,10 @@ import * as React from "react"
 import replace from "react-string-replace"
 import { type Labels } from "../../models/CustomLabel"
 
-const { Consumer, Provider } = React.createContext({})
+const Context: React.Context<Labels> = React.createContext({})
+const { Consumer, Provider } = Context
 
-export const LabelProvider: React.ComponentType<{
-	value: Labels,
-	children?: React$Node
-}> = Provider
+export const LabelProvider = Provider
 
 // `Label` takes a custom label name as a child and renders a translated string.
 // You may also pass a map of substitution values via the `with` prop.
@@ -77,23 +75,19 @@ function getLabel(
 	}
 	return replace(label, tokenPattern, (token, start, end) => {
 		const replacement = substitutions[token.trim()]
-		switch (typeof replacement) {
-			case "undefined":
-				// If no substitution is given then preserve the original text.
-				return `{${token}}`
-			case "object":
-				if (!replacement) {
-					// null check
-					return replacement
-				}
-				// Replacements will be members of an array. React prefers that
-				// non-string array element nodes have a `key` property.
-				return React.cloneElement(replacement, {
-					key: `${token}-${start}-${end}`
-				})
-			default:
-				return replacement
+		if (typeof replacement === "undefined") {
+			// If no substitution is given then preserve the original text.
+			return `{${token}}`
 		}
+		if (React.isValidElement(replacement)) {
+			// Replacements will be members of an array. React prefers that
+			// `React.Element` nodes have a `key` property.
+			const elem: React.Element<any> = (replacement: any)
+			return React.cloneElement(elem, {
+				key: `${token}-${start}-${end}`
+			})
+		}
+		return replacement
 	})
 }
 

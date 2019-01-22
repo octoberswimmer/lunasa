@@ -24,12 +24,6 @@ const eventsOpts = {
 
 afterEach(() => {
 	jest.clearAllMocks()
-	// Remove spies from `EventModel`
-	for (const method of Object.values(EventModel)) {
-		if (method && typeof method.mockRestore === "function") {
-			method.mockRestore()
-		}
-	}
 })
 
 it("requests events by date range", () => {
@@ -313,6 +307,15 @@ it("updates an existing event based on changes in a draft", async () => {
 	expect(update).toHaveBeenCalledWith(["1"], draft)
 })
 
+it("deletes the event that is being edited", async () => {
+	const del = jest.spyOn(EventModel, "del")
+	const events = new Events(eventsOpts)
+	const draft = { Id: "1", Subject: "event draft" }
+	await events.setEventDraft(draft)
+	await events.deleteEvent()
+	expect(del).toHaveBeenCalledWith(["1"])
+})
+
 it("removes draft event from state on successful create", async () => {
 	const events = new Events(eventsOpts)
 	const account = failIfMissing(
@@ -332,6 +335,15 @@ it("removes draft event from state on successful update", async () => {
 	)
 	await events.setEventDraft({ Id: "1", Subject: "event draft" }, account)
 	await events.saveDraft()
+	expect(events.state.errors).toEqual([])
+	expect(events.state.eventDraft).toBeFalsy()
+	expect(events.state.referenceData.draft).not.toBeDefined()
+})
+
+it("removes draft event from state on successful delete", async () => {
+	const events = new Events(eventsOpts)
+	await events.setEventDraft({ Id: "1", Subject: "event draft" })
+	await events.deleteEvent()
 	expect(events.state.errors).toEqual([])
 	expect(events.state.eventDraft).toBeFalsy()
 	expect(events.state.referenceData.draft).not.toBeDefined()
@@ -372,6 +384,20 @@ it("it updates events list with updated event", async () => {
 	await events.saveDraft()
 	expect(events.state.events).toHaveLength(1)
 	expect(events.state.events[0]).toHaveProperty("Subject", "Call")
+})
+
+it("removes event from local state when it is deleted", async () => {
+	const events = new Events(eventsOpts)
+	await events._fetchEvents({})
+	expect(events.state.events).toContainEqual(
+		expect.objectContaining({ Id: "1" })
+	)
+	await events.setEventDraft({ Id: "1", Subject: "event draft" })
+	await events.deleteEvent()
+	expect(events.state.errors).toEqual([])
+	expect(events.state.events).not.toContainEqual(
+		expect.objectContaining({ Id: "1" })
+	)
 })
 
 it("changes the start and end times of an event", async () => {

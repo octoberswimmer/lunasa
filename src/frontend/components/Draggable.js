@@ -21,7 +21,7 @@ type Props = {
 }
 
 export default class Draggable extends React.Component<Props> {
-	ref = React.createRef()
+	ref: { current: null | HTMLDivElement } = React.createRef()
 
 	componentDidMount() {
 		this.initDraggable()
@@ -35,6 +35,7 @@ export default class Draggable extends React.Component<Props> {
 		const elem = this.ref.current
 		if (elem) {
 			const $elem = $(elem)
+			// $FlowFixMe: Flow does not see jQuery props added by plugins.
 			$elem.draggable(this.props.options || {})
 			if (this.props.identifier) {
 				$elem.data({ identifier: this.props.identifier })

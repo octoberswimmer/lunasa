@@ -11,10 +11,15 @@ public with sharing class CalendarController {
 	public String getLabelsAsJson() {
 		Map<String, String> labels = new Map<String, String>();
 		labels.put('All', System.Label.All);
+		labels.put('Are_You_Sure', System.Label.Are_You_Sure);
+		labels.put('Cancel_Delete', System.Label.Cancel_Delete);
 		labels.put('Cancel_Editing', System.Label.Cancel_Editing);
+		labels.put('Confirm_Delete', System.Label.Confirm_Delete);
 		labels.put('Date', System.Label.Date);
+		labels.put('Delete_Event', System.Label.Delete_Event);
 		labels.put('Edit_Event', System.Label.Edit_Event);
 		labels.put('Event', System.Label.Event);
+		labels.put('Event_Will_Be_Deleted', System.Label.Event_Will_Be_Deleted);
 		labels.put('Field_Required', System.Label.Field_Required);
 		labels.put('Invalid_Date', System.Label.Invalid_Date);
 		labels.put('Invalid_Time', System.Label.Invalid_Time);

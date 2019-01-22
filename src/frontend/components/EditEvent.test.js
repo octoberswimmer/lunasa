@@ -101,6 +101,82 @@ it("discards event draft when the user clicks 'Cancel'", async () => {
 	expect(events.state.eventDraft).toBeFalsy()
 })
 
+it("requests confirmation when the user clicks 'Delete'", async () => {
+	const events = new Events(eventsOpts)
+	const deleteEvent = jest.spyOn(events, "deleteEvent")
+	await prepopulate(events)
+	const event = events.state.events[0]
+	await events.setEventDraft(event)
+	const wrapper = mount(<EditEvent />, events)
+	const button = wrapper.find("button").filterWhere(n => n.text() === "Delete")
+	button.simulate("click")
+	await delay()
+	wrapper.update()
+	expect(wrapper.find(".confirm-delete-content").text()).toMatch(
+		"event will be permanently deleted"
+	)
+})
+
+it("deletes event when the user clicks 'Delete' and confirms", async () => {
+	const events = new Events(eventsOpts)
+	const deleteEvent = jest.spyOn(events, "deleteEvent")
+	await prepopulate(events)
+	const event = events.state.events[0]
+	await events.setEventDraft(event)
+	const wrapper = mount(<EditEvent />, events)
+
+	const deleteButton = wrapper
+		.find("button")
+		.filterWhere(n => n.text() === "Delete")
+	deleteButton.simulate("click")
+	await delay()
+	wrapper.update()
+
+	const confirmButton = wrapper
+		.find("ConfirmDeleteDialog")
+		.find("button")
+		.filterWhere(n => n.text() === "Delete")
+	confirmButton.simulate("click")
+	expect(deleteEvent).toHaveBeenCalled()
+})
+
+it("closes confirmation dialog when user clicks 'Cancel'", async () => {
+	const events = new Events(eventsOpts)
+	const deleteEvent = jest.spyOn(events, "deleteEvent")
+	await prepopulate(events)
+	const event = events.state.events[0]
+	await events.setEventDraft(event)
+	const wrapper = mount(<EditEvent />, events)
+
+	const deleteButton = wrapper
+		.find("button")
+		.filterWhere(n => n.text() === "Delete")
+	deleteButton.simulate("click")
+	await delay()
+	wrapper.update()
+
+	const cancelButton = wrapper
+		.find("ConfirmDeleteDialog")
+		.find("button")
+		.filterWhere(n => n.text() === "Cancel")
+	cancelButton.simulate("click")
+	await delay()
+	wrapper.update()
+
+	expect(deleteEvent).not.toHaveBeenCalled()
+	expect(wrapper.find(".confirm-delete-content")).not.toExist()
+})
+
+it("hides the 'Delete' button if the event being edited has never been saved", async () => {
+	const events = new Events(eventsOpts)
+	const deleteEvent = jest.spyOn(events, "deleteEvent")
+	await prepopulate(events)
+	await events.setEventDraft(draft)
+	const wrapper = mount(<EditEvent />, events)
+	const button = wrapper.find("button").filterWhere(n => n.text() === "Delete")
+	expect(button).not.toExist()
+})
+
 it("displays errors if required fields are left blank", async () => {
 	const events = new Events(eventsOpts)
 	await events.setEventDraft({ ...draft, Subject: "Meeting" })
@@ -297,6 +373,7 @@ async function submit(wrapper: enzyme.ReactWrapper) {
 async function prepopulate(events: Events): Promise<void> {
 	await Promise.all([
 		events._fetchEventDescription(),
-		events._fetchEventLayout()
+		events._fetchEventLayout(),
+		events._fetchEvents({})
 	])
 }
