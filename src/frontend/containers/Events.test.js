@@ -2,6 +2,7 @@
 
 import moment from "moment-timezone"
 import EventModel from "../api/Events"
+import { maxObjectsLimit } from "../api/RemoteObject"
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
 import * as ef from "../models/Event.testFixtures"
@@ -115,14 +116,33 @@ it("avoids making the same query twice in a row", () => {
 	)
 })
 
-it("fetches first 100 events", () => {
+it("fetches first maxObjectsLimit events", () => {
 	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
 	const today = moment()
 	events.getEventsByDateRange(today, today)
 	events.getEventsByDateRange(today, today)
 	expect(retrieve).toHaveBeenCalledTimes(1)
-	expect(retrieve).toHaveBeenCalledWith(expect.objectContaining({ limit: 100 }))
+	expect(retrieve).toHaveBeenCalledWith(
+		expect.objectContaining({ limit: maxObjectsLimit })
+	)
+})
+
+it("fetches more events", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	events._fetchMoreEvents({
+		where: {
+			StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
+			EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
+			OwnerId: { eq: eventsOpts.userId }
+		},
+		limit: maxObjectsLimit
+	})
+	expect(retrieve).toHaveBeenCalledWith(
+		expect.objectContaining({ limit: maxObjectsLimit, offset: maxObjectsLimit })
+	)
 })
 
 it("requests event sObject description", async () => {

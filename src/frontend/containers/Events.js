@@ -13,6 +13,7 @@ import { type EventObjectInput } from "fullcalendar"
 import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
+import { maxObjectsLimit, defaultLimit } from "../api/RemoteObject"
 import { type RestApi } from "../api/RestApi"
 import { type Criteria } from "../api/SObject"
 import { type Account } from "../models/Account"
@@ -221,7 +222,7 @@ export default class EventContainer extends Container<State> {
 		const start = setTimezone(timezone, rangeStart).startOf("day")
 		const end = setTimezone(timezone, rangeEnd).endOf("day")
 		return this._fetchEvents({
-			limit: 100,
+			limit: maxObjectsLimit,
 			where: {
 				StartDateTime: { lt: visualforceDatetime(end) },
 				EndDateTime: { gt: visualforceDatetime(start) },
@@ -232,9 +233,31 @@ export default class EventContainer extends Container<State> {
 
 	async _fetchEvents(query: Criteria<Event>): Promise<void> {
 		return asyncAction(this, async () => {
-			const events = await this._requestEvents(query)
+			let events = await this._requestEvents(query)
+			if (events.length === query.limit) {
+				events = events.concat(await this._fetchMoreEvents(query))
+			}
 			await this.setState({ events })
 		})
+	}
+
+	/*
+	 * Requests remaining events, in case the total number of events exceeds maxObjectsLimits
+	 */
+	async _fetchMoreEvents(query: Criteria<Event>): Promise<Array<Event>> {
+		let current = []
+		let more = []
+		let iteration = 1
+		const limit = query.limit || defaultLimit
+		do {
+			current = await this._requestEvents({
+				...query,
+				offset: limit * iteration
+			})
+			more = more.concat(current)
+			iteration++
+		} while (current.length > 0)
+		return more
 	}
 
 	async _fetchEventDescription(): Promise<void> {
