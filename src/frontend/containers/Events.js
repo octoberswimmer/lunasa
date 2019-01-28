@@ -256,7 +256,7 @@ export default class EventContainer extends Container<State> {
 			})
 			more = more.concat(current)
 			iteration++
-		} while (current.length > 0)
+		} while (current.length === limit)
 		return more
 	}
 

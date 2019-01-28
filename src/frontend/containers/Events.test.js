@@ -128,7 +128,47 @@ it("fetches first maxObjectsLimit events", () => {
 	)
 })
 
-it("fetches more events", async () => {
+it("single request if events < limit ", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	retrieve.mockImplementationOnce((_, cb) =>
+		[...Array(maxObjectsLimit - 1)].map(_ => ef.events[0])
+	)
+	await events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(1)
+})
+
+it("subsequent request if events == limit", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	retrieve.mockImplementationOnce((_, cb) =>
+		[...Array(maxObjectsLimit)].map(_ => ef.events[0])
+	)
+	await events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(2)
+})
+
+it("subsequent requests while events > limit", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	retrieve
+		.mockImplementationOnce((_, cb) =>
+			[...Array(maxObjectsLimit)].map(_ => ef.events[0])
+		)
+		.mockImplementationOnce((_, cb) =>
+			[...Array(maxObjectsLimit)].map(_ => ef.events[0])
+		)
+		.mockImplementationOnce((_, cb) =>
+			[...Array(maxObjectsLimit - 1)].map(_ => ef.events[0])
+		)
+	await events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(3)
+})
+
+it("fetches more events using offset", async () => {
 	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
 	const today = moment()
