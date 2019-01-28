@@ -2,6 +2,7 @@
 
 import moment from "moment-timezone"
 import EventModel from "../api/Events"
+import { maxObjectsLimit } from "../api/RemoteObject"
 import RestApi from "../api/RestApi"
 import * as af from "../models/Account.testFixtures"
 import * as ef from "../models/Event.testFixtures"
@@ -115,14 +116,76 @@ it("avoids making the same query twice in a row", () => {
 	)
 })
 
-it("fetches first 100 events", () => {
+it("fetches first maxObjectsLimit events", () => {
 	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
 	const today = moment()
 	events.getEventsByDateRange(today, today)
 	events.getEventsByDateRange(today, today)
 	expect(retrieve).toHaveBeenCalledTimes(1)
-	expect(retrieve).toHaveBeenCalledWith(expect.objectContaining({ limit: 100 }))
+	expect(retrieve).toHaveBeenCalledWith(
+		expect.objectContaining({ limit: maxObjectsLimit })
+	)
+})
+
+it("single request if events < limit ", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	retrieve.mockImplementationOnce((_, cb) =>
+		[...Array(maxObjectsLimit - 1)].map(_ => ef.events[0])
+	)
+	await events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(1)
+})
+
+it("subsequent request if events == limit", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	retrieve.mockImplementationOnce((_, cb) =>
+		[...Array(maxObjectsLimit)].map(_ => ef.events[0])
+	)
+	await events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(2)
+})
+
+it("subsequent requests while events > limit", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const today = moment()
+	retrieve
+		.mockImplementationOnce((_, cb) =>
+			[...Array(maxObjectsLimit)].map(_ => ef.events[0])
+		)
+		.mockImplementationOnce((_, cb) =>
+			[...Array(maxObjectsLimit)].map(_ => ef.events[0])
+		)
+		.mockImplementationOnce((_, cb) =>
+			[...Array(maxObjectsLimit - 1)].map(_ => ef.events[0])
+		)
+	await events.getEventsByDateRange(today, today)
+	expect(retrieve).toHaveBeenCalledTimes(3)
+})
+
+it("events state should always be fresh", async () => {
+	const retrieve = jest.spyOn(EventModel, "retrieve")
+	const events = new Events(eventsOpts)
+	const eventsLength = 10
+	const today = moment()
+	retrieve
+		.mockImplementationOnce(async (_, cb) => {
+			await delay(2000)
+			return [...Array(eventsLength * 2)].map(_ => ef.events[0])
+		})
+		.mockImplementationOnce((_, cb) =>
+			[...Array(eventsLength)].map(_ => ef.events[0])
+		)
+	await Promise.all([
+		events.getEventsByDateRange(today, today),
+		events.getEventsByDateRange(today, today.add(200, "hour"))
+	])
+	expect(events.state.events.length).toBe(eventsLength)
 })
 
 it("requests event sObject description", async () => {

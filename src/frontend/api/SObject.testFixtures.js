@@ -65,9 +65,11 @@ export default class SObjectMock<Fields: Object> implements SObject<Fields> {
 		return cb(null, ef.eventDescription, event)
 	}
 	retrieve(criteria: Criteria<Fields>, cb: Callback<SObjectRecord<Fields>[]>) {
-		const results = Object.keys(this.fixtures).map(
-			k => new SObjectRecordMock(this.fixtures[k])
-		)
+		const keys = Object.keys(this.fixtures)
+		const results = keys
+			.map(k => new SObjectRecordMock(this.fixtures[k]))
+			.slice(criteria.offset || 0) //so it is possible to mock offset
+			.slice(0, criteria.limit || keys.length) //so it is possible to mock limit
 		cb(null, results, event)
 	}
 	update(ids: Id[], changes: $Shape<Fields>, cb: Callback<Id[]>) {

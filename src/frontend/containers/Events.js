@@ -13,6 +13,7 @@ import { type EventObjectInput } from "fullcalendar"
 import { Container } from "unstated"
 import Events, { type Event } from "../api/Events"
 import type RemoteObject from "../api/RemoteObject"
+import { maxObjectsLimit, defaultLimit } from "../api/RemoteObject"
 import { type RestApi } from "../api/RestApi"
 import { type Criteria } from "../api/SObject"
 import { type Account } from "../models/Account"
@@ -109,10 +110,22 @@ export default class EventContainer extends Container<State> {
 		// Skip making the request on consecutive calls with the same query to
 		// avoid getting stuck in a loop. Preserve order so that results from
 		// slow-running requests do not overwrite results from faster,
-		// more-recently-dispatched requests.
-		this._requestEvents = preserveRequestOrder(query =>
-			this._remoteObject.retrieve(query)
-		)
+		// more-recently-dispatched requests. Iterate requests to get past the restriction of maxObjectsLimit per query.
+		this._requestEvents = preserveRequestOrder(async query => {
+			let current = []
+			let more = []
+			let iteration = 0
+			const limit = query.limit || defaultLimit
+			do {
+				let newQuery = { ...query }
+				// the RemoteObject documentation states that offset must be greater than zero
+				if (iteration > 0) newQuery.offset = limit * iteration
+				current = await this._remoteObject.retrieve(newQuery)
+				more = more.concat(current)
+				iteration++
+			} while (current.length === limit)
+			return more
+		})
 	}
 
 	isCreatingEvent(): boolean {
@@ -221,7 +234,7 @@ export default class EventContainer extends Container<State> {
 		const start = setTimezone(timezone, rangeStart).startOf("day")
 		const end = setTimezone(timezone, rangeEnd).endOf("day")
 		return this._fetchEvents({
-			limit: 100,
+			limit: maxObjectsLimit,
 			where: {
 				StartDateTime: { lt: visualforceDatetime(end) },
 				EndDateTime: { gt: visualforceDatetime(start) },
