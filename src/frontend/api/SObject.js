@@ -31,6 +31,7 @@ export type Callback<T> = (
 
 export type Criteria<Fields: Object = Object> = {|
 	limit?: number,
+	offset?: number,
 	orderBy?: Ordering<Fields>[],
 	where?: Conditions<Fields>
 |}

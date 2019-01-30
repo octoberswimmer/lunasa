@@ -12,6 +12,10 @@ import { type Callback, type Criteria, type SObject } from "./SObject"
 
 type Id = string
 
+//according to salesforce documentation
+export const maxObjectsLimit = 100
+export const defaultLimit = 20
+
 export default class RemoteObject<Fields: Object> {
 	sObject: Promise<SObject<Fields>>
 	transformAfterRetrieve: ?(record: Fields) => Fields
