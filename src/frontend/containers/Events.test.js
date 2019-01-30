@@ -168,21 +168,24 @@ it("subsequent requests while events > limit", async () => {
 	expect(retrieve).toHaveBeenCalledTimes(3)
 })
 
-it("fetches more events using offset", async () => {
+it("events state should always be fresh", async () => {
 	const retrieve = jest.spyOn(EventModel, "retrieve")
 	const events = new Events(eventsOpts)
+	const eventsLength = 10
 	const today = moment()
-	events._fetchMoreEvents({
-		where: {
-			StartDateTime: { lt: visualforceDatetime(today.endOf("day")) },
-			EndDateTime: { gt: visualforceDatetime(today.startOf("day")) },
-			OwnerId: { eq: eventsOpts.userId }
-		},
-		limit: maxObjectsLimit
-	})
-	expect(retrieve).toHaveBeenCalledWith(
-		expect.objectContaining({ limit: maxObjectsLimit, offset: maxObjectsLimit })
-	)
+	retrieve
+		.mockImplementationOnce(async (_, cb) => {
+			await delay(2000)
+			return [...Array(eventsLength * 2)].map(_ => ef.events[0])
+		})
+		.mockImplementationOnce((_, cb) =>
+			[...Array(eventsLength)].map(_ => ef.events[0])
+		)
+	await Promise.all([
+		events.getEventsByDateRange(today, today),
+		events.getEventsByDateRange(today, today.add(200, "hour"))
+	])
+	expect(events.state.events.length).toBe(eventsLength)
 })
 
 it("requests event sObject description", async () => {

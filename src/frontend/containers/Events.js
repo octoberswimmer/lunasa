@@ -110,10 +110,22 @@ export default class EventContainer extends Container<State> {
 		// Skip making the request on consecutive calls with the same query to
 		// avoid getting stuck in a loop. Preserve order so that results from
 		// slow-running requests do not overwrite results from faster,
-		// more-recently-dispatched requests.
-		this._requestEvents = preserveRequestOrder(query =>
-			this._remoteObject.retrieve(query)
-		)
+		// more-recently-dispatched requests. Iterate requests to get past the restriction of maxObjectsLimit per query.
+		this._requestEvents = preserveRequestOrder(async query => {
+			let current = []
+			let more = []
+			let iteration = 0
+			const limit = query.limit || defaultLimit
+			do {
+				let newQuery = { ...query }
+				// the RemoteObject documentation states that offset must be greater than zero
+				if (iteration > 0) newQuery.offset = limit * iteration
+				current = await this._remoteObject.retrieve(newQuery)
+				more = more.concat(current)
+				iteration++
+			} while (current.length === limit)
+			return more
+		})
 	}
 
 	isCreatingEvent(): boolean {
@@ -233,31 +245,9 @@ export default class EventContainer extends Container<State> {
 
 	async _fetchEvents(query: Criteria<Event>): Promise<void> {
 		return asyncAction(this, async () => {
-			let events = await this._requestEvents(query)
-			if (events.length === query.limit) {
-				events = events.concat(await this._fetchMoreEvents(query))
-			}
+			const events = await this._requestEvents(query)
 			await this.setState({ events })
 		})
-	}
-
-	/*
-	 * Requests remaining events, in case the total number of events exceeds maxObjectsLimits
-	 */
-	async _fetchMoreEvents(query: Criteria<Event>): Promise<Array<Event>> {
-		let current = []
-		let more = []
-		let iteration = 1
-		const limit = query.limit || defaultLimit
-		do {
-			current = await this._requestEvents({
-				...query,
-				offset: limit * iteration
-			})
-			more = more.concat(current)
-			iteration++
-		} while (current.length === limit)
-		return more
 	}
 
 	async _fetchEventDescription(): Promise<void> {
