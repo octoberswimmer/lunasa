@@ -196,7 +196,8 @@ export default class AccountContainer extends Container<State> {
 	async selectSortField(sortField: SortField.SortField): Promise<void> {
 		await this.setState({
 			selectedSortField: sortField,
-			sortDirection: SortField.getDefaultSortOrder(sortField)
+			sortDirection: SortField.getDefaultSortOrder(sortField),
+			offset: 0
 		})
 		await this._fetchAccounts()
 	}

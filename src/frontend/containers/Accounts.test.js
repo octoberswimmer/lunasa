@@ -412,3 +412,27 @@ it("looks up an account by its URL", async () => {
 		)
 	).toEqual(account)
 })
+
+it("offset is zeroed when sorting", async () => {
+	const accounts = new Accounts({
+		...opts,
+		accountIds: [
+			"001f200001XrDt1AAF",
+			"001f200001XrDt2AAF",
+			"001f200001XrDt0AAF"
+		]
+	})
+	await accounts.setState({ offset: 100 })
+	expect(accounts.state.offset).toBe(100)
+
+	await accounts.selectSortField(
+		failIfMissing(
+			sff.sortFields.find(
+				s =>
+					SortField.getFieldForSoql(s, fdf.fieldDefinitions) ===
+					"Account.CreatedDate"
+			)
+		)
+	)
+	expect(accounts.state.offset).toBe(0)
+})
