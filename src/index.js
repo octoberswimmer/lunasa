@@ -27,6 +27,7 @@ import { type SortField } from "./frontend/models/SortField"
 export function lunasa({
 	accountFieldSet,
 	accountIds,
+	minTime,
 	eventCreateFieldSet,
 	eventRecordTypeInfos,
 	labels,
@@ -42,6 +43,7 @@ export function lunasa({
 }: {
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
+	minTime: string,
 	eventCreateFieldSet: FieldSet,
 	eventRecordTypeInfos: RecordTypeInfo[],
 	labels: { [key: string]: string },
@@ -88,6 +90,7 @@ export function lunasa({
 					<App
 						labels={labels}
 						language={language}
+						minTime={minTime}
 						spinner={resolveAsset(staticDirectory, spinner)}
 					/>
 				</LabelProvider>
@@ -128,6 +131,7 @@ if (process.env.NODE_ENV !== "production") {
 				eventRecordTypeInfos: eventFixtures.eventRecordTypeInfos,
 				labels: labelFixtures.labels,
 				language: navigator.language,
+				minTime: "13:00",
 				root,
 				assistiveRoot,
 				sessionToken: "0000",

@@ -89,6 +89,13 @@ it("provides language setting to calendar", async () => {
 	expect(calendar).toHaveProp("language", "de_DE")
 })
 
+it("provides minTime setting to calendar", async () => {
+	const minTime = "19:12"
+	const wrapper = mount(<App minTime={minTime} />)
+	const calendar = wrapper.find(FullCalendar)
+	expect(calendar.props().options.minTime).toEqual(minTime)
+})
+
 it("sets an event draft when a calendar event is clicked", async () => {
 	initializeCalendar.mockRestore()
 	const events = new Events(eventsOpts)
