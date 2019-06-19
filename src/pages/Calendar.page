@@ -66,6 +66,7 @@
 			</apex:repeat>
 			null
 			].filter(function(x) { return !!x; }),
+			minTime: "{!JSINHTMLENCODE(earliestTime)}",
 			eventRecordTypeInfos: {!eventRecordTypeInfos},
 			labels: {!labelsAsJson},
 			language: "{!JSINHTMLENCODE(locale)}",

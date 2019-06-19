@@ -19,7 +19,8 @@ import EditEvent from "./EditEvent"
 
 type Props = {
 	language?: ?string, // e.g. "en_US"
-	spinner?: string // path to spinner image
+	spinner?: string, // path to spinner image
+	minTime?: string
 }
 
 export default function App(props: Props) {
@@ -27,6 +28,7 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const options = {
+					minTime: props.minTime,
 					defaultView: "agendaWeek",
 					droppable: true,
 					// Toolbar controls to be displayed in calendar header
