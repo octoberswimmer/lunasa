@@ -2,9 +2,9 @@ public with sharing class CalendarController {
 	public String earliestTime {get; set;}
 
 	public CalendarController(ApexPages.StandardSetController stdController) {
-		Appointment_Time__c appointmentTime = Appointment_Time__c.getInstance();
+		Lunasa_Settings__c lunasaSettings = Lunasa_Settings__c.getInstance();
 
-		this.earliestTime = appointmentTime.Earliest_Time__c;
+		this.earliestTime = lunasaSettings.Earliest_Time__c;
 	}
 
 	public String getEventRecordTypeInfos() {
