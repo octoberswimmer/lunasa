@@ -75,6 +75,7 @@ export default class FullCalendar extends React.Component<Props> {
 		// Do not call `new Calendar()` directly because there is some necessary
 		// logic in `$.fn.fullCalendar()`.
 		const $elem = $(this.getRootElement())
+
 		$elem.fullCalendar(this.props.options || {})
 		this.instance = $elem.fullCalendar("getCalendar")
 		if (this.props.defaultTimedEventDuration) {
