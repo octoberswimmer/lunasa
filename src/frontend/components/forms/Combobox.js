@@ -72,7 +72,7 @@ export default class Combobox extends React.Component<Props, State> {
 			onSelect: (event, { selection }: { selection: PickListValue[] }) => {
 				const option = selection[0]
 				if (option) {
-					form.setFieldValue(name, option.value)
+					form.setFieldValue(name, option.label)
 				}
 			}
 		}
