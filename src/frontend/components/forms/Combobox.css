@@ -1,0 +1,4 @@
+.slds-combobox .slds-listbox.slds-dropdown {
+	max-height: 300px;
+	overflow: auto;
+}

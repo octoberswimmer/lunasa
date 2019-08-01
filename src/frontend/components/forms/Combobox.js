@@ -11,6 +11,7 @@ import filter from "@salesforce/design-system-react/components/combobox/filter"
 import { Field } from "formik"
 import * as React from "react"
 import { type PickListValue } from "../../models/SObjectDescription"
+import "./Combobox.css"
 
 // Additional props are passed through to `SLDSCombobox`
 type Props = {
@@ -105,6 +106,7 @@ function applicableOptions(
 	// combobox is populated with a default value.
 	return filter({
 		inputValue: !inputValue || !dirty ? "" : inputValue,
+		limit: 1000, // maximum number of picklist options supported by Salesforce
 		options: options.map(addId),
 		selection: [inputValue].filter(isTruthy)
 	})
