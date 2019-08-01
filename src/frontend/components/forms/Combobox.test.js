@@ -134,7 +134,7 @@ it("updates form state when a completion is clicked", async () => {
 	wrapper.update()
 	expect(onSubmit).toHaveBeenCalledWith(
 		{
-			fruit: "banana"
+			fruit: "Banana"
 		},
 		expect.anything()
 	)
