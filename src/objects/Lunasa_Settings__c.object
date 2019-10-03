@@ -23,6 +23,18 @@
         <trackTrending>false</trackTrending>
         <type>Checkbox</type>
     </fields>
+    <fields>
+        <fullName>Latest_Time__c</fullName>
+        <defaultValue>&quot;24:00&quot;</defaultValue>
+        <description>Lastest time available for appointments</description>
+        <externalId>false</externalId>
+        <label>Latest Time</label>
+        <length>5</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
     <label>Lunasa Settings</label>
     <visibility>Public</visibility>
 </CustomObject>

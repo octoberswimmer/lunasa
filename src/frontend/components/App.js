@@ -21,7 +21,8 @@ type Props = {
 	language?: ?string, // e.g. "en_US"
 	spinner?: string, // path to spinner image
 	weekends?: boolean,
-	minTime?: string
+	minTime?: string,
+	maxTime?: string
 }
 
 export default function App(props: Props) {
@@ -31,6 +32,7 @@ export default function App(props: Props) {
 				const options = {
 					weekends: props.weekends,
 					minTime: props.minTime,
+					maxTime: props.maxTime,
 					defaultView: "agendaWeek",
 					droppable: true,
 					// Toolbar controls to be displayed in calendar header

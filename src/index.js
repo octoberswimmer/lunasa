@@ -23,12 +23,14 @@ import { type FieldDefinition } from "./frontend/models/FieldDefinition"
 import { type FieldSet } from "./frontend/models/FieldSet"
 import { type RecordTypeInfo } from "./frontend/models/RecordType"
 import { type SortField } from "./frontend/models/SortField"
+import { type LunasaOptions } from "./frontend/models/Lunasa"
 
 export function lunasa({
 	accountFieldSet,
 	accountIds,
 	weekends,
 	minTime,
+	maxTime,
 	eventCreateFieldSet,
 	eventRecordTypeInfos,
 	labels,
@@ -41,24 +43,7 @@ export function lunasa({
 	fieldDefinitions,
 	staticDirectory,
 	userId
-}: {
-	accountFieldSet: FieldSet,
-	accountIds?: ?(string[]),
-	weekends: boolean,
-	minTime: string,
-	eventCreateFieldSet: FieldSet,
-	eventRecordTypeInfos: RecordTypeInfo[],
-	labels: { [key: string]: string },
-	language?: string,
-	timezone?: string,
-	root: HTMLElement,
-	assistiveRoot: HTMLElement,
-	sessionToken: string,
-	sortFields: SortField[],
-	fieldDefinitions: FieldDefinition[],
-	staticDirectory: string,
-	userId: string
-}) {
+}: LunasaOptions) {
 	// Set base path for requests for lazily-loaded Javascript chunks.
 	declare var __webpack_public_path__: string
 	if (staticDirectory) {
@@ -94,6 +79,7 @@ export function lunasa({
 						language={language}
 						weekends={weekends}
 						minTime={minTime}
+						maxTime={maxTime}
 						spinner={resolveAsset(staticDirectory, spinner)}
 					/>
 				</LabelProvider>
@@ -136,6 +122,7 @@ if (process.env.NODE_ENV !== "production") {
 				language: navigator.language,
 				minTime: "13:00",
 				weekends: false,
+				maxTime: "24:00",
 				root,
 				assistiveRoot,
 				sessionToken: "0000",
