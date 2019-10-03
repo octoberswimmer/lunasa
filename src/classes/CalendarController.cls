@@ -1,9 +1,11 @@
 public with sharing class CalendarController {
+	public Boolean weekends {get; set;}
 	public String earliestTime {get; set;}
 
 	public CalendarController(ApexPages.StandardSetController stdController) {
 		Lunasa_Settings__c lunasaSettings = Lunasa_Settings__c.getInstance();
 
+		this.weekends = !lunasaSettings.Hide_Weekends__c;
 		this.earliestTime = lunasaSettings.Earliest_Time__c;
 	}
 

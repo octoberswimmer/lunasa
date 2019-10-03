@@ -89,6 +89,13 @@ it("provides language setting to calendar", async () => {
 	expect(calendar).toHaveProp("language", "de_DE")
 })
 
+it("provides weekends setting to calendar", async () => {
+	const weekends = false
+	const wrapper = mount(<App weekends={weekends} />)
+	const calendar = wrapper.find(FullCalendar)
+	expect(calendar.props().options.weekends).toEqual(weekends)
+})
+
 it("provides minTime setting to calendar", async () => {
 	const minTime = "19:12"
 	const wrapper = mount(<App minTime={minTime} />)
