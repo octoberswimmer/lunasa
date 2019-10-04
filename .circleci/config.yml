@@ -28,7 +28,7 @@ jobs:
       - run: mkdir ~/bin
       - run:
           name: Get Latest Force CLI Release
-          command: curl --output ~/bin/force https://force-cli.heroku.com/releases/v0.24.3/linux-amd64/force
+          command: curl --output ~/bin/force https://force-cli.herokuapp.com/releases/v0.26.1/linux-amd64/force
       - run: chmod +x ~/bin/force
       - run: force login -i login -u "$SF_USER" -key lib/ci.key --connected-app-client-id "$CLIENT_ID"
       - run:
