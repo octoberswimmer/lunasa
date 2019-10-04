@@ -20,6 +20,7 @@ import EditEvent from "./EditEvent"
 type Props = {
 	language?: ?string, // e.g. "en_US"
 	spinner?: string, // path to spinner image
+	weekends?: boolean,
 	minTime?: string
 }
 
@@ -28,6 +29,7 @@ export default function App(props: Props) {
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
 				const options = {
+					weekends: props.weekends,
 					minTime: props.minTime,
 					defaultView: "agendaWeek",
 					droppable: true,
