@@ -29,10 +29,9 @@ export default function App(props: Props) {
 	return (
 		<Subscribe to={[Accounts, Events]}>
 			{(accounts, events) => {
-				const options = {
+				const options: any = {
 					weekends: props.weekends,
 					minTime: props.minTime,
-					maxTime: props.maxTime,
 					defaultView: "agendaWeek",
 					droppable: true,
 					// Toolbar controls to be displayed in calendar header
@@ -91,6 +90,11 @@ export default function App(props: Props) {
 						events.getEventsByDateRange(view.start, view.end)
 					}
 				}
+
+				if (props.maxTime !== undefined && props.maxTime.length > 3) {
+					options.maxTime = props.maxTime
+				}
+
 				const isLoading = accounts.isLoading() || events.isLoading()
 				return (
 					<div className={classNames("App", { loading: isLoading })}>
