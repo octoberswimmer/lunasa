@@ -110,6 +110,20 @@ it("provides maxTime setting to calendar", async () => {
 	expect(calendar.props().options.maxTime).toEqual(maxTime)
 })
 
+it("doesn't provide maxTime setting to calendar if blank", async () => {
+	const maxTime = ""
+	const wrapper = mount(<App maxTime={maxTime} />)
+	const calendar = wrapper.find(FullCalendar)
+	expect(calendar.props().options.maxTime).toBeUndefined()
+})
+
+it("doesn't provide maxTime setting to calendar if malformed", async () => {
+	const maxTime = "22:"
+	const wrapper = mount(<App maxTime={maxTime} />)
+	const calendar = wrapper.find(FullCalendar)
+	expect(calendar.props().options.maxTime).toBeUndefined()
+})
+
 it("sets an event draft when a calendar event is clicked", async () => {
 	initializeCalendar.mockRestore()
 	const events = new Events(eventsOpts)
