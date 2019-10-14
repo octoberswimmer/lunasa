@@ -29,6 +29,7 @@ export function lunasa({
 	accountIds,
 	weekends,
 	minTime,
+	maxTime,
 	eventCreateFieldSet,
 	eventRecordTypeInfos,
 	labels,
@@ -46,6 +47,7 @@ export function lunasa({
 	accountIds?: ?(string[]),
 	weekends: boolean,
 	minTime: string,
+	maxTime: string,
 	eventCreateFieldSet: FieldSet,
 	eventRecordTypeInfos: RecordTypeInfo[],
 	labels: { [key: string]: string },
@@ -94,6 +96,7 @@ export function lunasa({
 						language={language}
 						weekends={weekends}
 						minTime={minTime}
+						maxTime={maxTime}
 						spinner={resolveAsset(staticDirectory, spinner)}
 					/>
 				</LabelProvider>
@@ -135,6 +138,7 @@ if (process.env.NODE_ENV !== "production") {
 				labels: labelFixtures.labels,
 				language: navigator.language,
 				minTime: "13:00",
+				maxTime: "24:00",
 				weekends: false,
 				root,
 				assistiveRoot,

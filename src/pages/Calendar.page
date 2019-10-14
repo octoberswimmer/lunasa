@@ -68,6 +68,7 @@
 			].filter(function(x) { return !!x; }),
 			weekends: {!weekends},
 			minTime: "{!JSINHTMLENCODE(earliestTime)}",
+			maxTime: "{!JSINHTMLENCODE(latestTime)}",
 			eventRecordTypeInfos: {!eventRecordTypeInfos},
 			labels: {!labelsAsJson},
 			language: "{!JSINHTMLENCODE(locale)}",
