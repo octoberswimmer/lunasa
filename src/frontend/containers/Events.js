@@ -65,7 +65,7 @@ export default class EventContainer extends Container<State> {
 	// Memoized API interfaces
 	_fetchEvents: (query: Criteria<Event>) => Promise<void>
 	_fetchEventDescription: () => Promise<void>
-	_fetchEventLayout: () => Promise<void>
+	_fetchEventLayout: (recordType?: RecordTypeInfo) => Promise<void>
 	_fetchReferenceData: (eventId: Id) => Promise<void>
 	_requestEvents: (query: Criteria<Event>) => Promise<Event[]>
 
@@ -185,6 +185,10 @@ export default class EventContainer extends Container<State> {
 		}
 	}
 
+	setEventLayout(recordType: RecordTypeInfo) {
+		this._fetchEventLayout(recordType)
+	}
+
 	getEventsForFullcalendar(): EventObjectInput[] {
 		return this.state.events.map(e => forFullcalendar(this.state.timezone, e))
 	}
@@ -257,16 +261,18 @@ export default class EventContainer extends Container<State> {
 		})
 	}
 
-	async _fetchEventLayout(): Promise<void> {
+	async _fetchEventLayout(recordType?: RecordTypeInfo): Promise<void> {
 		await asyncAction(this, async () => {
 			const client = await this._restClient
-			const recordType = this.state.eventRecordTypeInfos.find(
-				rt => rt.defaultRecordTypeMapping
-			)
-			if (!recordType) {
+
+			const recordTypeInfo =
+				recordType ||
+				this.state.eventRecordTypeInfos.find(rt => rt.defaultRecordTypeMapping)
+			if (!recordTypeInfo) {
 				throw new Error("Could not determine your event record type.")
 			}
-			const eventLayout = await client.fetchLayout(recordType)
+
+			const eventLayout = await client.fetchLayout(recordTypeInfo)
 			await this.setState({ eventLayout })
 		})
 	}

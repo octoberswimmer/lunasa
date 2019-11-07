@@ -232,6 +232,23 @@ it("does not transmit request for layout more than once", async () => {
 	expect(client.fetchLayout).toHaveBeenCalledTimes(1)
 })
 
+it("set event layout for record type", async () => {
+	const events = new Events({
+		...eventsOpts,
+		eventRecordTypeInfos: ef.eventRecordTypeInfos
+	})
+	//set offsite events layout
+	const recordTypeToBeSet = ef.eventRecordTypeInfos.find(
+		e => e.developerName === "Offsite_Events"
+	)
+	if (recordTypeToBeSet) {
+		events.setEventLayout(recordTypeToBeSet)
+	}
+	await delay()
+	const layout = events.getEventLayout()
+	expect(layout).toEqual(ef.offsiteEventLayout)
+})
+
 it("gets data from a referenced record", async () => {
 	const referencedRecords = {
 		What: {
@@ -247,8 +264,9 @@ it("gets data from a referenced record", async () => {
 		}
 	}
 	const client = await restClient
-	jest.spyOn(client, "query").mockImplementation(
-		async (query: string): Promise<QueryResult> => {
+	jest
+		.spyOn(client, "query")
+		.mockImplementation(async (query: string): Promise<QueryResult> => {
 			if (
 				query.match(/SELECT.*What\.Name.*FROM Event.*WHERE Id = 'someEventId'/)
 			) {
@@ -264,8 +282,7 @@ it("gets data from a referenced record", async () => {
 					records: []
 				}
 			}
-		}
-	)
+		})
 	const events = new Events(eventsOpts)
 	events.getReference("WhatId", "someEventId") // trigger fetch
 	await delay() // wait for fetch to complete

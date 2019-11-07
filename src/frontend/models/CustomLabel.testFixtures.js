@@ -25,6 +25,7 @@ export const labels: Labels = {
 	Search: "Search",
 	Selected_Accounts: "Selected Accounts",
 	Sort_by: "Sort by",
+	Layout_by: "Layout",
 	Time: "Time ({timezone})",
 	Toggle_Sort_Direction: "Toggle Sort Direction",
 

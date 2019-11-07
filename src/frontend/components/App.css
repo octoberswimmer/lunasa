@@ -9,8 +9,13 @@
 
 .accounts {
   flex: 0 0 18rem;
-  padding: 0.5rem;
   width: 18rem;
+}
+
+.layout-accounts  {
+  display: flex;
+  padding: 0.5rem;
+  flex-direction: column;
 }
 
 .calendar {

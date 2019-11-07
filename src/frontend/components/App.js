@@ -16,6 +16,7 @@ import AccountList from "./AccountList"
 import { getIdentifierFromDraggable } from "./Draggable"
 import FullCalendar from "./FullCalendar"
 import EditEvent from "./EditEvent"
+import Layout from "./Layout"
 
 type Props = {
 	language?: ?string, // e.g. "en_US"
@@ -103,11 +104,16 @@ export default function App(props: Props) {
 							<Errors container={events} />
 						</ToastContainer>
 						<div className="main">
-							<AccountList
-								className="accounts"
-								fieldSet={accounts.state.accountFieldSet}
-								spinner={props.spinner}
-							/>
+							<div className="layout-accounts">
+								<Layout
+									eventRecordTypeInfos={events.state.eventRecordTypeInfos}
+								></Layout>
+								<AccountList
+									className="accounts"
+									fieldSet={accounts.state.accountFieldSet}
+									spinner={props.spinner}
+								/>
+							</div>
 							<FullCalendar
 								className="calendar"
 								defaultTimedEventDuration={defaultTimedEventDuration}
