@@ -9,8 +9,10 @@
 
 .select-wrapper {
   display: flex;
-  align-items: center; /* center loading spinner vertically */
-  position: relative; /* set stacking context for loading spinner */
+  align-items: center;
+  /* center loading spinner vertically */
+  position: relative;
+  /* set stacking context for loading spinner */
 }
 
 .select-wrapper .loading-spinner {
@@ -24,4 +26,40 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+@media (max-height: 768px) {
+  .accounts {
+    padding: 0;
+  }
+
+  .account-card-list {
+    font-size: 0.75rem;
+    line-height: 1.1;
+  }
+
+  .account-card-list .slds-text-heading--small,
+  .account-card-list .slds-text-heading_small {
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+
+  .slds-card__tile {
+    margin-top: .35rem;
+  }
+
+  .slds-card__header {
+    padding: .25rem 1rem 0;
+    margin: 0 0 .25rem;
+  }
+
+  .slds-card__body {
+    margin-top: .15rem;
+    margin-bottom: .15rem;
+  }
+
+  slds-p-around--medium,
+  .slds-p-around_medium {
+    padding: 0.5rem;
+  }
 }
