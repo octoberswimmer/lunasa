@@ -7,6 +7,8 @@ import * as clf from "../../models/CustomLabel.testFixtures"
 import * as F from "../../models/Filter"
 import { LabelProvider } from "../i18n/Label"
 import FilterByFirstLetter from "./FilterByFirstLetter"
+import { sortFields } from "../../models/SortField.testFixtures"
+import { fieldDefinitions } from "../../models/FieldDefinition.testFixtures"
 
 it("displays a list of Latin letters", () => {
 	const wrapper = mount(
@@ -94,6 +96,20 @@ it("highlights 'All' when the corresponding filter is active", () => {
 	)
 	const button = wrapper.find(Button).filterWhere(n => n.text() === "All")
 	expect(button).toHaveClassName("selected")
+})
+
+it("hides letters when sort filter is not string type", () => {
+	const wrapper = mount(
+		<FilterByFirstLetter
+			filters={[F.firstLetterAny()]}
+			locale="en-US"
+			selectedSortField={sortFields[1]}
+			fieldDefinitions={[fieldDefinitions[1]]}
+			onApplyFilter={noop}
+		/>
+	)
+	const span = wrapper.find("span")
+	expect(span).toHaveClassName("hidden")
 })
 
 function noop() {}

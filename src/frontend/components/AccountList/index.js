@@ -48,6 +48,8 @@ export default function AccountList(props: Props) {
 					<FilterByFirstLetter
 						filters={accounts.state.filters}
 						locale={accounts.state.locale}
+						selectedSortField={accounts.state.selectedSortField}
+						fieldDefinitions={accounts.state.fieldDefinitions}
 						onApplyFilter={filter => {
 							accounts.applyFilter(filter)
 						}}

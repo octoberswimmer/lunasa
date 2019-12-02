@@ -18,3 +18,7 @@
   background-color: rgb(198, 225, 255);
   color: black;
 }
+
+.hidden {
+  display: none;
+}

@@ -194,11 +194,15 @@ export default class AccountContainer extends Container<State> {
 	}
 
 	async selectSortField(sortField: SortField.SortField): Promise<void> {
-		await this.setState({
+		await this.setState(state => ({
 			selectedSortField: sortField,
 			sortDirection: SortField.getDefaultSortOrder(sortField),
+			//display all records since the alphabet is hidden for non string sort fields
+			filters: SortField.isStringFilter(state.fieldDefinitions, sortField)
+				? state.filters
+				: F.applyFilter(state.filters, F.firstLetterAny()),
 			offset: 0
-		})
+		}))
 		await this._fetchAccounts()
 	}
 
@@ -292,8 +296,8 @@ export default class AccountContainer extends Container<State> {
 		return result.totalSize
 	}
 
-	_getWhereClause({ filters, listView, locale }: Request): string {
-		const filterCondition = F.whereCondition(filters, { locale })
+	_getWhereClause({ sortBy, filters, listView, locale }: Request): string {
+		const filterCondition = F.whereCondition(filters, { locale }, sortBy)
 		if (listView.id === GIVEN_IDS) {
 			const ids = this.state.accountIds
 			if (!ids || ids.length < 1) {

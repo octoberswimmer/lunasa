@@ -104,3 +104,12 @@ it("produces a SOQL `where` clause when multiple filters are applied", () => {
 		stringifyCondition(F.whereCondition(filters, { locale: "en-US" }))
 	).toBe("(Name LIKE 'o%') AND (Name LIKE '%Juicer%')")
 })
+
+it("uses the supplied field name", () => {
+	const filters = [F.firstLetter("b")]
+	expect(
+		stringifyCondition(
+			F.whereCondition(filters, { locale: "en-US" }, "TestField")
+		)
+	).toBe("TestField LIKE 'b%'")
+})

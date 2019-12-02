@@ -77,3 +77,15 @@ export function getFieldForSoql(s: SortField, fs: FieldDefinition[]): string {
 		return field
 	}
 }
+
+export function isStringFilter(
+	fieldDefinitions: FieldDefinition[],
+	selectedSortField: SortField
+) {
+	const field = `${getField(selectedSortField)}`
+	const fieldForSort = fieldDefinitions.find(
+		f => f.DurableId === field || f.QualifiedApiName === field
+	)
+
+	return fieldForSort && fieldForSort.ValueTypeId === "string"
+}

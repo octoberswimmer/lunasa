@@ -10,5 +10,6 @@
 
 export type FieldDefinition = {
 	DurableId: string,
-	QualifiedApiName: string
+	QualifiedApiName: string,
+	ValueTypeId: string
 }

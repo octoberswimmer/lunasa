@@ -83,15 +83,16 @@ export function isFilteredBySubstring(filters: Filter[]): ?string {
 
 export function whereCondition(
 	filters: Filter[],
-	opts: { locale: string }
+	opts: { locale: string },
+	field: string = "Name"
 ): WhereCondition {
 	const conditions = excludeNull(
 		filters.map(filter => {
 			switch (filter.type) {
 				case FIRST_LETTER:
-					return whereConditionFirstLetter(filter.option, opts)
+					return whereConditionFirstLetter(filter.option, opts, field)
 				case SUBSTRING:
-					return whereConditionSubstring(filter.substring)
+					return whereConditionSubstring(filter.substring, field)
 			}
 		})
 	)
@@ -100,16 +101,17 @@ export function whereCondition(
 
 function whereConditionFirstLetter(
 	option: FirstLetterOption,
-	{ locale }: { locale: string }
+	{ locale }: { locale: string },
+	field: string
 ): ?WhereCondition {
 	switch (option.type) {
 		case LATIN_LETTER:
 			return startsWithOneOf(
-				"Name",
+				field,
 				getEquivalentCharacters(locale, option.letter)
 			)
 		case OTHER_LETTER:
-			return not(startsWithOneOf("Name", getAlphabet(locale)))
+			return not(startsWithOneOf(field, getAlphabet(locale)))
 		case ANY_LETTER:
 			return null
 	}
@@ -124,8 +126,11 @@ function startsWithOneOf(field: string, letters: string[]): WhereCondition {
 	return conjunction("OR", conditions)
 }
 
-function whereConditionSubstring(substr: ?string): ?WhereCondition {
+function whereConditionSubstring(
+	substr: ?string,
+	field: string
+): ?WhereCondition {
 	if (substr) {
-		return { field: "Name", operator: "LIKE", values: [`'%${substr}%'`] }
+		return { field, operator: "LIKE", values: [`'%${substr}%'`] }
 	}
 }

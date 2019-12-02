@@ -70,7 +70,7 @@ public with sharing class CalendarController {
 
 	public String getSortFieldDefinitionsAsJson() {
 		List<FieldDefinition> fieldDefinitions = [
-			SELECT DurableId, QualifiedApiName
+			SELECT ValueTypeId, DurableId, QualifiedApiName
 			FROM FieldDefinition
 			WHERE
 				EntityDefinition.QualifiedApiName = 'Account' AND

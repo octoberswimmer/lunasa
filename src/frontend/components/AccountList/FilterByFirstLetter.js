@@ -7,18 +7,30 @@ import { getAlphabetCollapsed } from "../../locale"
 import * as F from "../../models/Filter"
 import { Label } from "../i18n/Label"
 import "./FilterByFirstLetter.css"
+import { type SortField, isStringFilter } from "../../models/SortField"
+import { type FieldDefinition } from "../../models/FieldDefinition"
 
 type Props = {
 	filters: F.Filter[],
 	locale: string,
-	onApplyFilter(filter: F.Filter): void
+	onApplyFilter(filter: F.Filter): void,
+	fieldDefinitions?: FieldDefinition[],
+	selectedSortField?: ?SortField
 }
 
 export default function FilterByFirstLetter({
 	filters,
 	locale,
-	onApplyFilter
+	onApplyFilter,
+	fieldDefinitions,
+	selectedSortField
 }: Props) {
+	const toggleAlphabet =
+		fieldDefinitions &&
+		selectedSortField &&
+		isStringFilter(fieldDefinitions, selectedSortField)
+			? ""
+			: "hidden"
 	const selectedLetter = F.isFilteredByLetter(filters)
 	const chars = getAlphabetCollapsed(locale).map(char => (
 		<Button
@@ -68,7 +80,8 @@ export default function FilterByFirstLetter({
 				"filterLetters",
 				"slds-grid",
 				"slds-grid_vertical-align-center",
-				"slds-p-vertical_xx-small"
+				"slds-p-vertical_xx-small",
+				toggleAlphabet
 			)}
 		>
 			{[...chars, other, any]}
