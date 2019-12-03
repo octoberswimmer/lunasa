@@ -5,7 +5,7 @@
   "homepage": ".",
   "scripts": {
     "start": "react-app-rewired start",
-    "prebuild": "flow check && cross-env CI=true yarn test",
+
     "build": "react-app-rewired build && yarn run static",
     "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject",

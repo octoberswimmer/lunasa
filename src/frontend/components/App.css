@@ -19,9 +19,6 @@
 }
 
 @media (max-height: 768px) {
-  html, body {
-    font-size: 16px;
-  }
   .calendar {
     font-size: 0.80rem;
   }

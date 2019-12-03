@@ -30,7 +30,7 @@
 
 @media (max-height: 768px) {
   .accounts {
-    padding: 0;
+    padding: .5rem 0 0 .5rem;
   }
 
   .account-card-list {
