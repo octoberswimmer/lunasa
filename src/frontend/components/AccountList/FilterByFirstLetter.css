@@ -22,3 +22,9 @@
 .hidden {
   display: none;
 }
+
+@media (max-height: 768px) {
+  .filterLetter {
+    padding: 0 4px;
+  }
+}

@@ -17,3 +17,9 @@
   flex-grow: 1;
   padding: 0.5em;
 }
+
+@media (max-height: 768px) {
+  .calendar {
+    font-size: 0.80rem;
+  }
+}
