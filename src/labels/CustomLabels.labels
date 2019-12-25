@@ -177,6 +177,14 @@
         <value>Sort by</value>
     </labels>
     <labels>
+        <fullName>Layout_by</fullName>
+        <categories>Account_Scheduler</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select layout according to Record Type.</shortDescription>
+        <value>Layout</value>
+    </labels>
+    <labels>
         <fullName>Time</fullName>
         <categories>Account_Scheduler</categories>
         <language>en_US</language>

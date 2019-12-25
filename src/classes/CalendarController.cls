@@ -40,6 +40,7 @@ public with sharing class CalendarController {
 		labels.put('Search', System.Label.Search);
 		labels.put('Selected_Accounts', System.Label.Selected_Accounts);
 		labels.put('Sort_by', System.Label.Sort_by);
+		labels.put('Layout_by', System.Label.Layout_by);
 		labels.put('Time', System.Label.Time);
 		labels.put('Toggle_Sort_Direction', System.Label.Toggle_Sort_Direction);
 		return JSON.serialize(labels);
