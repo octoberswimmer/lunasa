@@ -9,6 +9,7 @@ import { Provider } from "unstated"
 import Events from "../containers/Events"
 import * as af from "../models/Account.testFixtures"
 import * as clf from "../models/CustomLabel.testFixtures"
+import * as ef from "../models/Event.testFixtures"
 import {
 	eventCreateFieldSet,
 	eventDescription,
@@ -64,6 +65,43 @@ it("renders a form", async () => {
 	expect(formik.props()).toMatchObject({
 		initialValues: draft
 	})
+})
+
+it("sets layout from default record type for new events", async () => {
+	const events = new Events(eventsOpts)
+	await prepopulate(events)
+	const wrapper = mount(<EditEvent />, events)
+	const recordType = events.state.eventRecordTypeInfos.find(
+		({ defaultRecordTypeMapping }) => defaultRecordTypeMapping
+	)
+	if (recordType) {
+		expect(events.state.eventLayout).toBe(
+			ef.eventLayouts[recordType.urls.layout]
+		)
+	} else {
+		throw new Error("expected to match layout")
+	}
+})
+
+it("sets layout from custom record type for saved events", async () => {
+	const events = new Events(eventsOpts)
+	const recordType = events.state.eventRecordTypeInfos.find(
+		({ recordTypeId }) => recordTypeId == "012000000000000AAA"
+	)
+	if (recordType) {
+		await events.setEventDraft({
+			...draft,
+			RecordTypeId: recordType.recordTypeId
+		})
+		await prepopulate(events)
+		const wrapper = mount(<EditEvent />, events)
+
+		expect(events.state.eventLayout).toBe(
+			ef.eventLayouts[recordType.urls.layout]
+		)
+	} else {
+		throw new Error("expected to match layout")
+	}
 })
 
 it("saves an event", async () => {

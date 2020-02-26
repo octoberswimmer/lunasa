@@ -6,8 +6,12 @@ import * as React from "react"
 import * as FS from "../models/FieldSet"
 import { type Layout, getPicklistValues } from "../models/Layout"
 import { type Record } from "../models/QueryResult"
-import { type SObjectDescription } from "../models/SObjectDescription"
+import {
+	type SObjectDescription,
+	type PickListValue
+} from "../models/SObjectDescription"
 import Checkbox from "./forms/Checkbox"
+import { type RecordTypeInfo } from "../models/RecordType"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
 import { getErrorText } from "./i18n/errorMessages"
@@ -21,8 +25,11 @@ type Props = {
 	fieldSet: FS.FieldSet,
 	getReference?: (fieldName: string) => ?Record,
 	layout: Layout,
+	eventRecordTypeInfos: RecordTypeInfo[],
 	timezone: string
 }
+
+const recordTypeFieldName = "RecordTypeId"
 
 export default function SObjectForm({
 	singleColumn,
@@ -31,6 +38,7 @@ export default function SObjectForm({
 	fieldSet,
 	getReference,
 	layout,
+	eventRecordTypeInfos,
 	timezone
 }: Props) {
 	return (
@@ -42,7 +50,8 @@ export default function SObjectForm({
 				description,
 				getReference,
 				layout,
-				timezone
+				timezone,
+				eventRecordTypeInfos
 			)}
 		</Form>
 	)
@@ -56,7 +65,8 @@ function inputsForFieldSet(
 	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
 	layout: Layout,
-	timezone: string
+	timezone: string,
+	eventRecordTypeInfos: RecordTypeInfo[]
 ): React.Node {
 	const inputs = []
 	const increment = singleColumn ? 1 : 2
@@ -78,7 +88,8 @@ function inputsForFieldSet(
 							description,
 							getReference,
 							layout,
-							timezone
+							timezone,
+							eventRecordTypeInfos
 						)}
 					</div>
 				))}
@@ -127,7 +138,8 @@ function inputFor(
 	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
 	layout: Layout,
-	timezone: string
+	timezone: string,
+	eventRecordTypeInfos: RecordTypeInfo[]
 ): React.Node {
 	switch (type) {
 		case "boolean":
@@ -175,22 +187,28 @@ function inputFor(
 			)
 		case "picklist":
 			const values = getPicklistValues(description, layout, name) || []
-			return (
-				<FormElement
-					errorMessage={errorMessage}
-					label={label}
-					required={required}
-				>
-					<Field className="slds-select" component="select" name={name}>
-						{values.map(({ label, value }) => (
-							<option key={value} value={value}>
-								{label}
-							</option>
-						))}
-					</Field>
-				</FormElement>
-			)
+
+			return picklistFor({ label, name, required, type }, errorMessage, values)
 		case "reference":
+			if (name === recordTypeFieldName) {
+				const values = eventRecordTypeInfos
+					.filter(
+						({ active, available, master }) => active && available && !master
+					)
+					.map(({ recordTypeId, name, defaultRecordTypeMapping }) => ({
+						active: true,
+						defaultValue: defaultRecordTypeMapping,
+						label: name,
+						value: recordTypeId
+					}))
+
+				return picklistFor(
+					{ label, name, required, type },
+					errorMessage,
+					values
+				)
+			}
+
 			const record = getReference && getReference(name)
 			const href = record && hrefFromApiUrl(record.attributes.url)
 			const address = record &&
@@ -226,6 +244,24 @@ function inputFor(
 				</FormElement>
 			)
 	}
+}
+
+function picklistFor(
+	{ label, name, required }: FS.Field,
+	errorMessage: ?string,
+	values: PickListValue[]
+) {
+	return (
+		<FormElement errorMessage={errorMessage} label={label} required={required}>
+			<Field className="slds-select" component="select" name={name}>
+				{values.map(({ label, value }) => (
+					<option key={value} value={value}>
+						{label}
+					</option>
+				))}
+			</Field>
+		</FormElement>
+	)
 }
 
 function Address({ city, country, postalCode, state, street }: FS.Address) {

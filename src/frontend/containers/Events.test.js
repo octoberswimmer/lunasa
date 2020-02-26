@@ -232,6 +232,48 @@ it("does not transmit request for layout more than once", async () => {
 	expect(client.fetchLayout).toHaveBeenCalledTimes(1)
 })
 
+it("event layout is cached", async () => {
+	const events = new Events(eventsOpts)
+	//sets the layout for default record type
+	events.getEventLayout()
+	await delay()
+
+	expect(events.state.cachedEventLayouts).toEqual({
+		"012f2000000lw2FAAQ": ef.eventLayout
+	})
+})
+
+it("set event layout for record type", async () => {
+	const events = new Events({
+		...eventsOpts,
+		eventRecordTypeInfos: ef.eventRecordTypeInfos
+	})
+	//set offsite events layout
+	const recordTypeToBeSet = ef.eventRecordTypeInfos.find(
+		e => e.developerName === "Offsite_Events"
+	)
+	if (recordTypeToBeSet) {
+		events.setEventLayout(recordTypeToBeSet.recordTypeId)
+	}
+	await delay()
+	const layout = events.getEventLayout()
+	expect(layout).toEqual(ef.offsiteEventLayout)
+})
+
+it("set event layout for default record type", async () => {
+	const events = new Events({
+		...eventsOpts,
+		eventRecordTypeInfos: ef.eventRecordTypeInfos
+	})
+	expect(events.state.eventLayout).toBeNull()
+
+	events.setDefaultEventLayout()
+
+	await delay()
+	const layout = events.getEventLayout()
+	expect(layout).toEqual(ef.eventLayout)
+})
+
 it("gets data from a referenced record", async () => {
 	const referencedRecords = {
 		What: {

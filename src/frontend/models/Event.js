@@ -16,7 +16,8 @@ export type Event = {
 	ShowAs?: string,
 	StartDateTime: Date | number,
 	Subject: string,
-	WhatId?: Id
+	WhatId?: Id,
+	RecordTypeId?: string
 }
 
 export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(

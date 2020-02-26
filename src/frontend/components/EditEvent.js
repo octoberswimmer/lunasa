@@ -31,12 +31,21 @@ export default function EditEvent(props: Props) {
 }
 
 function EventForm({ events, spinner, singleColumn }: *) {
+	const { eventCreateFieldSet, eventDraft } = events.state
+
+	if (eventDraft && eventDraft.RecordTypeId) {
+		events.setEventLayout(eventDraft.RecordTypeId)
+	} else {
+		events.setDefaultEventLayout()
+	}
+
 	const description = events.getEventDescription()
 	const layout = events.getEventLayout()
+
 	if (!description || !layout) {
 		return null
 	}
-	const { eventCreateFieldSet, eventDraft } = events.state
+
 	const initialValues = {
 		...getDefaultValues(description, layout, eventCreateFieldSet),
 		...eventDraft
@@ -180,6 +189,7 @@ function EventModal({
 						getReference={fieldName =>
 							events.getReference(fieldName, eventDraft && eventDraft.Id)
 						}
+						eventRecordTypeInfos={events.state.eventRecordTypeInfos}
 						layout={layout}
 						timezone={events.state.timezone}
 					/>

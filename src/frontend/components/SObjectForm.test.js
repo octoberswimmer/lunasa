@@ -15,6 +15,7 @@ import {
 	offsiteEventLayout
 } from "../models/Event.testFixtures"
 import { delay, inputElement } from "../testHelpers"
+import * as ef from "../models/Event.testFixtures"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
 import SObjectForm from "./SObjectForm"
@@ -38,6 +39,7 @@ afterEach(() => {
 it("presents inputs based on a given field set", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{ name: "InputA", label: "Input A", type: "string" },
@@ -100,6 +102,7 @@ it("shows only one column per grid if single column mode is enabled", () => {
 it("presents a checkbox input", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{
@@ -124,6 +127,7 @@ it("presents a checkbox input", () => {
 it("presents a checked checkbox when the corresponding value is `true`", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{ name: "IsAllDayEvent", label: "Is All Day Event", type: "boolean" }
@@ -140,6 +144,7 @@ it("presents a checked checkbox when the corresponding value is `true`", () => {
 it("presents a combobox input", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{
@@ -182,6 +187,7 @@ it("presents a combobox input", () => {
 it("gets combobox values from the given layout", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{
@@ -217,6 +223,7 @@ it("gets combobox values from the given layout", () => {
 it("displays validation error message with combobox input", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			errors={{ Subject: FIELD_REQUIRED }}
 			fieldSet={[
@@ -245,6 +252,7 @@ it("presents a picklist input", () => {
 	]
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[{ name: "ShowAs", label: "Show Time As", type: "picklist" }]}
 			layout={layout}
@@ -259,9 +267,35 @@ it("presents a picklist input", () => {
 	}
 })
 
+it("presents record types as a picklist input", () => {
+	// Values from events fixtures
+	const values = [
+		{ label: "First Event Record Type", value: "012f2000000lw2FAAQ" },
+		{ label: "Offsite Events", value: "012f2000000lw2PAAQ" }
+	]
+	const wrapper = mount(
+		<SObjectForm
+			eventRecordTypeInfos={ef.eventRecordTypeInfos}
+			description={description}
+			fieldSet={[
+				{ name: "RecordTypeId", label: "Record Type Id", type: "reference" }
+			]}
+			layout={layout}
+			timezone={timezone}
+		/>
+	)
+	const input = wrapper.find("select")
+	expect(input.closest("label").text()).toMatch("Record Type Id")
+	for (const { label, value } of values) {
+		const option = input.find(`option[value='${value}']`)
+		expect(option.text()).toBe(label)
+	}
+})
+
 it("gets a boolean value from a checkbox input", async () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={eventCreateFieldSet}
 			layout={layout}
@@ -282,6 +316,7 @@ it("gets a boolean value from a checkbox input", async () => {
 it("presents a date input", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{ name: "Date", label: "Date", required: false, type: "date" }
@@ -302,6 +337,7 @@ it("presents a date input", () => {
 it("presents a datetime input", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{
@@ -328,6 +364,7 @@ it("presents a datetime input", () => {
 it("gets a Date value from a datetime input", async () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={eventCreateFieldSet}
 			layout={layout}
@@ -354,6 +391,7 @@ it("gets a Date value from a datetime input", async () => {
 it("presents a textarea input", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={[
 				{ name: "Description", label: "Description", type: "textarea" }
@@ -369,6 +407,7 @@ it("presents a textarea input", () => {
 it("gets a string value from a textarea input", async () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			fieldSet={eventCreateFieldSet}
 			layout={layout}
@@ -390,6 +429,7 @@ it("gets a string value from a textarea input", async () => {
 it("displays an asterisk in labels for required fields", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			errors={{ Description: FIELD_REQUIRED }}
 			fieldSet={[
@@ -414,6 +454,7 @@ it("displays an asterisk in labels for required fields", () => {
 it("displays validation errors with form inputs", () => {
 	const wrapper = mount(
 		<SObjectForm
+			eventRecordTypeInfos={[]}
 			description={description}
 			errors={{ Description: FIELD_REQUIRED }}
 			fieldSet={[

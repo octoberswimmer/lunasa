@@ -4,6 +4,16 @@ public with sharing class CalendarController {
 	public String earliestTime {get; set;}
 	public String latestTime {get; set;}
 	public String defaultListViewName {get; set;}
+	public Boolean hasRecordTypeField {
+		get {
+			try {
+				Object recordtypeId = new Event().get('recordtypeId');
+				return true;
+			} catch(Exception objEx) {
+				return false;
+			}
+		}
+	}
 
 	public CalendarController(ApexPages.StandardSetController stdController) {
 		Lunasa_Settings__c lunasaSettings = Lunasa_Settings__c.getInstance();
