@@ -17,9 +17,18 @@
     <fields>
         <fullName>Hide_Weekends__c</fullName>
         <defaultValue>true</defaultValue>
-        <description>Whether to include Saturdayr and Sunday on the calendar</description>
+        <description>Whether to include Saturday and Sunday on the calendar</description>
         <externalId>false</externalId>
         <label>Hide Weekends</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Single_Column_Mode__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>Enable compact layout</description>
+        <externalId>false</externalId>
+        <label>Single Column Mode</label>
         <trackTrending>false</trackTrending>
         <type>Checkbox</type>
     </fields>

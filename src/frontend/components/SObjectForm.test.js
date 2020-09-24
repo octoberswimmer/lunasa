@@ -56,6 +56,47 @@ it("presents inputs based on a given field set", () => {
 	expect(inputB.closest("label").text()).toBe("Input B")
 })
 
+it("shows two columns per grid by default", () => {
+	const wrapper = mount(
+		<SObjectForm
+			description={description}
+			fieldSet={[
+				{ name: "InputA", label: "Input A", type: "string" },
+				{ name: "InputB", label: "Input B", type: "string" },
+				{ name: "InputC", label: "Input C", type: "string" },
+				{ name: "InputD", label: "Input D", type: "string" }
+			]}
+			layout={layout}
+			timezone={timezone}
+		/>
+	)
+
+	const grids = wrapper.find(".slds-grid")
+	//two inputs per grid
+	expect(grids.length).toBe(2)
+})
+
+it("shows only one column per grid if single column mode is enabled", () => {
+	const wrapper = mount(
+		<SObjectForm
+			singleColumn={true}
+			description={description}
+			fieldSet={[
+				{ name: "InputA", label: "Input A", type: "string" },
+				{ name: "InputB", label: "Input B", type: "string" },
+				{ name: "InputC", label: "Input C", type: "string" },
+				{ name: "InputD", label: "Input D", type: "string" }
+			]}
+			layout={layout}
+			timezone={timezone}
+		/>
+	)
+
+	const grids = wrapper.find(".slds-grid")
+	//one input per grid
+	expect(grids.length).toBe(4)
+})
+
 it("presents a checkbox input", () => {
 	const wrapper = mount(
 		<SObjectForm

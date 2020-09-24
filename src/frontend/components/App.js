@@ -21,6 +21,7 @@ type Props = {
 	language?: ?string, // e.g. "en_US"
 	spinner?: string, // path to spinner image
 	weekends?: boolean,
+	singleColumn?: boolean,
 	minTime?: string,
 	maxTime?: string
 }
@@ -116,7 +117,10 @@ export default function App(props: Props) {
 								options={options}
 							/>
 							{events.isCreatingEvent() || events.isEditingEvent() ? (
-								<EditEvent spinner={props.spinner} />
+								<EditEvent
+									spinner={props.spinner}
+									singleColumn={props.singleColumn}
+								/>
 							) : null}
 						</div>
 					</div>

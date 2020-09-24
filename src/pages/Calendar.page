@@ -67,6 +67,7 @@
 			null
 			].filter(function(x) { return !!x; }),
 			weekends: {!weekends},
+			singleColumn: {!singleColumn},
 			minTime: "{!JSINHTMLENCODE(earliestTime)}",
 			maxTime: "{!JSINHTMLENCODE(latestTime)}",
 			eventRecordTypeInfos: {!eventRecordTypeInfos},
