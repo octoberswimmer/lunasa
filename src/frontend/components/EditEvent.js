@@ -18,6 +18,7 @@ import { Label, WithLabels } from "./i18n/Label"
 import SObjectForm from "./SObjectForm"
 
 type Props = {
+	singleColumn?: boolean,
 	spinner?: string // path to spinner image
 }
 
@@ -29,7 +30,7 @@ export default function EditEvent(props: Props) {
 	)
 }
 
-function EventForm({ events, spinner }: *) {
+function EventForm({ events, spinner, singleColumn }: *) {
 	const description = events.getEventDescription()
 	const layout = events.getEventLayout()
 	if (!description || !layout) {
@@ -63,7 +64,12 @@ function EventForm({ events, spinner }: *) {
 			}}
 			render={formikProps => (
 				<React.Fragment>
-					<EventModal {...formikProps} events={events} spinner={spinner} />
+					<EventModal
+						{...formikProps}
+						singleColumn={singleColumn}
+						events={events}
+						spinner={spinner}
+					/>
 					<ConfirmDeleteDialog events={events} />
 				</React.Fragment>
 			)}
@@ -72,6 +78,7 @@ function EventForm({ events, spinner }: *) {
 }
 
 function EventModal({
+	singleColumn,
 	errors,
 	events,
 	handleSubmit,
@@ -79,6 +86,7 @@ function EventModal({
 	values,
 	spinner
 }: {
+	singleColumn: boolean,
 	errors: { [field: string]: string },
 	events: Events,
 	handleSubmit: (e: SyntheticEvent<any>) => void,
@@ -161,6 +169,7 @@ function EventModal({
 					}
 				>
 					<SObjectForm
+						singleColumn={singleColumn}
 						description={description}
 						errors={errors}
 						fieldSet={toggleTimeInputs(

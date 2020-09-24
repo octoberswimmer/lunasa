@@ -15,6 +15,7 @@ import { getErrorText } from "./i18n/errorMessages"
 type Errors = { [key: string]: string }
 
 type Props = {
+	singleColumn?: boolean,
 	description: SObjectDescription, // description may be loading when form renders
 	errors?: ?Errors,
 	fieldSet: FS.FieldSet,
@@ -24,6 +25,7 @@ type Props = {
 }
 
 export default function SObjectForm({
+	singleColumn,
 	description,
 	errors,
 	fieldSet,
@@ -34,6 +36,7 @@ export default function SObjectForm({
 	return (
 		<Form className="slds-form slds-form_stacked">
 			{inputsForFieldSet(
+				singleColumn,
 				fieldSet,
 				errors,
 				description,
@@ -45,8 +48,9 @@ export default function SObjectForm({
 	)
 }
 
-// Get fields in pairs, and arrange inputs in a two-column grid
+// Get fields and arrange inputs in a two-column (one if single column mode) grid
 function inputsForFieldSet(
+	singleColumn?: boolean,
 	fieldSet: FS.FieldSet,
 	errors: ?Errors,
 	description: SObjectDescription,
@@ -55,8 +59,9 @@ function inputsForFieldSet(
 	timezone: string
 ): React.Node {
 	const inputs = []
-	for (let i = 0; i < fieldSet.length; i += 2) {
-		const fields = fieldSet.slice(i, i + 2)
+	const increment = singleColumn ? 1 : 2
+	for (let i = 0; i < fieldSet.length; i += increment) {
+		const fields = fieldSet.slice(i, i + increment)
 		inputs.push(
 			<div
 				key={fields.map(field => field.name).join("-")}

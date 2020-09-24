@@ -1,5 +1,6 @@
 public with sharing class CalendarController {
 	public Boolean weekends {get; set;}
+	public Boolean singleColumn  {get; set;}
 	public String earliestTime {get; set;}
 	public String latestTime {get; set;}
 
@@ -7,6 +8,7 @@ public with sharing class CalendarController {
 		Lunasa_Settings__c lunasaSettings = Lunasa_Settings__c.getInstance();
 
 		this.weekends = !lunasaSettings.Hide_Weekends__c;
+		this.singleColumn = lunasaSettings.Single_Column_Mode__c;
 		this.earliestTime = lunasaSettings.Earliest_Time__c;
 		this.latestTime = lunasaSettings.Latest_Time__c;
 	}

@@ -25,6 +25,7 @@ import { type RecordTypeInfo } from "./frontend/models/RecordType"
 import { type SortField } from "./frontend/models/SortField"
 
 export function lunasa({
+	singleColumn,
 	accountFieldSet,
 	accountIds,
 	weekends,
@@ -43,6 +44,7 @@ export function lunasa({
 	staticDirectory,
 	userId
 }: {
+	singleColumn: boolean,
 	accountFieldSet: FieldSet,
 	accountIds?: ?(string[]),
 	weekends: boolean,
@@ -93,6 +95,7 @@ export function lunasa({
 				<LabelProvider value={labels}>
 					<App
 						labels={labels}
+						singleColumn={singleColumn}
 						language={language}
 						weekends={weekends}
 						minTime={minTime}
@@ -140,6 +143,7 @@ if (process.env.NODE_ENV !== "production") {
 				minTime: "13:00",
 				maxTime: "24:00",
 				weekends: false,
+				singleColumn: false,
 				root,
 				assistiveRoot,
 				sessionToken: "0000",
