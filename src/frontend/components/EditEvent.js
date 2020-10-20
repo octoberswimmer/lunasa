@@ -104,6 +104,7 @@ function EventModal({
 		<WithLabels>
 			{label => (
 				<Modal
+					containerClassName={["event-form-modal"]}
 					contentClassName={[
 						"event-form-modal-content",
 						"slds-p-around--medium"
