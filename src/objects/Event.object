@@ -23,6 +23,11 @@
             <isRequired>false</isRequired>
         </availableFields>
         <availableFields>
+            <field>Type</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </availableFields>
+        <availableFields>
             <field>WhoId</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
