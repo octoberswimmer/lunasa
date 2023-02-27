@@ -10,7 +10,9 @@ import { type SObjectDescription } from "../models/SObjectDescription"
 import Checkbox from "./forms/Checkbox"
 import Combobox from "./forms/Combobox"
 import DateTime from "./forms/DateTime"
+import SalesforceLookup from "./forms/Lookup"
 import { getErrorText } from "./i18n/errorMessages"
+import * as ContactHandler from "../models/Contact"
 
 type Errors = { [key: string]: string }
 
@@ -21,7 +23,8 @@ type Props = {
 	fieldSet: FS.FieldSet,
 	getReference?: (fieldName: string) => ?Record,
 	layout: Layout,
-	timezone: string
+	timezone: string,
+	contacts?: ?(Record[])
 }
 
 export default function SObjectForm({
@@ -31,7 +34,8 @@ export default function SObjectForm({
 	fieldSet,
 	getReference,
 	layout,
-	timezone
+	timezone,
+	contacts
 }: Props) {
 	return (
 		<Form className="slds-form slds-form_stacked">
@@ -42,7 +46,8 @@ export default function SObjectForm({
 				description,
 				getReference,
 				layout,
-				timezone
+				timezone,
+				contacts
 			)}
 		</Form>
 	)
@@ -56,7 +61,8 @@ function inputsForFieldSet(
 	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
 	layout: Layout,
-	timezone: string
+	timezone: string,
+	contacts: ?(Record[])
 ): React.Node {
 	const inputs = []
 	const increment = singleColumn ? 1 : 2
@@ -78,7 +84,8 @@ function inputsForFieldSet(
 							description,
 							getReference,
 							layout,
-							timezone
+							timezone,
+							contacts
 						)}
 					</div>
 				))}
@@ -127,7 +134,8 @@ function inputFor(
 	description: SObjectDescription,
 	getReference: ?(fieldName: string) => ?Record,
 	layout: Layout,
-	timezone: string
+	timezone: string,
+	contacts
 ): React.Node {
 	switch (type) {
 		case "boolean":
@@ -192,19 +200,41 @@ function inputFor(
 			)
 		case "reference":
 			const record = getReference && getReference(name)
-			const href = record && hrefFromApiUrl(record.attributes.url)
-			const address = record &&
-				record.BillingAddress && <Address {...record.BillingAddress} />
-			return (
-				<div className="slds-form-element slds-p-vertical_xx-small">
-					<span className="slds-form-element__label">{label}</span>
-					<div className="slds-form-element__control">
-						{record ? <a href={href}>{record.Name}</a> : "-"}
-						<br />
-						{address || null}
+
+			if (name === "WhoId") {
+				let myCurrentValue
+				if (record) {
+					myCurrentValue = {
+						id: ContactHandler.getId(record),
+						value: ContactHandler.getId(record),
+						label: record.Name
+					}
+				}
+				return (
+					<SalesforceLookup
+						label="Contact"
+						placeholder="Select a contact"
+						value={myCurrentValue}
+						options={contacts}
+						name={name}
+					/>
+				)
+			} else {
+				const href = record && hrefFromApiUrl(record.attributes.url)
+				const address = record &&
+					record.BillingAddress && <Address {...record.BillingAddress} />
+				return (
+					<div className="slds-form-element slds-p-vertical_xx-small">
+						<span className="slds-form-element__label">{label}</span>
+						<div className="slds-form-element__control">
+							{record ? <a href={href}>{record.Name}</a> : "-"}
+							<br />
+							{address || null}
+						</div>
 					</div>
-				</div>
-			)
+				)
+			}
+
 		case "textarea":
 			return (
 				<FormElement

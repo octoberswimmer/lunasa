@@ -9,6 +9,7 @@ import {
 import { type RecordTypeInfo } from "../models/RecordType"
 import { type QueryResult } from "../models/QueryResult"
 import * as af from "../models/Account.testFixtures"
+import * as cf from "../models/Contact.testFixtures"
 import * as ef from "../models/Event.testFixtures"
 import * as lf from "../models/ListView.testFixtures"
 
@@ -36,7 +37,12 @@ export default function ListViewsApi() {
 	}
 
 	async function query(soqlQuery: string): Promise<QueryResult> {
-		return af.accountQueryResult
+		if(soqlQuery.includes('FROM Account')) {
+			return af.accountQueryResult
+		} else {
+			return cf.contactQueryResult
+		}
+		
 	}
 
 	return { fetchLayout, fetchListViews, fetchListViewDescription, query }

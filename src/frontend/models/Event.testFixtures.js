@@ -73,6 +73,12 @@ export const eventCreateFieldSet: FieldSet = [
 		type: "reference"
 	},
 	{
+		name: "WhoId",
+		label: "Who",
+		required: false,
+		type: "reference"
+	},
+	{
 		name: "ShowAs",
 		label: "Show Time As",
 		required: false,

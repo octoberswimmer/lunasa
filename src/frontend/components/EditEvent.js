@@ -46,6 +46,7 @@ function EventForm({ events, spinner, singleColumn }: *) {
 			enableReinitialize={false}
 			initialValues={initialValues}
 			onSubmit={async (values, actions) => {
+				delete values.searchTerm;
 				await events.setEventDraft(values)
 				await events.saveDraft()
 				actions.setSubmitting(false)
@@ -97,6 +98,8 @@ function EventModal({
 	const description = events.getEventDescription()
 	const layout = events.getEventLayout()
 	const { eventCreateFieldSet, eventDraft } = events.state
+	
+	const contacts = events.getContacts(values.searchTerm);
 	if (!description || !layout) {
 		return null
 	}
@@ -182,6 +185,7 @@ function EventModal({
 						}
 						layout={layout}
 						timezone={events.state.timezone}
+						contacts={contacts}
 					/>
 				</Modal>
 			)}
