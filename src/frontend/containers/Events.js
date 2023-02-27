@@ -230,7 +230,7 @@ export default class EventContainer extends Container<State> {
 	)
 
 	getContacts(searchTerm: string): ?(Contact[]) {
-		if (this.state.searchTerm != searchTerm) {
+		if (this.state.searchTerm !== searchTerm) {
 			this.throttledFetchContacts.call(this, searchTerm)
 		}
 

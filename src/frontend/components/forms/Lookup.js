@@ -13,15 +13,15 @@ class SalesforceLookup extends React.Component {
 	}
 
 	lookup({ field, form }) {
-		const { label, name, options, placeholder, value, ...rest } = this.props
+		const { label, name, options, placeholder, value } = this.props
 		if (value && !this.state.isDirty) {
-			this.state.isDirty = true
+			this.setState({ isDirty: true })
 			const index = options.map(e => e.id).indexOf(value.value)
 			if (index >= 0) {
-				this.state.selectedIndex = index
+				this.setState({ selectedIndex: index })
 			} else {
 				options.unshift(value)
-				this.state.selectedIndex = 0
+				this.setState({ selectedIndex: -0 })
 			}
 		}
 		const events = {
