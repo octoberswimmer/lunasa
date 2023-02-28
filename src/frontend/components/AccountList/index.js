@@ -76,6 +76,7 @@ export default function AccountList(props: Props) {
 						<AccountCards
 							accounts={accounts.getAccounts()}
 							fieldSet={props.fieldSet}
+							account={accounts}
 						/>
 					</div>
 					<Pagination
@@ -222,10 +223,12 @@ function SelectSortField(props: {
 
 function AccountCards({
 	accounts,
-	fieldSet
+	fieldSet,
+	account
 }: {
 	accounts: ?(Account[]),
-	fieldSet: FieldSet
+	fieldSet: FieldSet,
+	account : Accounts
 }) {
 	return accounts
 		? accounts.map(record => (
@@ -233,6 +236,7 @@ function AccountCards({
 					key={record.attributes.url}
 					fieldSet={fieldSet}
 					record={record}
+					account={account}
 				/>
 		  ))
 		: []

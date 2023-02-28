@@ -108,6 +108,7 @@ export default function App(props: Props) {
 								className="accounts"
 								fieldSet={accounts.state.accountFieldSet}
 								spinner={props.spinner}
+								accounts={accounts}
 							/>
 							<FullCalendar
 								className="calendar"
