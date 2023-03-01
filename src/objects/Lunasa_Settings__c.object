@@ -3,6 +3,36 @@
     <customSettingsType>Hierarchy</customSettingsType>
     <enableFeeds>false</enableFeeds>
     <fields>
+        <fullName>Next_Day_Threshold__c</fullName>
+        <defaultValue>&quot;00:00:00&quot;</defaultValue>
+        <description>When an event’s end time spans into another day, the minimum time it must be in
+            order for it to render as if it were on that day.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>When an event’s end time spans into another day, the minimum time it must be
+            in order for it to render as if it were on that day.</inlineHelpText>
+        <label>Next Day Threshold</label>
+        <length>8</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Event_Color__c</fullName>
+        <defaultValue>&quot;#3a87ad&quot;</defaultValue>
+        <description>Hexadecimal color for the events displayed in the calendar</description>
+        <externalId>false</externalId>
+        <inlineHelpText>A hexadecimal color is specified with: #rrggbb Where rr (red), gg (green)
+            and bb (blue) are hexadecimal integers between 00 and ff, specifying the intensity of
+            the color.</inlineHelpText>
+        <label>Event Color</label>
+        <length>7</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Earliest_Time__c</fullName>
         <defaultValue>&quot;00:00&quot;</defaultValue>
         <description>Earliest time available for appointments</description>

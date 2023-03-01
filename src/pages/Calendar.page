@@ -80,7 +80,9 @@
 			sortFields: {!sortFieldsAsJson},
 			fieldDefinitions: {!sortFieldDefinitionsAsJson},
 			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}",
-			userId: "{!JSINHTMLENCODE($User.Id)}"
+			userId: "{!JSINHTMLENCODE($User.Id)}",
+			eventColor: "{!JSINHTMLENCODE(eventColor)}",
+			nextDayThreshold: "{!JSINHTMLENCODE(nextDayThreshold)}"
 		});
 	</script>
 </apex:page>

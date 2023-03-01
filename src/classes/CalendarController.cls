@@ -3,6 +3,8 @@ public with sharing class CalendarController {
 	public Boolean singleColumn  {get; set;}
 	public String earliestTime {get; set;}
 	public String latestTime {get; set;}
+	public String eventColor {get; set;}
+	public String nextDayThreshold {get; set;}
 
 	public CalendarController(ApexPages.StandardSetController stdController) {
 		Lunasa_Settings__c lunasaSettings = Lunasa_Settings__c.getInstance();
@@ -10,7 +12,8 @@ public with sharing class CalendarController {
 		this.weekends = !lunasaSettings.Hide_Weekends__c;
 		this.singleColumn = lunasaSettings.Single_Column_Mode__c;
 		this.earliestTime = lunasaSettings.Earliest_Time__c;
-		this.latestTime = lunasaSettings.Latest_Time__c;
+		this.eventColor = lunasaSettings.Event_Color__c;
+		this.nextDayThreshold = lunasaSettings.Next_Day_Threshold__c;
 	}
 
 	public String getEventRecordTypeInfos() {

@@ -23,7 +23,9 @@ type Props = {
 	weekends?: boolean,
 	singleColumn?: boolean,
 	minTime?: string,
-	maxTime?: string
+	maxTime?: string,
+	eventColor?: string,
+	nextDayThreshold?: string
 }
 
 export default function App(props: Props) {
@@ -41,6 +43,8 @@ export default function App(props: Props) {
 						right: "agendaWeek,month today prev,next"
 					},
 					height: "auto",
+					eventColor: props.eventColor,
+					nextDayThreshold: props.nextDayThreshold,
 					timezone: false, // date values from calendar will be ambiguously-zoned
 
 					// `drop` is called when an external draggable (e.g. an
