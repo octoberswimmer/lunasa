@@ -26,6 +26,7 @@ type Props = {
 	className?: string | string[],
 	debounceInterval?: number,
 	fieldSet: FieldSet,
+	defaultListViewName?: string,
 	spinner?: string // path to spinner image
 }
 
@@ -36,6 +37,7 @@ export default function AccountList(props: Props) {
 				<div className={classNames("account-list", props.className)}>
 					<div className="select-wrapper">
 						<SelectAccountListView
+							defaultListViewName={props.defaultListViewName}
 							listViews={accounts.getListViews()}
 							onSelectListView={listView => {
 								accounts.selectListView(listView)
@@ -91,6 +93,7 @@ export default function AccountList(props: Props) {
 
 type SelectProps = {
 	listViews: ?(ListViewLike[]),
+	defaultListViewName?: string,
 	onSelectListView(listView: ListViewLike): void
 }
 
@@ -112,7 +115,7 @@ class SelectAccountListView extends React.Component<SelectProps> {
 		// Trigger fetch for accounts from the first list view when list views
 		// load.
 		if (!prevProps.listViews) {
-			this.onInput()
+			this.onInput(undefined, this.props.defaultListViewName)
 		}
 	}
 
@@ -144,16 +147,30 @@ class SelectAccountListView extends React.Component<SelectProps> {
 		)
 	}
 
-	onInput(event?: SyntheticInputEvent<>) {
+	defaultListView(defaultListViewName) {
+		return this.props.listViews.find(
+			v =>
+				v.developerName === defaultListViewName ||
+				v.label === defaultListViewName
+		)
+	}
+
+	onInput(event?: SyntheticInputEvent<>, defaultListViewName?: string) {
 		const { onSelectListView, listViews } = this.props
 		const select = this.select.current
 		if (!select || !listViews) {
 			return
 		}
-		const listViewId = select.value
-		const listView = listViews.filter(view => view.id === listViewId)[0]
+
+		const listView =
+			this.defaultListView(defaultListViewName) ||
+			listViews.filter(view => view.id === select.value)[0]
 		if (listView) {
 			onSelectListView(listView)
+			//see componentDidUpdate
+			if (defaultListViewName) {
+				select.value = listView.id
+			}
 		}
 	}
 }

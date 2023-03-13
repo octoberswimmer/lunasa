@@ -80,7 +80,8 @@
 			sortFields: {!sortFieldsAsJson},
 			fieldDefinitions: {!sortFieldDefinitionsAsJson},
 			staticDirectory: "{!JSINHTMLENCODE(URLFOR($Resource.Calendar, ''))}",
-			userId: "{!JSINHTMLENCODE($User.Id)}"
+			userId: "{!JSINHTMLENCODE($User.Id)}",
+			defaultListViewName: "{!JSINHTMLENCODE(defaultListViewName)}",
 		});
 	</script>
 </apex:page>

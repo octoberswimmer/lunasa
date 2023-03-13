@@ -42,7 +42,8 @@ export function lunasa({
 	sortFields,
 	fieldDefinitions,
 	staticDirectory,
-	userId
+	userId,
+	defaultListViewName
 }: {
 	singleColumn: boolean,
 	accountFieldSet: FieldSet,
@@ -61,7 +62,8 @@ export function lunasa({
 	sortFields: SortField[],
 	fieldDefinitions: FieldDefinition[],
 	staticDirectory: string,
-	userId: string
+	userId: string,
+	defaultListViewName?: string
 }) {
 	// Set base path for requests for lazily-loaded Javascript chunks.
 	declare var __webpack_public_path__: string
@@ -100,6 +102,7 @@ export function lunasa({
 						weekends={weekends}
 						minTime={minTime}
 						maxTime={maxTime}
+						defaultListViewName={defaultListViewName}
 						spinner={resolveAsset(staticDirectory, spinner)}
 					/>
 				</LabelProvider>
@@ -150,7 +153,8 @@ if (process.env.NODE_ENV !== "production") {
 				sortFields: sortFieldFixtures.sortFields,
 				fieldDefinitions: fieldDefinitionFixtures.fieldDefinitions,
 				staticDirectory: "",
-				userId: "testuserid"
+				userId: "testuserid",
+				defaultListViewName: "All Accounts"
 			})
 		}
 	)

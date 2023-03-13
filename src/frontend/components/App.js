@@ -23,7 +23,8 @@ type Props = {
 	weekends?: boolean,
 	singleColumn?: boolean,
 	minTime?: string,
-	maxTime?: string
+	maxTime?: string,
+	defaultListViewName?: string
 }
 
 export default function App(props: Props) {
@@ -105,6 +106,7 @@ export default function App(props: Props) {
 						</ToastContainer>
 						<div className="main">
 							<AccountList
+								defaultListViewName={props.defaultListViewName}
 								className="accounts"
 								fieldSet={accounts.state.accountFieldSet}
 								spinner={props.spinner}
