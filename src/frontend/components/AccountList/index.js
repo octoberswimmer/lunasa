@@ -98,7 +98,7 @@ type SelectProps = {
 }
 
 class SelectAccountListView extends React.Component<SelectProps> {
-	onInput: (event?: SyntheticInputEvent<>) => void
+	onInput: (event?: SyntheticInputEvent<>, defaultListViewName?: string) => void
 	select: { current: null | React.ElementRef<"select"> }
 
 	constructor(props: SelectProps) {
@@ -147,24 +147,19 @@ class SelectAccountListView extends React.Component<SelectProps> {
 		)
 	}
 
-	defaultListView(defaultListViewName) {
-		return this.props.listViews.find(
-			v =>
-				v.developerName === defaultListViewName ||
-				v.label === defaultListViewName
-		)
-	}
-
 	onInput(event?: SyntheticInputEvent<>, defaultListViewName?: string) {
 		const { onSelectListView, listViews } = this.props
 		const select = this.select.current
 		if (!select || !listViews) {
 			return
 		}
-
+		const defaultListView = listViews.find(
+			(v: any) =>
+				v.developerName === defaultListViewName ||
+				v.label === defaultListViewName
+		)
 		const listView =
-			this.defaultListView(defaultListViewName) ||
-			listViews.filter(view => view.id === select.value)[0]
+			defaultListView || listViews.filter(view => view.id === select.value)[0]
 		if (listView) {
 			onSelectListView(listView)
 			//see componentDidUpdate
