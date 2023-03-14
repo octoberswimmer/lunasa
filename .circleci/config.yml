@@ -24,7 +24,7 @@ jobs:
 
       - run:
           name: Decrypt Key
-          command: openssl aes-256-cbc -d -in lib/ci.key.enc -out lib/ci.key -k "$JWT_KEY"
+          command: openssl aes-256-cbc -md sha256 -pbkdf2 -d -in lib/ci.key.enc -out lib/ci.key -k "$JWT_KEY"
       - run: mkdir ~/bin
       - run:
           name: Get Latest Force CLI Release
