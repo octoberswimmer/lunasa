@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Decrypt Key
           command: openssl aes-256-cbc -md sha256 -pbkdf2 -d -in lib/ci.key.enc -out lib/ci.key -k "$JWT_KEY"
-      - run: mkdir ~/bin
+      - run: mkdir -p ~/bin
       - run:
           name: Get Latest Force CLI Release
           command: curl --output ~/bin/force https://force-cli.herokuapp.com/releases/v0.26.1/linux-amd64/force
