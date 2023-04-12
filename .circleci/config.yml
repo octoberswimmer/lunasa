@@ -32,7 +32,7 @@ jobs:
       - run: chmod +x ~/bin/force
       - run: force login -i login -u "$SF_USER" -key lib/ci.key --connected-app-client-id "$CLIENT_ID"
       - run:
-          name: Build Shipping Update Application Static Resource
+          name: Build Lunasa Application Static Resource
           command: yarn build
       - run:
           name: Run Salesforce Tests
