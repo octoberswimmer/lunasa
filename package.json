@@ -55,10 +55,7 @@
     "postinstall-prepare": "^1.0.1",
     "prettier": "^1.13.4",
     "react-app-rewired": "^1.5.2",
-    "reset-date-cache": "^1.0.4",
+    "reset-date-cache": "^1.0.5",
     "traverse": "^0.6.6"
-  },
-  "engines": {
-    "node": "^8.0.0"
   }
 }
