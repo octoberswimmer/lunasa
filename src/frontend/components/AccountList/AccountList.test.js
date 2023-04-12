@@ -169,6 +169,24 @@ it("updates accounts state when a sort option is selected", () => {
 	expect(accounts.selectSortField).toHaveBeenCalledWith(sortByCreatedDate)
 })
 
+it("sets default list view", async () => {
+	const accounts = new Accounts(accountsOpts)
+	const listView =
+		lf.accountListViews.listviews[lf.accountListViews.listviews.length - 1]
+	const wrapper = mount(
+		<AccountList
+			defaultListViewName={listView.label}
+			fieldSet={af.accountFieldSet}
+		/>,
+		{
+			accounts
+		}
+	)
+	await accounts.fetchListViews()
+	const select = wrapper.find("select.select-list-view")
+	expect(select.instance().value).toBe(listView.id)
+})
+
 it("updates accounts state when a sort direction is selected", async () => {
 	const accounts = new Accounts(accountsOpts)
 	jest.spyOn(accounts, "selectSortDirection")
