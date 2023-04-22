@@ -16,7 +16,8 @@ export type Event = {
 	ShowAs?: string,
 	StartDateTime: Date | number,
 	Subject: string,
-	WhatId?: Id
+	WhatId?: Id,
+	Color__c?: string
 }
 
 export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(
@@ -41,7 +42,8 @@ export function forFullcalendar(
 		allDay: Boolean(event.IsAllDayEvent),
 		editable: true,
 		type: "Event",
-		id: event.Id
+		id: event.Id,
+		backgroundColor: event.Color__c
 	}
 }
 
