@@ -44,62 +44,62 @@
             <valueSetDefinition>
                 <sorted>false</sorted>
                 <value>
-                    <fullName>Blue</fullName>
+                    <fullName>#0000FF</fullName>
                     <default>false</default>
                     <label>Blue</label>
                 </value>
                 <value>
-                    <fullName>DarkGreen</fullName>
+                    <fullName>#006400</fullName>
                     <default>false</default>
                     <label>Dark Green</label>
                 </value>
                 <value>
-                    <fullName>Green</fullName>
+                    <fullName>#00FF00</fullName>
                     <default>false</default>
                     <label>Green</label>
                 </value>
                 <value>
-                    <fullName>Grey</fullName>
+                    <fullName>#808080</fullName>
                     <default>false</default>
                     <label>Grey</label>
                 </value>
                 <value>
-                    <fullName>Indigo</fullName>
+                    <fullName>#4B0082</fullName>
                     <default>false</default>
                     <label>Indigo</label>
                 </value>
                 <value>
-                    <fullName>LightBlue</fullName>
+                    <fullName>#ADD8E6</fullName>
                     <default>false</default>
                     <label>Light Blue</label>
                 </value>
                 <value>
-                    <fullName>Orange</fullName>
+                    <fullName>#FFA500</fullName>
                     <default>false</default>
                     <label>Orange</label>
                 </value>
                 <value>
-                    <fullName>Peach</fullName>
+                    <fullName>#FFE5B4</fullName>
                     <default>false</default>
                     <label>Peach</label>
                 </value>
                 <value>
-                    <fullName>Purple</fullName>
+                    <fullName>#800080</fullName>
                     <default>false</default>
                     <label>Purple</label>
                 </value>
                 <value>
-                    <fullName>Red</fullName>
+                    <fullName>#FF0000</fullName>
                     <default>false</default>
                     <label>Red</label>
                 </value>
                 <value>
-                    <fullName>Violet</fullName>
+                    <fullName>#7F00FF</fullName>
                     <default>false</default>
                     <label>Violet</label>
                 </value>
                 <value>
-                    <fullName>Yellow</fullName>
+                    <fullName>#FFFF00</fullName>
                     <default>false</default>
                     <label>Yellow</label>
                 </value>
