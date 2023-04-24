@@ -25,6 +25,8 @@ export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(
 	"hour"
 )
 
+const defaultBackgroundColor = "#5fa7c5"
+
 /*
  * Convert a Salesforce Event record into a value that can be given to
  * Fullcalendar for display.
@@ -43,7 +45,7 @@ export function forFullcalendar(
 		editable: true,
 		type: "Event",
 		id: event.Id,
-		backgroundColor: event.Color__c
+		backgroundColor: event.Color__c || defaultBackgroundColor
 	}
 }
 

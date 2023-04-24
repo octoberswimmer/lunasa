@@ -1183,7 +1183,7 @@ declare module "fullcalendar" {
 		overlap?: boolean;
 		constraint?: ConstraintInput;
 		color?: string;
-		backgroundColor?: ?string;
+		backgroundColor?: string;
 		borderColor?: string;
 		textColor?: string;
 	}
