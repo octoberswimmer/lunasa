@@ -133,7 +133,10 @@ it("sets the 'allDay' flag in FullCalendar if appropriate", () => {
 })
 
 it("sets the 'backgroundColor' flag in FullCalendar if appropriate", () => {
-	const event = forFullcalendar(timezone, { ...testEvent, Color__c: "Purple" })
+	const event = forFullcalendar(timezone, {
+		...testEvent,
+		oscal__Color__c: "Purple"
+	})
 	expect(event).toHaveProperty("backgroundColor", "Purple")
 })
 

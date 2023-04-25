@@ -8,6 +8,11 @@
             <isRequired>false</isRequired>
         </availableFields>
         <availableFields>
+            <field>Color__c</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </availableFields>
+        <availableFields>
             <field>Location</field>
             <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>

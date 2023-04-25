@@ -17,7 +17,7 @@ export type Event = {
 	StartDateTime: Date | number,
 	Subject: string,
 	WhatId?: Id,
-	Color__c?: string
+	oscal__Color__c?: string
 }
 
 export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(
@@ -45,7 +45,7 @@ export function forFullcalendar(
 		editable: true,
 		type: "Event",
 		id: event.Id,
-		backgroundColor: event.Color__c || defaultBackgroundColor
+		backgroundColor: event.oscal__Color__c || defaultBackgroundColor
 	}
 }
 

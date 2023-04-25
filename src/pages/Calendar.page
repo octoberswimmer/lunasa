@@ -22,6 +22,7 @@
 			<apex:remoteObjectField name="ReminderDateTime" />
 			<apex:remoteObjectField name="StartDateTime" />
 			<apex:remoteObjectField name="Subject" />
+			<apex:remoteObjectField name="Color__c" />
 			<apex:remoteObjectField name="WhatId" />
 			<apex:remoteObjectField name="WhoId" />
 		</apex:remoteObjectModel>
