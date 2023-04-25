@@ -132,6 +132,14 @@ it("sets the 'allDay' flag in FullCalendar if appropriate", () => {
 	expect(event).toHaveProperty("allDay", true)
 })
 
+it("sets the 'backgroundColor' flag in FullCalendar if appropriate", () => {
+	const event = forFullcalendar(timezone, {
+		...testEvent,
+		oscal__Color__c: "Purple"
+	})
+	expect(event).toHaveProperty("backgroundColor", "Purple")
+})
+
 /*
  * There is a bug in FullCalendar that causes an all-day event to displayed
  * ending one day earlier than it should. For example if the `start` and `end`

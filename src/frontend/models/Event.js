@@ -16,13 +16,16 @@ export type Event = {
 	ShowAs?: string,
 	StartDateTime: Date | number,
 	Subject: string,
-	WhatId?: Id
+	WhatId?: Id,
+	oscal__Color__c?: string
 }
 
 export const defaultTimedEventDuration: moment$MomentDuration = moment.duration(
 	1,
 	"hour"
 )
+
+const defaultBackgroundColor = "#5fa7c5"
 
 /*
  * Convert a Salesforce Event record into a value that can be given to
@@ -41,7 +44,8 @@ export function forFullcalendar(
 		allDay: Boolean(event.IsAllDayEvent),
 		editable: true,
 		type: "Event",
-		id: event.Id
+		id: event.Id,
+		backgroundColor: event.oscal__Color__c || defaultBackgroundColor
 	}
 }
 
