@@ -5,20 +5,32 @@ import Icon from "@salesforce/design-system-react/components/icon"
 import $ from "jquery"
 import moment from "moment"
 import * as React from "react"
+import { Component } from "react"
 import ReactHtmlParser from "react-html-parser"
 import { type FieldSet, type FieldType } from "../models/FieldSet"
 import { type Record } from "../models/QueryResult"
 import "./AccountCard.css"
 import Draggable from "./Draggable"
+import Accounts from "../containers/Accounts"
 
 type Props = {
 	fieldSet: FieldSet,
-	record: Record
+	record: Record,
+	account?: Accounts
+}
+
+type State = {
+	myReferenceData: any
 }
 
 const imagePattern = /^\s*<img .*>\s*$/i
 
-function format(type: FieldType, value: any): React.Node {
+function format(
+	type: FieldType,
+	value: any,
+	name: any,
+	myReferenceData: any
+): React.Node {
 	if (value == null) {
 		return "-"
 	}
@@ -36,70 +48,114 @@ function format(type: FieldType, value: any): React.Node {
 			} else {
 				return String(value)
 			}
+		case "reference":
+			let myReferenceValue = ""
+			if (myReferenceData[name.replace("__c", "__r")]) {
+				myReferenceValue = myReferenceData[name.replace("__c", "__r")].Name
+			}
+			return String(myReferenceValue)
 		default:
 			return String(value)
 	}
 }
 
-export default function AccountCard({ fieldSet, record }: Props) {
-	const fields: React.Node[] = []
-	var accountName: ?string
-	for (const { name, label, type } of fieldSet) {
-		if (name === "Name") {
-			accountName = record[name]
-		} else {
-			const displayValue = format(type, record[name])
-			fields.push(
-				<dt
-					className="slds-item_label slds-text-color-weak slds-truncate"
-					key={name}
-					title={label}
-				>
-					{label}
-				</dt>
+class AccountCard extends Component<Props, State> {
+	state = {
+		myReferenceData: []
+	}
+
+	async componentDidMount() {
+		const { fieldSet, record, account } = this.props
+		const referenceFields = []
+
+		for (const { name, type } of fieldSet) {
+			if (type === "reference") {
+				referenceFields.push(name.replace("__c", "__r.Name"))
+			}
+		}
+
+		if (referenceFields.length && account != null) {
+			const urlPattern = new RegExp("/sobjects/Account/([^/]+)$")
+			let myAccountId = ""
+			const match = record.attributes.url.match(urlPattern)
+			if (match) {
+				myAccountId = match[1]
+			}
+
+			const myReferenceData = await account.getAccountReferenceData(
+				referenceFields,
+				myAccountId
 			)
-			fields.push(
-				<dd
-					className="slds-item_detail slds-truncate"
-					key={name + "-value"}
-					title={displayValue}
-				>
-					{displayValue}
-				</dd>
-			)
+			this.setState({ myReferenceData })
 		}
 	}
-	return (
-		<Draggable
-			identifier={{
-				type: "Account",
-				url: record.attributes.url
-			}}
-			options={{
-				helper: "clone", // clone card when dragging, leave original in list
-				opacity: 0.35,
-				start(event, ui) {
-					// Fixes width of the dragged element so that it matches the
-					// width of the original account card. Without this callback
-					// the dragged version of the account card appears to be too
-					// wide.
-					ui.helper.width($(event.target).width())
-				},
-				zIndex: 100
-			}}
-		>
-			<Card
-				className="slds-card__tile"
-				bodyClassName="account-card"
-				heading={accountName || "Account"}
-				icon={<Icon category="standard" name="account" size="small" />}
+
+	render() {
+		const { fieldSet, record } = this.props
+		const { myReferenceData } = this.state
+		const fields: React.Node[] = []
+		var accountName: ?string
+
+		for (const { name, label, type } of fieldSet) {
+			if (name === "Name") {
+				accountName = record[name]
+			} else {
+				const displayValue = format(type, record[name], name, myReferenceData)
+				fields.push(
+					<dt
+						className="slds-item_label slds-text-color-weak slds-truncate"
+						key={name}
+						title={label}
+					>
+						{label}
+					</dt>
+				)
+				fields.push(
+					<dd
+						className="slds-item_detail slds-truncate"
+						key={`${name}-value`}
+						title={displayValue}
+					>
+						{displayValue}
+					</dd>
+				)
+			}
+		}
+
+		return (
+			<Draggable
+				identifier={{
+					type: "Account",
+					url: record.attributes.url
+				}}
+				options={{
+					helper: "clone", // clone card when dragging, leave original in list
+					opacity: 0.35,
+					start(event: any, ui: any) {
+						// Fixes width of the dragged element so that it matches the
+						// width of the original account card. Without this callback
+						// the dragged version of the account card appears to be too
+						// wide.
+						ui.helper.width($(event.target).width())
+					},
+					zIndex: 100
+				}}
 			>
-				<article className="slds-tile">
-					<div className="slds-tile__detail">
-						<dl className="slds-list_horizontal slds-wrap">{fields}</dl>
-					</div>
-				</article>
-			</Card>
-		</Draggable>
-	)
+				<Card
+					className="slds-card__tile"
+					bodyClassName="account-card"
+					heading={accountName || "Account"}
+					icon={<Icon category="standard" name="account" size="small" />}
+				>
+					<article className="slds-tile">
+						<div className="slds-tile__detail">
+							<dl className="slds-list_horizontal slds-wrap">{fields}</dl>
+						</div>
+					</article>
+				</Card>
+			</Draggable>
+		)
+	}
 }
+
+export default AccountCard

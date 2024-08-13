@@ -32,6 +32,7 @@ import {
 	asyncActionInitState,
 	isLoading
 } from "./asyncAction"
+import { memoize } from "./memoize"
 
 // To view accounts the user may select a predefined list view, or may select
 // an option to view accounts by account IDs given via URL query parameter.
@@ -71,6 +72,11 @@ export default class AccountContainer extends Container<State> {
 	_restClient: Promise<RestApi>
 	_lastRequest: ?Request
 
+	_queryAccountReferenceInformation: (
+		referenceFields: string[],
+		accountId: string
+	) => Promise<any>
+
 	constructor(opts: {|
 		accountFieldSet: FieldSet,
 		accountIds?: ?(Id[]),
@@ -107,6 +113,8 @@ export default class AccountContainer extends Container<State> {
 				: SortField.ASCENDING,
 			fieldDefinitions: opts.fieldDefinitions || []
 		}
+		this._queryAccountReferenceInformation = memoize(this._queryAccountReferenceInformation.bind(this))
+
 	}
 
 	getAccount(url: string): ?Account {
@@ -121,6 +129,10 @@ export default class AccountContainer extends Container<State> {
 		if (result) {
 			return result.records
 		}
+	}
+
+	async getAccountReferenceData(fields: string[], accountId: string): ?any {
+		return await this._queryAccountReferenceInformation(fields, accountId)
 	}
 
 	getListViews(): ?(ListViewLike[]) {
@@ -286,6 +298,18 @@ export default class AccountContainer extends Container<State> {
 		const orderDir = sortDirection === SortField.DESCENDING ? "DESC" : "ASC"
 		const query = `SELECT ${fields} FROM Account ${where} ORDER BY ${sortBy} ${orderDir} NULLS FIRST, Id ASC NULLS FIRST LIMIT ${limit} OFFSET ${offset}`
 		return client.query(query)
+	}
+
+	async _queryAccountReferenceInformation(
+		referenceFields: string[],
+		accountId: string
+	): ?any {
+		const client = await this._restClient
+		const fields = referenceFields.join(",")
+		const query = `SELECT ${fields} FROM Account WHERE Id = '${accountId}'`
+		const result = await client.query(query)
+		const record = await result.records[0]
+		return record
 	}
 
 	async _fetchRecordCount(req: Request): Promise<number> {
