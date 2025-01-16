@@ -1,46 +1,34 @@
-# SLDS Calendar
+# Lunasa
+## Drag-and-Drop Account Appointment Scheduler for Salesforce
 
-## Lightning Design System Account Calendar Application
+Schedule events for any account all on one screen. Drag and drop scheduler lets
+you plan your day, week, and month, all on one page. Manage your calendar and
+make appointments quickly and easily with Lunasa.
 
-This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
+![Display accounts filtered by any data field alongside your calendar on one screen](docs/images/Lunasa-App-Exchange-slide2-v2.jpg)
 
-Below you will find some information on how to perform common tasks.<br>
-You can find the most recent version of this guide [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md).
+![Drag and drop strategic scheduling blocks for your sales nurturing activities](docs/images/Lunasa-App-Exchange-slide3-v2.jpg)
 
-## Before you start
+![Get a holistic view of your account nurturing activities over the week or month](docs/images/Lunasa-App-Exchange-slide4-v2.jpg)
 
-Project dependencies and build script are managed with [yarn][]. Install yarn
-and run this command to install project dependencies:
+![Label each scheduled item and include notes](docs/images/Lunasa-App-Exchange-slide5-v2.jpg)
 
-    $ yarn
+![Admins can configure sorting filters to make your sales team more efficient](docs/images/Lunasa-App-Exchange-slide6-v2.jpg)
 
-[yarn]: https://yarnpkg.com/lang/en/docs/install/
+![Lunasa key benefits](docs/images/Lunasa-App-Exchange-slide7-v2.jpg)
 
-## Running in development mode
+## Installation
 
-Run:
+[Install Lunasa managed package in production org](https://installer.octoberswimmer.com/?namespace=oscal&version=1.22&id=033f4000000IjDwAAK)
 
-    $ yarn start
+[Install Lunasa managed package in sandbox](https://installer.octoberswimmer.com/?namespace=oscal&version=1.22&id=033f4000000IjDwAAK&endpoint=https://test.salesforce.com)
 
-Then navigate a browser to http://localhost:3000/
+## Configuration
 
-As long as the `yarn start` command is running the app will automatically
-rebuild when source files change. Refresh the browser to see changes.
+Review the [brief configuration guide](docs/Lunasa-Drag-and-Drop-Calendar.pdf)
+for customization options.
 
-## Running tests
+# License
 
-Run:
-
-    $ yarn test
-
-
-## Deploying
-
-First build the frontend app:
-
-    $ yarn run build
-
-That will create a Visualforce static resource with bundled Javascript and CSS
-resources. Next push resources to Salesforce:
-
-    $ force import -d src
+* Free to use in sandboxes and developer orgs
+* [Sponsor](https://github.com/sponsors/octoberswimmer) development at the $150/month or $3,000 one-time level for production use.  Includes unlimited users.
