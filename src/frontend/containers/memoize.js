@@ -2,7 +2,7 @@
 
 import equal from "fast-deep-equal"
 
-type CacheEntry<Inputs, R> = { inputs: Inputs, result: R }
+type CacheEntry<Inputs, R> = { inputs: Inputs, result: R , timestamp: number}
 
 /*
  * `memoize` stores the result for a given set of inputs in a cache, and returns
@@ -11,16 +11,23 @@ type CacheEntry<Inputs, R> = { inputs: Inputs, result: R }
 export function memoize<Inputs: *, R>(
 	fn: (...inputs: Inputs) => R
 ): (...inputs: Inputs) => R {
-	const cache: CacheEntry<Inputs, R>[] = []
+	const cache: CacheEntry<Inputs, R>[] = [];
+	const CACHE_EXPIRATION = 5000; // set the cache expiration time to 5 seconds
+  
 	return function _memoize(...inputs: Inputs): R {
-		const entry = cache.find(entry => equal(entry.inputs, inputs))
-		if (entry && equal(entry.inputs, inputs)) {
-			return entry.result
-		}
-		const result = fn(...inputs)
-		cache.push({ inputs, result })
-		return result
-	}
+	  const now = Date.now(); // get the current time
+	  const entry = cache.find(
+		(entry) => equal(entry.inputs, inputs) && now - entry.timestamp < CACHE_EXPIRATION
+	  ); // check if the cached entry exists and has not expired
+  
+	  if (entry) {
+		return entry.result;
+	  }
+  
+	  const result = fn(...inputs);
+	  cache.push({ inputs, result, timestamp: now }); // add the timestamp when adding the entry to the cache
+	  return result;
+	};
 }
 
 /*

@@ -17,6 +17,7 @@ import { maxObjectsLimit, defaultLimit } from "../api/RemoteObject"
 import { type RestApi } from "../api/RestApi"
 import { type Criteria } from "../api/SObject"
 import { type Account } from "../models/Account"
+import { type Contact } from "../models/Contact"
 import {
 	forFullcalendar,
 	newEvent,
@@ -31,6 +32,7 @@ import {
 	getRelationshipName
 } from "../models/SObjectDescription"
 import { type Record, getId, getType } from "../models/QueryResult"
+import { type QueryResult } from "../models/QueryResult"
 import { type RecordTypeInfo } from "../models/RecordType"
 import { stringifyCondition } from "../models/WhereCondition"
 import { excludeNull } from "../util/array"
@@ -45,6 +47,30 @@ import { memoize, preserveRequestOrder, skipDuplicateInputs } from "./memoize"
 
 type Id = string
 
+function throttle(fn: Function, delay: number): Function {
+	let lastTime = 0
+	let timeoutId = undefined
+
+	return function(...args: any[]) {
+		const now = Date.now()
+		const elapsed = now - lastTime
+
+		if (elapsed < delay) {
+			// If the elapsed time is less than the delay, schedule the function to be called
+			// after the remaining time
+			clearTimeout(timeoutId)
+			timeoutId = setTimeout(() => {
+				fn(...args)
+				lastTime = now
+			}, delay - elapsed)
+		} else {
+			// Otherwise, just call the function immediately
+			fn(...args)
+			lastTime = now
+		}
+	}
+}
+
 export type State = AsyncActionState & {
 	awaitingConfirmDelete: boolean, // `true` if awaiting confirmation to delete
 	events: Event[],
@@ -55,7 +81,9 @@ export type State = AsyncActionState & {
 	eventRecordTypeInfos: RecordTypeInfo[],
 	referenceData: { [key: Id]: Record }, // map from Event IDs to What and Who properties
 	timezone: string,
-	userId: Id
+	userId: Id,
+	contacts: Contact[],
+	searchTerm: ?string
 }
 
 export default class EventContainer extends Container<State> {
@@ -68,6 +96,7 @@ export default class EventContainer extends Container<State> {
 	_fetchEventLayout: () => Promise<void>
 	_fetchReferenceData: (eventId: Id) => Promise<void>
 	_requestEvents: (query: Criteria<Event>) => Promise<Event[]>
+	_fetchContacts: (contactName: string) => Promise<QueryResult>
 
 	constructor(opts: {|
 		eventCreateFieldSet: FieldSet,
@@ -91,7 +120,9 @@ export default class EventContainer extends Container<State> {
 			eventRecordTypeInfos: opts.eventRecordTypeInfos,
 			referenceData: {},
 			timezone: opts.timezone,
-			userId: opts.userId
+			userId: opts.userId,
+			contacts: [],
+			searchTerm: ""
 		}
 
 		// Memoizing methods that fetch data from APIs avoids loops where
@@ -187,6 +218,23 @@ export default class EventContainer extends Container<State> {
 
 	getEventsForFullcalendar(): EventObjectInput[] {
 		return this.state.events.map(e => forFullcalendar(this.state.timezone, e))
+	}
+
+	fetchContactsThrottled(searchTerm: string): void {
+		this._fetchContacts(searchTerm)
+	}
+
+	throttledFetchContacts = throttle(
+		this.fetchContactsThrottled.bind(this),
+		1000
+	)
+
+	getContacts(searchTerm: string): ?(Contact[]) {
+		if (this.state.searchTerm !== searchTerm) {
+			this.throttledFetchContacts.call(this, searchTerm)
+		}
+
+		return this.state.contacts
 	}
 
 	/*
@@ -298,6 +346,27 @@ export default class EventContainer extends Container<State> {
 		})
 	}
 
+	async _fetchContacts(searchTerm: string): Promise<QueryResult> {
+		const query = `SELECT Id,Name FROM Contact WHERE Name like '%${searchTerm}%'`
+		const client = await this._restClient
+		const result = await client.query(query)
+		const contactsFromResult = result.records.length > 0 ? result.records : []
+		if (contactsFromResult.length) {
+			let contacts = []
+			contactsFromResult.forEach(contact => {
+				const parts = contact.attributes.url.split("/")
+				const contactId = parts[parts.length - 1]
+				contact.label = contact.Name
+				contact.id = contactId
+				contact.value = contactId
+				contacts.push(contact)
+			})
+			await this.setState({ contacts })
+			await this.setState({ searchTerm })
+		}
+		return client.query(query)
+	}
+
 	async _fetchBillingAddress<T: ?Record>(record: T): Promise<T> {
 		if (!record || getType(record) !== "Account") {
 			return record
@@ -382,9 +451,14 @@ export default class EventContainer extends Container<State> {
 			if (!draft) {
 				throw new Error("There is no event draft to save.")
 			}
-			const event = draft.Id
-				? await this._update(draft)
-				: await this._create(draft)
+
+			let event;
+			if (draft.Id) {
+				event = await this._update(draft)
+				this._fetchReferenceData(draft.Id)
+			} else {
+				event = await this._create(draft)
+			}
 			await this._mergeChangedEvent(event)
 		})
 	}
@@ -425,6 +499,7 @@ export default class EventContainer extends Container<State> {
 		const addedEvents = excludeNull(
 			changed.map(e => (typeof e === "object" ? e : null))
 		)
+
 		await this.setState(state => {
 			const events = state.events.filter(e => !removedIds.includes(e.Id))
 			const referenceData = { ...state.referenceData }
