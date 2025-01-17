@@ -52,6 +52,7 @@ export type State = AsyncActionState & {
 	eventDescription: ?SObjectDescription,
 	eventDraft: ?$Shape<Event>,
 	eventLayout: ?Layout,
+	cachedEventLayouts: { [key: string]: ?Layout },
 	eventRecordTypeInfos: RecordTypeInfo[],
 	referenceData: { [key: Id]: Record }, // map from Event IDs to What and Who properties
 	timezone: string,
@@ -64,8 +65,9 @@ export default class EventContainer extends Container<State> {
 
 	// Memoized API interfaces
 	_fetchEvents: (query: Criteria<Event>) => Promise<void>
+	_setEventLayout: (recordType: RecordTypeInfo) => void
 	_fetchEventDescription: () => Promise<void>
-	_fetchEventLayout: () => Promise<void>
+	_fetchEventLayout: (recordType?: RecordTypeInfo) => Promise<void>
 	_fetchReferenceData: (eventId: Id) => Promise<void>
 	_requestEvents: (query: Criteria<Event>) => Promise<Event[]>
 
@@ -87,6 +89,7 @@ export default class EventContainer extends Container<State> {
 			eventCreateFieldSet: opts.eventCreateFieldSet,
 			eventDescription: null,
 			eventDraft: null,
+			cachedEventLayouts: {},
 			eventLayout: null,
 			eventRecordTypeInfos: opts.eventRecordTypeInfos,
 			referenceData: {},
@@ -101,6 +104,7 @@ export default class EventContainer extends Container<State> {
 		// multiple times with the same inputs - e.g. when navigating forward
 		// a page of results and navigating back.
 		this._fetchEvents = skipDuplicateInputs(this._fetchEvents.bind(this))
+		this._setEventLayout = skipDuplicateInputs(this._setEventLayout.bind(this))
 		this._fetchEventDescription = memoize(
 			this._fetchEventDescription.bind(this)
 		)
@@ -185,6 +189,38 @@ export default class EventContainer extends Container<State> {
 		}
 	}
 
+	setDefaultEventLayout() {
+		const defaultRecordType = this.state.eventRecordTypeInfos.find(
+			rt => rt.defaultRecordTypeMapping
+		)
+
+		if (defaultRecordType) {
+			this._setEventLayout(defaultRecordType)
+		}
+	}
+
+	setEventLayout(recordTypeId: string) {
+		const customRecordType = this.state.eventRecordTypeInfos.find(
+			rt => rt.recordTypeId === recordTypeId
+		)
+
+		if (customRecordType) {
+			this._setEventLayout(customRecordType)
+		}
+	}
+
+	_setEventLayout(recordType: RecordTypeInfo) {
+		const eventLayout = this.state.cachedEventLayouts[recordType.recordTypeId]
+
+		if (eventLayout) {
+			asyncAction(this, async () => {
+				await this.setState({ eventLayout })
+			})
+		} else {
+			this._fetchEventLayout(recordType)
+		}
+	}
+
 	getEventsForFullcalendar(): EventObjectInput[] {
 		return this.state.events.map(e => forFullcalendar(this.state.timezone, e))
 	}
@@ -257,17 +293,27 @@ export default class EventContainer extends Container<State> {
 		})
 	}
 
-	async _fetchEventLayout(): Promise<void> {
+	async _fetchEventLayout(recordType?: RecordTypeInfo): Promise<void> {
 		await asyncAction(this, async () => {
 			const client = await this._restClient
-			const recordType = this.state.eventRecordTypeInfos.find(
-				rt => rt.defaultRecordTypeMapping
-			)
-			if (!recordType) {
+			const recordTypeInfo =
+				recordType ||
+				this.state.eventRecordTypeInfos.find(rt => rt.defaultRecordTypeMapping)
+			if (!recordTypeInfo) {
 				throw new Error("Could not determine your event record type.")
 			}
-			const eventLayout = await client.fetchLayout(recordType)
-			await this.setState({ eventLayout })
+
+			const eventLayout = await client.fetchLayout(recordTypeInfo)
+
+			await this.setState(state => {
+				const cachedEventLayouts = state.cachedEventLayouts
+				cachedEventLayouts[recordTypeInfo.recordTypeId] = eventLayout
+
+				return {
+					eventLayout,
+					cachedEventLayouts
+				}
+			})
 		})
 	}
 
@@ -333,6 +379,7 @@ export default class EventContainer extends Container<State> {
 			const referenceData = accountWithAddress
 				? { ...state.referenceData, draft: { What: accountWithAddress } }
 				: state.referenceData
+
 			return {
 				eventDraft: details,
 				referenceData

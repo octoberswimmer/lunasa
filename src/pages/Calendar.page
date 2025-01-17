@@ -37,6 +37,27 @@
 	<div id="mount"></div>
 	<script src="{!URLFOR($Resource.Calendar, 'static/js/main.js')}" />
 	<script>
+		var fieldSet = [
+			<apex:repeat value="{!$ObjectType.Event.FieldSets.CreateEvent}" var="f">
+				{
+					name: "{!JSINHTMLENCODE(f)}",
+					label: "{!JSINHTMLENCODE(f.Label)}",
+					type: "{!JSINHTMLENCODE(f.Type)}",
+					required: {!OR(f.Required, f.DBRequired)}
+				},
+			</apex:repeat>
+			null
+			].filter(function(x) { return !!x; });
+
+		if ({!hasRecordTypeField}) {
+			fieldSet.push({
+				name: "RecordTypeId",
+				label: "Event Record Type",
+				type: "reference",
+				required: false
+			});
+		}
+
 		lunasa({
 			accountFieldSet: [
 			<apex:repeat value="{!$ObjectType.Account.FieldSets.CalendarCard}" var="f">
@@ -56,17 +77,7 @@
 			</apex:repeat>
 			null
 			].filter(function(x) { return !!x; }),
-			eventCreateFieldSet: [
-			<apex:repeat value="{!$ObjectType.Event.FieldSets.CreateEvent}" var="f">
-				{
-					name: "{!JSINHTMLENCODE(f)}",
-					label: "{!JSINHTMLENCODE(f.Label)}",
-					type: "{!JSINHTMLENCODE(f.Type)}",
-					required: {!OR(f.Required, f.DBRequired)}
-				},
-			</apex:repeat>
-			null
-			].filter(function(x) { return !!x; }),
+			eventCreateFieldSet: fieldSet,
 			weekends: {!weekends},
 			singleColumn: {!singleColumn},
 			minTime: "{!JSINHTMLENCODE(earliestTime)}",
